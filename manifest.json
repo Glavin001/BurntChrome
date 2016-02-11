@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+  "name": "Burnt Chrome",
+  "version": "0.1.0",
+  "browser_action": {
+    "default_icon": "src/icon.png"
+  },
+  "background": {
+    "scripts": ["dist/background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "bower_components/jquery/dist/jquery.min.js",
+        "bower_components/lodash/dist/lodash.min.js",
+        "bower_components/async/dist/async.min.js",
+        "node_modules/devtools-detect/index.js",
+        "dist/content.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    "bower_components/jquery/dist/jquery.min.map",
+    "bower_components/async/dist/async.min.map",
+    "dist/*.js.map"
+  ],
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "*://*"
+  ],
+}

@@ -6,7 +6,7 @@
     "default_icon": "src/icon.png"
   },
   "background": {
-    "scripts": ["dist/background.js"]
+    "scripts": ["dist/deps-background.js", "dist/background.js"]
   },
   "content_scripts": [
     {
@@ -14,22 +14,16 @@
         "<all_urls>"
       ],
       "js": [
-        "bower_components/jquery/dist/jquery.min.js",
-        "bower_components/lodash/dist/lodash.min.js",
-        "bower_components/async/dist/async.min.js",
-        "node_modules/devtools-detect/index.js",
+        "dist/deps-content.js",
         "dist/content.js"
       ]
     }
   ],
   "web_accessible_resources": [
-    "bower_components/jquery/dist/jquery.min.map",
-    "bower_components/async/dist/async.min.map",
     "dist/*.js.map"
   ],
   "permissions": [
     "webRequest",
-    "webRequestBlocking",
-    "*://*"
+    "webRequestBlocking"
   ]
 }

@@ -6,8 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "./node_modules/.bin/bower install",
-    "compile": "./node_modules/.bin/babel src --out-dir dist --source-maps inline",
-    "start": "./node_modules/.bin/babel src --watch --out-dir dist --source-maps inline"
+    "compile:deps:content": "./node_modules/.bin/uglifyjs ./bower_components/jquery/dist/jquery.js ./bower_components/async/dist/async.js ./bower_components/lodash/dist/lodash.js ./node_modules/devtools-detect/index.js --compress --output extension/dist/deps-content.js",
+    "compile:deps:background": "./node_modules/.bin/uglifyjs ./bower_components/async/dist/async.js ./bower_components/lodash/dist/lodash.js --compress --output extension/dist/deps-background.js",
+    "compile:deps": "npm-run-all compile:deps:*",
+    "compile:src": "./node_modules/.bin/babel extension/src --out-dir extension/dist --source-maps inline",
+    "compile": "npm-run-all compile:deps compile:src",
+    "start": "./node_modules/.bin/babel extension/src --watch --out-dir extension/dist --source-maps inline",
+    "pack": "./node_modules/.bin/crx pack -o burnt_chrome.crx ./extension"
   },
   "repository": {
     "type": "git",
@@ -25,6 +30,9 @@
   "devDependencies": {
     "babel-cli": "^6.5.1",
     "babel-preset-es2015": "^6.5.0",
-    "bower": "^1.7.7"
+    "babelify": "^7.2.0",
+    "bower": "^1.7.7",
+    "browserify": "^13.0.0",
+    "crx": "^3.0.3"
   }
 }

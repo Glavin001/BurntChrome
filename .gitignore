@@ -1,5 +1,6 @@
 bower_components/
 node_modules/
-dist/
+extension/dist/*
+!extension/dist/README.md
 *.pem
 *.crx

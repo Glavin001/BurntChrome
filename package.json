@@ -1,7 +1,7 @@
 {
   "name": "burntchrome",
   "version": "1.0.0",
-  "description": "> Software Engineering class project",
+  "description": "Software Engineering class project",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

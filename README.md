@@ -13,7 +13,7 @@ npm install
 3. Build the extension:
  ```bash
 # Compile all files
-npm compile
+npm run compile
 # Recompile files
 npm start
 ```

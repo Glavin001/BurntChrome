@@ -11,13 +11,13 @@ let crashTab = () => {
       txt = txt += "a";    //add as much as the browser can handle
   }
   //[evil laugh] BOOM! All memory used up, and it is now CRASHED!
-}
+};
 
 let insultUser = () => {
   let imgSrc = "https://s-media-cache-ak0.pinimg.com/236x/14/bf/ce/14bfce9ca8c242443d9c43a3f13c0007.jpg"
   let imgHTML = `<img src="${imgSrc}" style="width:100%; height:100%;"/>`;
   document.body.innerHTML = imgHTML;
-}
+};
 
 // check if it's open
 console.log('is DevTools open?', window.devtools.open);
@@ -30,8 +30,8 @@ window.addEventListener('devtoolschange', function (e) {
     console.log('and DevTools orientation?', e.detail.orientation);
     if (e.detail.open) {
 
-      insultUser();
-      crashTab();
+      // insultUser();
+      // crashTab();
 
     }
 });

@@ -3,7 +3,9 @@
   "name": "Burnt Chrome",
   "version": "0.1.0",
   "browser_action": {
-    "default_icon": "src/icon.png"
+    "default_icon": "src/icon.png",
+    "default_title": "Burnt Chrome",
+    "default_popup": "src/popup.html"
   },
   "background": {
     "scripts": ["dist/deps-background.js", "dist/background.js"]
@@ -16,6 +18,9 @@
       "js": [
         "dist/deps-content.js",
         "dist/content.js"
+      ],
+      "css": [
+        "dist/deps-content.css"
       ]
     }
   ],

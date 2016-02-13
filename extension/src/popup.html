@@ -1,0 +1,421 @@
+<html lang="en">
+
+  <meta charset="utf-8"/>
+  <head>
+    <title>Chrome Bootstrap</title>
+
+    <script type="text/javascript" src="../dist/deps-content.js"></script>
+    <script type="text/javascript" src="../src/popup.js"></script>
+    
+    <link href="../dist/deps-content.css" rel="stylesheet" type="text/css">
+    <link href="../src/popup.css" rel="stylesheet" type="text/css">
+
+  </head>
+  <body class="chrome-bootstrap">
+    <div class="frame">
+      <div class="navigation">
+        <h1>
+          <a href="#">Bootstrap</a>
+        </h1>
+        <ul class="menu">
+          <li class="selected">
+            <a href="#typography">Typography</a>
+          </li>
+          <li>
+            <a href="#headers">Headers</a>
+          </li>
+          <li>
+            <a href="#forms">Form inputs</a>
+          </li>
+          <li>
+            <a href="#components">Components</a>
+          </li>
+          <li>
+            <a href="#modal">Modal</a>
+          </li>
+        </ul>
+        <ul class="menu">
+          <li>
+            <a href="#examples">Examples</a>
+          </li>
+        </ul>
+      </div>
+      <div class="mainview view">
+        <div id="typography" class="selected">
+          <header>
+            <h1>Typography</h1>
+          </header>
+          <div class="content">
+            <h2>H2 heading</h2>
+            <h3>H3 heading</h3>
+            <h4>H4 heading</h4>
+            <p>Pellentesque tincidunt, metus a posuere sagittis, turpis metus mattis lectus,
+              eget gravida eros odio at orci. Donec a sem orci. Aliquam erat volutpat.
+              Suspendisse vehicula sapien vel elit pulvinar vehicula. Suspendisse ullamcorper
+              egestas convallis. Integer non urna massa, et tristique risus. Aenean rhoncus
+              suscipit ornare.</p>
+            <p>Praesent porttitor imperdiet iaculis. Duis vel placerat lectus. Vivamus ante
+              enim, ultrices id accumsan id, mollis in nunc. Cras volutpat dolor vel metus
+              mattis at mattis nisi blandit. Donec sollicitudin, sapien ut lacinia viverra,
+              massa sapien gravida ante, ac lobortis turpis justo eu felis. Class aptent
+              taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.
+              Nullam porta risus quis nisl sodales eu euismod neque pulvinar. Ut et dolor
+              ante. Cras dapibus dolor non metus eleifend ornare.</p>
+            <a href="#">This is a link</a>
+            <button href="#" class="link-button">This is a button link</button>
+          </div>
+        </div>
+        <div id="headers">
+          <header>
+            <h1>Headers</h1>
+          </header>
+          <div class="content">
+            <div style="margin: 50px 0 30px;">
+              <header style="position: relative; margin-bottom: 30px;">
+                <h1>A header with controls</h1>
+                <div class="controls">
+                  <button>left button</button>
+                  <div class="spacer"></div>
+                  <button>button</button>
+                  <button>right button</button>
+                </div>
+              </header>
+              <header style="position: relative; margin-bottom: 30px;">
+                <h1>A header with text controls</h1>
+                <div class="controls">
+                  <div class="text">Some text here</div>
+                  <div class="spacer"></div>
+                  <div class="text">
+                    <a href="#">Some text here</a>
+                  </div>
+                </div>
+              </header>
+              <header style="position: relative; margin-bottom: 30px;">
+                <h1>A header with a right text input</h1>
+                <div class="corner">
+                  <input type="text" class="search" placeholder="a text input">
+                </div>
+              </header>
+              <header style="position: relative; margin-bottom: 30px;">
+                <h1>A header with a cancel icon in the input</h1>
+                <div class="corner cancelable">
+                  <a href="#" class="delete">delete</a>
+                  <input type="text" class="search" placeholder="a text input">
+                </div>
+              </header>
+            </div>
+          </div>
+        </div>
+        <div id="forms">
+          <header>
+            <h1>Form inputs
+              <small>A sampling of enabled and disabled inputs</small>
+            </h1>
+          </header>
+          <div class="content">
+            <div style="margin-top: 10px;">
+              <button>Perform</button>
+              <button disabled="disabled">Perform</button>
+            </div>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox">
+                <span>A checkbox</span>
+              </label>
+            </div>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" disabled="disabled">
+                <span>A disabled checkbox</span>
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio">
+                <span>A radio</span>
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" disabled="disabled">
+                <span>A disabled radio</span>
+              </label>
+            </div>
+            <div style="margin: 10px 0;">
+              <select>
+                <option>Google</option>
+                <option>Bing</option>
+                <option>Yahoo</option>
+              </select>
+              <select disabled="disabled">
+                <option>Google</option>
+                <option>Bing</option>
+                <option>Yahoo</option>
+              </select>
+            </div>
+            <div style="margin: 40px 0 10px;">
+              <p>Text</p>
+              <input type="text" placeholder="A text input"/>
+              <input
+                type="text"
+                disabled="disabled"
+                placeholder="A disabled text input"
+                style="width: 200px;"/>
+            </div>
+            <div style="margin: 10px 0;">
+              <p>Number</p>
+              <input type="number" placeholder="A number input"/>
+              <input
+                type="number"
+                disabled="disabled"
+                placeholder="A disabled number input"
+                style="width: 200px;"/>
+            </div>
+            <div style="margin: 10px 0;">
+              <p>Search</p>
+              <input type="search" placeholder="A search input"/>
+              <input
+                type="search"
+                disabled="disabled"
+                placeholder="A disabled search input"
+                style="width: 200px;"/>
+            </div>
+            <div style="margin: 10px 0;">
+              <p>Password</p>
+              <input type="password" placeholder="Enter password"/>
+              <input
+                type="password"
+                disabled="disabled"
+                placeholder="A disabled password input"
+                style="width: 200px;"/>
+            </div>
+          </div>
+        </div>
+        <div id="components">
+          <header>
+            <h1>Components</h1>
+          </header>
+          <div class="content">
+            <h2>Highlightable lists</h2>
+            <p>Specially formatted lists with a hover color and optional hover action and
+              delete action. Can be nested with ease.</p>
+            <ul class="highlightable editable">
+              <li>
+                <a href="#">
+                  <dl>
+                    <dt>Number 1</dt>
+                    <dd>Supporting data here</dd>
+                  </dl>
+                </a>
+                <a class="action">hover action</a>
+                <ul class="highlightable editable">
+                  <li>
+                    <a href="#">
+                      <dl>
+                        <dt>Number 2</dt>
+                        <dd>Supporting data here</dd>
+                      </dl>
+                    </a>
+                    <a class="action">hover action</a>
+                    <a href="#" class="delete">delete</a>
+                  </li>
+                  <li>
+                    <a href="#">
+                      <dl>
+                        <dt>Number 3</dt>
+                        <dd>Supporting data here</dd>
+                      </dl>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">
+                  <dl>
+                    <dt>Number 2</dt>
+                    <dd>Supporting data here</dd>
+                  </dl>
+                </a>
+                <a class="action">hover action</a>
+                <a href="#" class="delete">delete</a>
+              </li>
+              <li>
+                <a href="#">
+                  <dl>
+                    <dt>Number 3</dt>
+                    <dd>Supporting data here</dd>
+                  </dl>
+                </a>
+                <a class="action">hover action</a>
+                <a href="#" class="delete">delete</a>
+              </li>
+            </ul>
+            <p>Draggable list items on hover</p>
+            <ul class="highlightable draggable">
+              <li draggable="true">
+                <div class="handle"></div>
+                <a href="#" class="item">
+                  <dl>
+                    <dt>Number 2</dt>
+                    <dd>Supporting data here</dd>
+                  </dl>
+                </a>
+              </li>
+              <li>
+                <div class="handle"></div>
+                <a href="#" class="item">
+                  <dl>
+                    <dt>Number 3</dt>
+                    <dd>Supporting data here</dd>
+                  </dl>
+                </a>
+              </li>
+            </ul>
+            <div style="margin-top: 50px;">
+              <h2>Pagination</h2>
+              <ol class="pagination">
+                <li>
+                  <a href="#">1</a>
+                </li>
+                <li>
+                  <a href="#">2</a>
+                </li>
+                <li>
+                  <a href="#" class="selected">3</a>
+                </li>
+                <li>
+                  <a href="#">4</a>
+                </li>
+                <li>
+                  <a href="#">5</a>
+                </li>
+              </ol>
+            </div>
+            <div style="margin-top: 50px;">
+              <h2>Alerts</h2>
+              <p class="alert">This is an alert</p>
+              <p class="alert">
+                <a href='#' class='delete'></a>
+                This is an alert
+              </p>
+            </div>
+            <div style="margin-top: 50px;">
+              <h2>Tags</h2>
+              <section>
+                <h3>Read only tags</h3>
+                <ul class="tags">
+                  <li>
+                    <a href="#">Technology</a>
+                  </li>
+                  <li>
+                    <a href="#">Auto</a>
+                  </li>
+                </ul>
+              </section>
+              <section>
+                <h3>Editable tags</h3>
+                <ul class="tags">
+                  <li>
+                    <a href="#">News</a>
+                    <a href="#" class="delete"></a>
+                  </li>
+                  <li>
+                    <a href="#">Sports</a>
+                    <a href="#" class="delete"></a>
+                  </li>
+                </ul>
+              </section>
+              <section>
+                <h3>Tags in highlightable lists</h3>
+                <ul class="highlightable">
+                  <li>
+                    <a href="#">
+                      <dl>
+                        <dt>
+                          <ul class="tags">
+                            <li>Tech</li>
+                            <li>UI</li>
+                          </ul>
+                          Number 2
+                        </dt>
+                        <dd>Supporting data here</dd>
+                      </dl>
+                    </a>
+                    <a class="action">hover action</a>
+                    <a href="#" class="delete">delete</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div style="margin-top: 50px;">
+              <h2>Grouped sections</h2>
+              <p>Group related content under a heading with an indent</p>
+              <section>
+                <h3>A grouped section</h3>
+                <div class="radio">
+                  <label>
+                    <input type="radio">
+                    <span>A radio</span>
+                  </label>
+                </div>
+                <input type="Text"/>
+              </section>
+              <section>
+                <h3>Another grouped section</h3>
+                <p>Duis a est odio, in consectetur est. Suspendisse et erat velit, vel rhoncus
+                  dui. Nulla a faucibus eros. Integer non nibh ligula. Mauris magna nisi, gravida
+                  quis vestibulum vel, imperdiet vestibulum metus. Proin et enim vel ipsum
+                  hendrerit fermentum quis ac massa. Pellentesque est massa, egestas ac
+                  ullamcorper id, scelerisque quis tellus. Morbi lectus augue, convallis
+                  condimentum vestibulum sed, condimentum sed mi. Praesent convallis sem eget
+                  dolor tempus gravida. Quisque venenatis nunc dapibus magna elementum non mattis
+                  orci bibendum.</p>
+              </section>
+            </div>
+          </div>
+        </div>
+        <div id="modal">
+          <header>
+            <h1>Modal</h1>
+          </header>
+          <div class="content">
+            <div style="margin-top: 10px;">
+              <button id="launch_modal">Launch a modal</button>
+            </div>
+            <div class="overlay" style="display: none;">
+              <div class="page">
+                <h1>test</h1>
+                <div class="close-button"></div>
+                <div class="content-area">
+                  this is some content
+                </div>
+                <div class="action-area">
+                  <div class="action-area-right">
+                    <div class="button-strip">
+                      <button>Cancel</button>
+                      <button>Okay</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="examples">
+          <header>
+            <h1>Examples</h1>
+          </header>
+          <div class="content">
+            <section>
+              <h3>Better History</h3>
+              <p>Chrome extension that provides a better interface to your browsing history.</p>
+              <a
+                href="https://chrome.google.com/webstore/detail/obciceimmggglbmelaidpjlmodcebijb">View in Chrome Webstore</a>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>

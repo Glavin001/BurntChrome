@@ -1,4 +1,4 @@
-# Burnt Chrome
+# Burnt Chrome [![Build Status](https://travis-ci.org/Glavin001/BurntChrome.svg?branch=master)](https://travis-ci.org/Glavin001/BurntChrome)
 
 > Class Project for CSCI 3428 Software Engineering
 

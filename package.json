@@ -4,7 +4,7 @@
   "description": "Software Engineering class project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --compilers js:babel-core/register",
     "postinstall": "./node_modules/.bin/npm-run-all bower:install compile",
     "bower:install": "./node_modules/.bin/bower install",
     "compile:deps:css:content": "./node_modules/.bin/cleancss --source-map-inline-sources -o extension/dist/deps-content.css ./bower_components/chrome-bootstrap/chrome-bootstrap.css",
@@ -35,12 +35,14 @@
   },
   "devDependencies": {
     "babel-cli": "^6.5.1",
+    "babel-core": "^6.5.2",
     "babel-preset-es2015": "^6.5.0",
     "babelify": "^7.2.0",
     "bower": "^1.7.7",
     "browserify": "^13.0.0",
     "clean-css": "^3.4.9",
     "crx": "^3.0.3",
+    "mocha": "^2.4.5",
     "npm-run-all": "^1.5.1",
     "uglifyjs": "^2.4.10"
   }

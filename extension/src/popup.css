@@ -2,3 +2,7 @@ body {
   height: 600px;
   width: 800px;
 }
+
+.frame {
+  margin-left: 21px;
+}

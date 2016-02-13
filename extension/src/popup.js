@@ -1,42 +1,44 @@
-$(function() {
-  $('.menu a').click(function(ev) {
-    ev.preventDefault();
-    var selected = 'selected';
-    $('.mainview > *').removeClass(selected);
-    $('.menu li').removeClass(selected);
-    setTimeout(function() {
-      $('.mainview > *:not(.selected)').css('display', 'none');
-    }, 100);
-    $(ev.currentTarget).parent().addClass(selected);
-    var currentView = $($(ev.currentTarget).attr('href'));
-    currentView.css('display', 'block');
-    setTimeout(function() {
-      currentView.addClass(selected);
-    }, 0);
-    setTimeout(function() {
-      $('body')[0].scrollTop = 0;
-    }, 200);
+
+$(document).ready(() => {
+
+  let handlebarsSelector = 'script[type="text/x-handlebars-template"]';
+  $(handlebarsSelector).each((index, $el) => {
+    // console.log($el, $el.id);
+    var templateId = $el.id;
+    if (!templateId) {
+      return console.warn("Unknown id for element: ", $el);
+    }
+    let containerId = templateId.split('-template')[0];
+    $($el).after($(`<div id="${containerId}"></div>`));
   });
-  $('#launch_modal').click(function(ev) {
-    ev.preventDefault();
-    var modal = $('.overlay').clone();
-    $(modal).removeAttr('style');
-    $(modal).find('button, .close-button').click(function() {
-      $(modal).addClass('transparent');
-      setTimeout(function() {
-        $(modal).remove();
-      }, 1000);
-    });
-    $(modal).click(function() {
-      $(modal).find('.page').addClass('pulse');
-      $(modal).find('.page').on('webkitAnimationEnd', function() {
-        $(this).removeClass('pulse');
-      });
-    });
-    $(modal).find('.page').click(function(ev) {
-      ev.stopPropagation();
-    });
-    $('body').append(modal);
+
+  let render = (id, context) => {
+    let el = document.getElementById(`${id}-template`);
+    let source = el.innerHTML;
+    let template = Handlebars.compile(source);
+    let html = template(context);
+    document.getElementById(id).innerHTML = html;
+  };
+
+  render('whitelist', {
+    whitelist: [
+      {
+        title: 'Google',
+        url: 'google.com'
+      },
+      {
+        title: 'Facebook',
+        url: 'facebook.com'
+      },
+      {
+        title: 'Twitter',
+        url: 'twitter.com'
+      },
+      {
+        title: 'How to Cheat on Exams 101',
+        url: 'cheatingonexams101.com'
+      },
+    ]
   });
-  $('.mainview > *:not(.selected)').css('display', 'none');
+
 });

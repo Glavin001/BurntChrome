@@ -9,14 +9,15 @@
     "bower:install": "./node_modules/.bin/bower install",
     "compile:deps:css:content": "./node_modules/.bin/cleancss --source-map-inline-sources -o extension/dist/deps-content.css ./bower_components/chrome-bootstrap/chrome-bootstrap.css",
     "compile:deps:css": "./node_modules/.bin/npm-run-all compile:deps:css:*",
-    "compile:deps:js:content": "./node_modules/.bin/uglifyjs ./bower_components/jquery/dist/jquery.js ./bower_components/async/dist/async.js ./bower_components/lodash/dist/lodash.js ./node_modules/devtools-detect/index.js --compress --output extension/dist/deps-content.js",
+    "compile:deps:js:content": "./node_modules/.bin/uglifyjs ./bower_components/jquery/dist/jquery.js ./bower_components/async/dist/async.js ./bower_components/lodash/dist/lodash.js ./node_modules/devtools-detect/index.js ./bower_components/handlebars/handlebars.min.js --compress --output extension/dist/deps-content.js",
     "compile:deps:js:background": "./node_modules/.bin/uglifyjs ./bower_components/async/dist/async.js ./bower_components/lodash/dist/lodash.js --compress --output extension/dist/deps-background.js",
     "compile:deps:js": "./node_modules/.bin/npm-run-all compile:deps:js:*",
     "compile:deps": "./node_modules/.bin/npm-run-all compile:deps:*",
     "compile:src:js": "./node_modules/.bin/babel extension/src --out-dir extension/dist --source-maps inline",
     "compile:src": "./node_modules/.bin/npm-run-all compile:src:*",
     "compile": "./node_modules/.bin/npm-run-all compile:deps compile:src",
-    "start": "./node_modules/.bin/babel extension/src --watch --out-dir extension/dist --source-maps inline",
+    "watch": "./node_modules/.bin/babel extension/src --watch --out-dir extension/dist --source-maps inline",
+    "start": "./node_modules/.bin/npm-run-all compile watch",
     "pack": "./node_modules/.bin/crx pack -o burnt_chrome.crx ./extension"
   },
   "repository": {

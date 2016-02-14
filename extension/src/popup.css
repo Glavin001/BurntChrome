@@ -1,8 +1,21 @@
 body {
-  height: 600px;
-  width: 800px;
+
 }
 
 .frame {
   margin-left: 21px;
+}
+header {
+  text-align: center;
+}
+.content .login {
+  text-align: center;
+}
+
+.form-group {
+  margin: 20px;
+}
+
+.login {
+
 }

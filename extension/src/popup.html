@@ -13,36 +13,78 @@
   </head>
   <body class="chrome-bootstrap">
 
-    <div class="frame">
+    <script id="frame-template" type="text/x-handlebars-template">
 
-      <header>
-        <h1>Burnt Chrome</h1>
-      </header>
+      <div class="frame">
 
-      <div class="content">
-        <h2>Whitelist</h2>
+        <header>
+          <h1>Burnt Chrome</h1>
+        </header>
 
-        <p>List of websites that are distinctly allowed.</p>
+        <div class="content">
 
-        <script id="whitelist-template" type="text/x-handlebars-template">
-          <ul class="highlightable editable">
-            {{#each whitelist as |website key|}}
-              <li>
-                <a href="{{website.url}}" target="_blank">
-                  <dl>
-                    <dt>{{website.title}}</dt>
-                    <dd>{{website.url}}</dd>
-                  </dl>
-                </a>
-                <a class="action">Edit</a>
-                <a href="#" class="delete">Delete</a>
-              </li>
-            {{/each}}
-          </ul>
-        </script>
+          {{#if isLoggedIn}}
+            <!-- Logged In -->
 
+            <h2>Whitelist</h2>
+            <p>List of websites that are distinctly allowed.</p>
+
+            <div>
+              <div class="form-group">
+                <input type="text" placeholder="Title or short description">
+                <input type="password" placeholder="URL">
+                <button>Add to Whitelist</button>
+              </div>
+            </div>
+
+            <ul class="highlightable editable">
+              {{#each whitelist as |website key|}}
+                <li>
+                  <a href="{{website.url}}" target="_blank">
+                    <dl>
+                      <dt>{{website.title}}</dt>
+                      <dd>{{website.url}}</dd>
+                    </dl>
+                  </a>
+                  <a class="action">Edit</a>
+                  <a href="#" class="delete">Delete</a>
+                </li>
+              {{/each}}
+            </ul>
+
+            {{else}}
+            <!-- Not Logged In -->
+
+            <div class="login">
+              <div class="form-group">
+                <input type="text" placeholder="Email or Username">
+              </div>
+              <div class="form-group">
+                <input type="password" placeholder="Password">
+              </div>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox">
+                  <span>Save password for next time</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <button id="sign-in">Sign in</button>
+              </div>
+              <div class="form-group">
+                <button>Create a new account</button>
+              </div>
+              <div class="form-group">
+                <a href="#">Forgot password?</a>
+              </div>
+            </div>
+
+          {{/if}}
+
+        </div>
       </div>
-    </div>
+
+    </script>
 
   </body>
 

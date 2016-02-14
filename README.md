@@ -13,6 +13,7 @@
 
 | [Evan Larose](https://github.com/LizardLeliel) | [Glavin Wiechert](https://github.com/Glavin001) | [Nathan Hernden](https://github.com/nhernden) | [Ziyun (Toby) Zhong](https://github.com/zhongziyun1993) |
 | --- | --- | --- | --- |
+| Software Tester | Project Leader, Lead Software Engineer | Lead Writer | Software Developer |
 | ![evan](https://avatars3.githubusercontent.com/u/7256908) | ![glavin](https://avatars0.githubusercontent.com/u/1885333) | ![nathan](https://avatars0.githubusercontent.com/u/13204557) | ![toby](https://avatars1.githubusercontent.com/u/3355559) |
 
 ## Contributing

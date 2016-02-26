@@ -1,0 +1,8 @@
+{
+  "title": "Burnt Chrome",
+  "source": "./extension/src",
+  "destination": "./docs",
+  "access": ["public","protected","private"],
+  "unexportIdentifier": true,
+  "undocumentIdentifier": true
+}

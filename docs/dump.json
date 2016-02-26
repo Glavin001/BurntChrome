@@ -1,0 +1,1638 @@
+[
+  {
+    "__docId__": 0,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/background.js",
+    "memberof": null,
+    "longname": "src/background.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 16,
+    "content": "/**\n@typedef {Object} whitelist_entry A whitelist entry\n@property {string} name The name of the whitelist entry.\n@property {string} url The URL for the whitelist entry.\n*/\n/**\n@typedef {Array<whitelist_entry>} whitelist A whitelist array\n*/\n\n\n/**\n@desc TODO helper indicating at runtime that a method is not yet implemented.\n\n@throws {Error} Not yet implemented.\n*/\nfunction TODO() {\n  throw new Error('Not yet implemented.');\n}\n\n/**\n@desc Authentication component\n*/\nclass Auth {\n  /**\n  @desc Initialize the instance.\n\n  @todo Not yet implemented.\n  */\n  constructor() {\n    TODO();\n  }\n  /**\n  @desc Login for the primary administrator.\n\n  @see https://developer.chrome.com/apps/identity\n  @see https://developer.chrome.com/apps/app_identity\n  @todo Not yet implemented.\n  */\n  login(callback) {\n    TODO();\n  }\n}\n\n/**\n@desc Whitelist component\n*/\nclass Whitelist {\n  /**\n  @description Initialize the instance.\n  */\n  constructor(email) {\n    this.email = email;\n  }\n  /**\n  @desc Add URL to whitelist.\n\n  @param {string} name - Name for whitelist entry\n  @param {string} url - URL for whitelist entry\n  @return {boolean} Was successfully added to whitelist\n  @throws {Error} URL is already in whitelist.\n  */\n  addURL(name, url) {\n    // Check that URL is not already in whitelist\n    if (this.isAllowed(url)) {\n      // Must already be in whitelist\n      // Throw an error!\n      throw new Error(`URL '${url}' is already in whitelist`);\n    }\n    // Not already in whitelist\n\n    // Get whitelist\n    let whitelist = this.get();\n    // Create new entry\n    let entry = {\n      name,\n      url\n    };\n    // Add entry to whitelist\n    whitelist.push(entry);\n    // Save whitelist\n    set(whitelist);\n    // Return successful\n    return true;\n  }\n  /**\n  @desc Remove URL from whitelist\n  @param {string} url - The URL to remove from the whitelist\n  @return {whitelist} whitelist The updated whitelist\n  */\n  removeURL(url) {\n    // Get whitelist\n    let whitelist = this.get();\n    // Find entry with matching URL in whitelist\n    // Remove entry\n    whitelist = _.remove(whitelist, (entry) => {\n      return Whitelist.matchURLs(url, entry.url);\n    });\n    // Save new whitelist\n    this.set(whitelist);\n    return whitelist;\n  }\n  /**\n  @desc Check if URL is allowed\n  @param {string} url - The URL to check if whitelist allows.\n  @return {boolean} Whether the URL is allowed.\n  */\n  isAllowed(url) {\n    // Get whitelist\n    let whitelist = this.get();\n    // Find entry with matching URL in whitelist\n    let idx = _.remove(whitelist, (entry) => {\n      return Whitelist.matchURLs(url, entry.url);\n    });\n    // Allow if not idx isnt -1\n    return idx !== -1;\n  }\n  /**\n  @desc Sync\n\n  @see https://developer.chrome.com/extensions/storage\n  @todo Implement.\n  */\n  sync(callback) {\n    TODO();\n  }\n\n  /**\n  @desc Get the whitelist in localStorage.\n\n  @return {whitelist} The whitelist.\n  */\n  get() {\n    return Whitelist.getWhitelistForEmail(this.email, whitelist);\n  }\n\n  /**\n  @desc Set the whitelist in localStorage.\n\n  @param {whitelist} whitelist - The whitelist to save.\n  @return {boolean} Whether successfully saved.\n  */\n  set(whitelist) {\n    return Whitelist.setWhitelistForEmail(this.email, whitelist);\n  }\n\n  /**\n  @desc Test URLs.\n  @param {string} a - URL to test against. Can be a RegExp.\n  @param {string} b - URL to test with.\n  @return {boolean} If URL `a` matches URL `b`\n  @private\n  @example\n  testURLs('google.com','google.com'); // True\n  testURLs('google.com','google.ca'); // False\n  */\n  testURLs(a, b) {\n    return (new RegExp(a)).test(b);\n  }\n\n  /**\n  @desc Get the key to lookup in localStorage for the whitelist.\n  @private\n  @return {string} localStorage key for the whitelist for the given email.\n  */\n  static getWhitelistKeyForEmail(email) {\n    return 'whitelist:'+email;\n  }\n  /**\n  @desc Get the whitelist from localStorage\n  @private\n  @return {whitelist} The whitelist\n  @see https://developer.chrome.com/extensions/storage\n  @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API\n  */\n  static getWhitelistForEmail(email) {\n    let key = Whitelist.getWhitelistKeyForEmail(email);\n    let whitelist = localStorage[key];\n    if (typeof whitelist === 'string') {\n      return JSON.parse(whitelist);\n    } else if (typeof whitelist === 'object') {\n      return whitelist;\n    } else {\n      console.warn('Unknown whitelist type: ', typeof whitelist, whitelist);\n      return [];\n    }\n  }\n  /**\n  @desc Set the whitelist in localStorage\n  @private\n  @param {string} email - The admin's email address.\n  @param {whitelist} whitelist - The whitelist to save.\n  @return {boolean} Whether successfully saved.\n  @see https://developer.chrome.com/extensions/storage\n  @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API\n  */\n  static setWhitelistForEmail(email, whitelist) {\n    let key = Whitelist.getWhitelistKeyForEmail(email);\n    if (typeof whitelist !== 'string') {\n      whitelist = JSON.stringify(whitelist);\n    }\n    localStorage[key] = whitelist;\n    // Return successful\n    return true;\n  }\n\n}\n\n/**\n@desc Moderator component\n*/\nclass Moderator {\n  /**\n  @desc Initialize the instance.\n  */\n  constructors() {\n    // FIXME:\n    let email = 'glavin.wiechert@gmail.com';\n\n    // Initialize related classes\n    this.whitelist = new Whitelist(email);\n\n    // Event listeners\n    this.setupListeners();\n  }\n  /**\n  @desc Setup all event listeners.\n\n  @see https://developer.chrome.com/extensions/webRequest\n  @listens {onBeforeRequest} Listens for before requests\n  @private\n  */\n  setupListeners() {\n    // Request listener\n    chrome.webRequest.onBeforeRequest.addListener(\n      function(info) {\n        var url = info.url;\n        let shouldAllow = this.whitelist.isAllowed(url);\n        console.log('URL: ', url, shouldAllow);\n        return {\n          cancel: !shouldAllow // (url.search(\"/.*\\.google\\..*/\") == -1)\n        }\n      },\n\n      {\n        urls: [\"<all_urls>\"]\n      },\n\n      [\"blocking\"]\n    );\n  }\n}\n\n/**\n===== Main =====\nStart the background script\n\n@ignore\n*/\nlet manager = new Manager();\n"
+  },
+  {
+    "__docId__": 1,
+    "kind": "typedef",
+    "static": true,
+    "variation": null,
+    "name": "whitelist_entry",
+    "memberof": "src/background.js",
+    "longname": "src/background.js~whitelist_entry",
+    "access": null,
+    "description": "",
+    "properties": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "name",
+        "description": "The name of the whitelist entry."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "url",
+        "description": "The URL for the whitelist entry."
+      }
+    ],
+    "type": {
+      "types": [
+        "Object"
+      ],
+      "optional": false,
+      "name": "whitelist_entry"
+    }
+  },
+  {
+    "__docId__": 2,
+    "kind": "typedef",
+    "static": true,
+    "variation": null,
+    "name": "whitelist",
+    "memberof": "src/background.js",
+    "longname": "src/background.js~whitelist",
+    "access": null,
+    "description": "",
+    "type": {
+      "types": [
+        "Array<whitelist_entry>"
+      ],
+      "optional": false,
+      "name": "whitelist"
+    }
+  },
+  {
+    "__docId__": 3,
+    "kind": "function",
+    "static": true,
+    "variation": null,
+    "name": "TODO",
+    "memberof": "src/background.js",
+    "longname": "src/background.js~TODO",
+    "access": null,
+    "export": false,
+    "importPath": "burntchrome/src/background.js",
+    "importStyle": null,
+    "description": "TODO helper indicating at runtime that a method is not yet implemented.",
+    "lineNumber": 16,
+    "params": [],
+    "throws": [
+      {
+        "types": [
+          "Error"
+        ],
+        "description": "Not yet implemented."
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 4,
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Auth",
+    "memberof": "src/background.js",
+    "longname": "src/background.js~Auth",
+    "access": null,
+    "export": false,
+    "importPath": "burntchrome/src/background.js",
+    "importStyle": null,
+    "description": "Authentication component",
+    "lineNumber": 23,
+    "interface": false
+  },
+  {
+    "__docId__": 5,
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/background.js~Auth",
+    "longname": "src/background.js~Auth#constructor",
+    "access": null,
+    "description": "Initialize the instance.",
+    "lineNumber": 29,
+    "todo": [
+      "Not yet implemented."
+    ],
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 6,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "login",
+    "memberof": "src/background.js~Auth",
+    "longname": "src/background.js~Auth#login",
+    "access": null,
+    "description": "Login for the primary administrator.",
+    "see": [
+      "https://developer.chrome.com/apps/identity",
+      "https://developer.chrome.com/apps/app_identity"
+    ],
+    "lineNumber": 39,
+    "todo": [
+      "Not yet implemented."
+    ],
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 7,
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Whitelist",
+    "memberof": "src/background.js",
+    "longname": "src/background.js~Whitelist",
+    "access": null,
+    "export": false,
+    "importPath": "burntchrome/src/background.js",
+    "importStyle": null,
+    "description": "Whitelist component",
+    "lineNumber": 47,
+    "interface": false
+  },
+  {
+    "__docId__": 8,
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 51,
+    "unknown": [
+      {
+        "tagName": "@description",
+        "tagValue": "Initialize the instance."
+      }
+    ],
+    "params": [
+      {
+        "name": "email",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 9,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "email",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist#email",
+    "access": null,
+    "description": null,
+    "lineNumber": 52,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 10,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "addURL",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist#addURL",
+    "access": null,
+    "description": "Add URL to whitelist.",
+    "lineNumber": 62,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "name",
+        "description": "Name for whitelist entry"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "url",
+        "description": "URL for whitelist entry"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "boolean"
+      ],
+      "spread": false,
+      "description": "Was successfully added to whitelist"
+    },
+    "throws": [
+      {
+        "types": [
+          "Error"
+        ],
+        "description": "URL is already in whitelist."
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 11,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "removeURL",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist#removeURL",
+    "access": null,
+    "description": "Remove URL from whitelist",
+    "lineNumber": 90,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "url",
+        "description": "The URL to remove from the whitelist"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "whitelist"
+      ],
+      "spread": false,
+      "description": "whitelist The updated whitelist"
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 12,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "isAllowed",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist#isAllowed",
+    "access": null,
+    "description": "Check if URL is allowed",
+    "lineNumber": 107,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "url",
+        "description": "The URL to check if whitelist allows."
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "boolean"
+      ],
+      "spread": false,
+      "description": "Whether the URL is allowed."
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 13,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "sync",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist#sync",
+    "access": null,
+    "description": "Sync",
+    "see": [
+      "https://developer.chrome.com/extensions/storage"
+    ],
+    "lineNumber": 123,
+    "todo": [
+      "Implement."
+    ],
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 14,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "get",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist#get",
+    "access": null,
+    "description": "Get the whitelist in localStorage.",
+    "lineNumber": 132,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "whitelist"
+      ],
+      "spread": false,
+      "description": "The whitelist."
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 15,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "set",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist#set",
+    "access": null,
+    "description": "Set the whitelist in localStorage.",
+    "lineNumber": 142,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "whitelist"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "whitelist",
+        "description": "The whitelist to save."
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "boolean"
+      ],
+      "spread": false,
+      "description": "Whether successfully saved."
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 16,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "testURLs",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist#testURLs",
+    "access": "private",
+    "description": "Test URLs.",
+    "examples": [
+      "testURLs('google.com','google.com'); // True\ntestURLs('google.com','google.ca'); // False"
+    ],
+    "lineNumber": 156,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "a",
+        "description": "URL to test against. Can be a RegExp."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "b",
+        "description": "URL to test with."
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "boolean"
+      ],
+      "spread": false,
+      "description": "If URL `a` matches URL `b`"
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 17,
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "getWhitelistKeyForEmail",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist.getWhitelistKeyForEmail",
+    "access": "private",
+    "description": "Get the key to lookup in localStorage for the whitelist.",
+    "lineNumber": 165,
+    "params": [
+      {
+        "name": "email",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "string"
+      ],
+      "spread": false,
+      "description": "localStorage key for the whitelist for the given email."
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 18,
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "getWhitelistForEmail",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist.getWhitelistForEmail",
+    "access": "private",
+    "description": "Get the whitelist from localStorage",
+    "see": [
+      "https://developer.chrome.com/extensions/storage",
+      "https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API"
+    ],
+    "lineNumber": 175,
+    "params": [
+      {
+        "name": "email",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "whitelist"
+      ],
+      "spread": false,
+      "description": "The whitelist"
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 19,
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "setWhitelistForEmail",
+    "memberof": "src/background.js~Whitelist",
+    "longname": "src/background.js~Whitelist.setWhitelistForEmail",
+    "access": "private",
+    "description": "Set the whitelist in localStorage",
+    "see": [
+      "https://developer.chrome.com/extensions/storage",
+      "https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API"
+    ],
+    "lineNumber": 196,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "email",
+        "description": "The admin's email address."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "whitelist"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "whitelist",
+        "description": "The whitelist to save."
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "boolean"
+      ],
+      "spread": false,
+      "description": "Whether successfully saved."
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 20,
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Moderator",
+    "memberof": "src/background.js",
+    "longname": "src/background.js~Moderator",
+    "access": null,
+    "export": false,
+    "importPath": "burntchrome/src/background.js",
+    "importStyle": null,
+    "description": "Moderator component",
+    "lineNumber": 211,
+    "interface": false
+  },
+  {
+    "__docId__": 21,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "constructors",
+    "memberof": "src/background.js~Moderator",
+    "longname": "src/background.js~Moderator#constructors",
+    "access": null,
+    "description": "Initialize the instance.",
+    "lineNumber": 215,
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 22,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "whitelist",
+    "memberof": "src/background.js~Moderator",
+    "longname": "src/background.js~Moderator#whitelist",
+    "access": null,
+    "description": null,
+    "lineNumber": 220,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 23,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "setupListeners",
+    "memberof": "src/background.js~Moderator",
+    "longname": "src/background.js~Moderator#setupListeners",
+    "access": "private",
+    "description": "Setup all event listeners.",
+    "see": [
+      "https://developer.chrome.com/extensions/webRequest"
+    ],
+    "lineNumber": 232,
+    "params": [],
+    "listens": [
+      {
+        "types": [
+          "onBeforeRequest"
+        ],
+        "description": "Listens for before requests"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 24,
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "manager",
+    "memberof": "src/background.js",
+    "longname": "src/background.js~manager",
+    "access": null,
+    "export": false,
+    "importPath": "burntchrome/src/background.js",
+    "importStyle": null,
+    "description": "===== Main =====\nStart the background script",
+    "lineNumber": 259,
+    "ignore": true,
+    "type": {
+      "types": [
+        "Manager"
+      ]
+    }
+  },
+  {
+    "__docId__": 25,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/content.js",
+    "memberof": null,
+    "longname": "src/content.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 3,
+    "content": "// content.js\n\nconsole.log(\"Hello from Burnt Chrome extension!\");\n\n/**\n@desc Crash the user's tab\n*/\nlet crashTab = () => {\n  // while(true) {\n  //   console.log('Hey! Fuck you.');\n  // }\n  var txt = \"a\";\n  while(1){\n      txt = txt += \"a\";    //add as much as the browser can handle\n  }\n  //[evil laugh] BOOM! All memory used up, and it is now CRASHED!\n};\n\n/**\n@desc Insult the user\n*/\nlet insultUser = () => {\n  let imgSrc = \"https://s-media-cache-ak0.pinimg.com/236x/14/bf/ce/14bfce9ca8c242443d9c43a3f13c0007.jpg\"\n  let imgHTML = `<img src=\"${imgSrc}\" style=\"width:100%; height:100%;\"/>`;\n  document.body.innerHTML = imgHTML;\n};\n\n// check if it's open\nconsole.log('is DevTools open?', window.devtools.open);\n// check it's orientation, null if not open\nconsole.log('and DevTools orientation?', window.devtools.orientation);\n\n// get notified when it's opened/closed or orientation changes\nwindow.addEventListener('devtoolschange', function (e) {\n    console.log('is DevTools open?', e.detail.open);\n    console.log('and DevTools orientation?', e.detail.orientation);\n    if (e.detail.open) {\n\n      // insultUser();\n      // crashTab();\n\n    }\n});\n"
+  },
+  {
+    "__docId__": 26,
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "crashTab",
+    "memberof": "src/content.js",
+    "longname": "src/content.js~crashTab",
+    "access": null,
+    "export": false,
+    "importPath": "burntchrome/src/content.js",
+    "importStyle": null,
+    "description": "Crash the user's tab",
+    "lineNumber": 8,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 27,
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "insultUser",
+    "memberof": "src/content.js",
+    "longname": "src/content.js~insultUser",
+    "access": null,
+    "export": false,
+    "importPath": "burntchrome/src/content.js",
+    "importStyle": null,
+    "description": "Insult the user",
+    "lineNumber": 22,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 28,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/popup.js",
+    "memberof": null,
+    "longname": "src/popup.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 5,
+    "content": "\n/**\n@desc Burnt Chrome namespace\n*/\nclass Burnt {\n  /**\n  @desc Initialize the instance.\n  */\n  constructor() {\n    // Setup defaults\n    this.templateId = 'frame';\n    this.__context = {\n      isLoggedIn: false,\n      whitelist: [\n        {\n          title: 'Google',\n          url: 'google.com'\n        },\n        {\n          title: 'Facebook',\n          url: 'facebook.com'\n        },\n        {\n          title: 'Twitter',\n          url: 'twitter.com'\n        },\n        {\n          title: 'How to Cheat on Exams 101',\n          url: 'cheatingonexams101.com'\n        },\n      ]\n    };\n\n    let handlebarsSelector = 'script[type=\"text/x-handlebars-template\"]';\n    $(handlebarsSelector).each((index, $el) => {\n      // console.log($el, $el.id);\n      var templateId = $el.id;\n      if (!templateId) {\n        return console.warn(\"Unknown id for element: \", $el);\n      }\n      let containerId = templateId.split('-template')[0];\n      $($el).after($(`<div id=\"${containerId}\"></div>`));\n    });\n    // Render initial page\n    burnt.refresh();\n  }\n  /**\n  @desc Render the template\n  */\n  render(id, context) {\n    let el = document.getElementById(`${id}-template`);\n    let source = el.innerHTML;\n    let template = Handlebars.compile(source);\n    let html = template(context);\n    document.getElementById(id).innerHTML = html;\n    console.log('html', html);\n    // Bind events\n    this.bind();\n  }\n  /**\n  @desc Bind the events\n  */\n  bind() {\n    console.log('Bind element events');\n    $('#sign-in').click(() => this.login());\n  }\n  /**\n  @desc Refresh the template\n  */\n  refresh() {\n    this.render(this.templateId, this.__context);\n  }\n  /**\n  @desc Set a property on the context\n  */\n  set(key, val) {\n    _.set(this.__context, key, val);\n    this.refresh();\n  }\n  /**\n  @desc Get a property on the context\n  */\n  get(key) {\n    return _.get(this.__context, key);\n  }\n  /**\n  @desc Login\n  @deprecated Login will be outsourced to Google's chrome.identity API\n  */\n  login() {\n    console.log('Login!');\n    this.set('isLoggedIn', true);\n  }\n};\n\n/**\nReady up!\n*/\n$(document).ready(() => {\n  console.log('Ready');\n  let burnt = window.burnt = new Burnt();\n});\n\n\n\n\n\n\n\n\n"
+  },
+  {
+    "__docId__": 29,
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Burnt",
+    "memberof": "src/popup.js",
+    "longname": "src/popup.js~Burnt",
+    "access": null,
+    "export": false,
+    "importPath": "burntchrome/src/popup.js",
+    "importStyle": null,
+    "description": "Burnt Chrome namespace",
+    "lineNumber": 5,
+    "interface": false
+  },
+  {
+    "__docId__": 30,
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/popup.js~Burnt",
+    "longname": "src/popup.js~Burnt#constructor",
+    "access": null,
+    "description": "Initialize the instance.",
+    "lineNumber": 9,
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 31,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "templateId",
+    "memberof": "src/popup.js~Burnt",
+    "longname": "src/popup.js~Burnt#templateId",
+    "access": null,
+    "description": null,
+    "lineNumber": 11,
+    "undocument": true,
+    "type": {
+      "types": [
+        "string"
+      ]
+    }
+  },
+  {
+    "__docId__": 32,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "__context",
+    "memberof": "src/popup.js~Burnt",
+    "longname": "src/popup.js~Burnt#__context",
+    "access": null,
+    "description": null,
+    "lineNumber": 12,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 33,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "render",
+    "memberof": "src/popup.js~Burnt",
+    "longname": "src/popup.js~Burnt#render",
+    "access": null,
+    "description": "Render the template",
+    "lineNumber": 50,
+    "params": [
+      {
+        "name": "id",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "context",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 34,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "bind",
+    "memberof": "src/popup.js~Burnt",
+    "longname": "src/popup.js~Burnt#bind",
+    "access": null,
+    "description": "Bind the events",
+    "lineNumber": 63,
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 35,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "refresh",
+    "memberof": "src/popup.js~Burnt",
+    "longname": "src/popup.js~Burnt#refresh",
+    "access": null,
+    "description": "Refresh the template",
+    "lineNumber": 70,
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 36,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "set",
+    "memberof": "src/popup.js~Burnt",
+    "longname": "src/popup.js~Burnt#set",
+    "access": null,
+    "description": "Set a property on the context",
+    "lineNumber": 76,
+    "params": [
+      {
+        "name": "key",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "val",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 37,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "get",
+    "memberof": "src/popup.js~Burnt",
+    "longname": "src/popup.js~Burnt#get",
+    "access": null,
+    "description": "Get a property on the context",
+    "lineNumber": 83,
+    "params": [
+      {
+        "name": "key",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 38,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "login",
+    "memberof": "src/popup.js~Burnt",
+    "longname": "src/popup.js~Burnt#login",
+    "access": null,
+    "description": "Login",
+    "lineNumber": 90,
+    "deprecated": "Login will be outsourced to Google's chrome.identity API",
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 40,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Infinity",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Infinity",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 41,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "NaN",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~NaN",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 42,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "undefined",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~undefined",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 43,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "null",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~null",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 44,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Object",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 45,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~object",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 46,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Function",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 47,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~function",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 48,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Boolean",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 49,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~boolean",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 50,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Symbol",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Symbol",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 51,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Error",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Error",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 52,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "EvalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~EvalError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 53,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "InternalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/InternalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~InternalError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 54,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "RangeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RangeError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 55,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "ReferenceError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ReferenceError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 56,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "SyntaxError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~SyntaxError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 57,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "TypeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~TypeError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 58,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "URIError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~URIError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 59,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Number",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 60,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~number",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 61,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Date",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Date",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 62,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "String",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~String",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 63,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "string",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~string",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 64,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "RegExp",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RegExp",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 65,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 66,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Int8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int8Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 67,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 68,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint8ClampedArray",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8ClampedArray",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 69,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Int16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int16Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 70,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint16Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 71,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Int32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int32Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 72,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint32Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 73,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Float32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float32Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 74,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Float64Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float64Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float64Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 75,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Map",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Map",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 76,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Set",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Set",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 77,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "WeakMap",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakMap",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 78,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "WeakSet",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakSet",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 79,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "ArrayBuffer",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ArrayBuffer",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 80,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "DataView",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~DataView",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 81,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "JSON",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~JSON",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 82,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Promise",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Promise",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 83,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Generator",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Generator",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 84,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "GeneratorFunction",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/GeneratorFunction",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~GeneratorFunction",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 85,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Reflect",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Reflect",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 86,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Proxy",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Proxy",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 88,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "CanvasRenderingContext2D",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~CanvasRenderingContext2D",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 89,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "DocumentFragment",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~DocumentFragment",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 90,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Element",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Element",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~Element",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 91,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Event",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Event",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~Event",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 92,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Node",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Node",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~Node",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 93,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "NodeList",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/NodeList",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~NodeList",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 94,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "XMLHttpRequest",
+    "externalLink": "https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~XMLHttpRequest",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 95,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "AudioContext",
+    "externalLink": "https://developer.mozilla.org/en/docs/Web/API/AudioContext",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~AudioContext",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  }
+]

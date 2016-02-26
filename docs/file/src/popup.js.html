@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">src/popup.js | Burnt Chrome API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="git+https://github.com/Glavin001/BurntChrome.git">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Auth.html">Auth</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Whitelist.html">Whitelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Burnt.html">Burnt</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-TODO">TODO</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-crashTab">crashTab</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-insultUser">insultUser</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist_entry">whitelist_entry</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/popup.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">
+/**
+@desc Burnt Chrome namespace
+*/
+class Burnt {
+  /**
+  @desc Initialize the instance.
+  */
+  constructor() {
+    // Setup defaults
+    this.templateId = &apos;frame&apos;;
+    this.__context = {
+      isLoggedIn: false,
+      whitelist: [
+        {
+          title: &apos;Google&apos;,
+          url: &apos;google.com&apos;
+        },
+        {
+          title: &apos;Facebook&apos;,
+          url: &apos;facebook.com&apos;
+        },
+        {
+          title: &apos;Twitter&apos;,
+          url: &apos;twitter.com&apos;
+        },
+        {
+          title: &apos;How to Cheat on Exams 101&apos;,
+          url: &apos;cheatingonexams101.com&apos;
+        },
+      ]
+    };
+
+    let handlebarsSelector = &apos;script[type=&quot;text/x-handlebars-template&quot;]&apos;;
+    $(handlebarsSelector).each((index, $el) =&gt; {
+      // console.log($el, $el.id);
+      var templateId = $el.id;
+      if (!templateId) {
+        return console.warn(&quot;Unknown id for element: &quot;, $el);
+      }
+      let containerId = templateId.split(&apos;-template&apos;)[0];
+      $($el).after($(`&lt;div id=&quot;${containerId}&quot;&gt;&lt;/div&gt;`));
+    });
+    // Render initial page
+    burnt.refresh();
+  }
+  /**
+  @desc Render the template
+  */
+  render(id, context) {
+    let el = document.getElementById(`${id}-template`);
+    let source = el.innerHTML;
+    let template = Handlebars.compile(source);
+    let html = template(context);
+    document.getElementById(id).innerHTML = html;
+    console.log(&apos;html&apos;, html);
+    // Bind events
+    this.bind();
+  }
+  /**
+  @desc Bind the events
+  */
+  bind() {
+    console.log(&apos;Bind element events&apos;);
+    $(&apos;#sign-in&apos;).click(() =&gt; this.login());
+  }
+  /**
+  @desc Refresh the template
+  */
+  refresh() {
+    this.render(this.templateId, this.__context);
+  }
+  /**
+  @desc Set a property on the context
+  */
+  set(key, val) {
+    _.set(this.__context, key, val);
+    this.refresh();
+  }
+  /**
+  @desc Get a property on the context
+  */
+  get(key) {
+    return _.get(this.__context, key);
+  }
+  /**
+  @desc Login
+  @deprecated Login will be outsourced to Google&apos;s chrome.identity API
+  */
+  login() {
+    console.log(&apos;Login!&apos;);
+    this.set(&apos;isLoggedIn&apos;, true);
+  }
+};
+
+/**
+Ready up!
+*/
+$(document).ready(() =&gt; {
+  console.log(&apos;Ready&apos;);
+  let burnt = window.burnt = new Burnt();
+});
+
+
+
+
+
+
+
+
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.5)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

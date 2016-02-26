@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">src/background.js | Burnt Chrome API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="git+https://github.com/Glavin001/BurntChrome.git">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Auth.html">Auth</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Whitelist.html">Whitelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Burnt.html">Burnt</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-TODO">TODO</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-crashTab">crashTab</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-insultUser">insultUser</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist_entry">whitelist_entry</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/background.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+@typedef {Object} whitelist_entry A whitelist entry
+@property {string} name The name of the whitelist entry.
+@property {string} url The URL for the whitelist entry.
+*/
+/**
+@typedef {Array&lt;whitelist_entry&gt;} whitelist A whitelist array
+*/
+
+
+/**
+@desc TODO helper indicating at runtime that a method is not yet implemented.
+
+@throws {Error} Not yet implemented.
+*/
+function TODO() {
+  throw new Error(&apos;Not yet implemented.&apos;);
+}
+
+/**
+@desc Authentication component
+*/
+class Auth {
+  /**
+  @desc Initialize the instance.
+
+  @todo Not yet implemented.
+  */
+  constructor() {
+    TODO();
+  }
+  /**
+  @desc Login for the primary administrator.
+
+  @see https://developer.chrome.com/apps/identity
+  @see https://developer.chrome.com/apps/app_identity
+  @todo Not yet implemented.
+  */
+  login(callback) {
+    TODO();
+  }
+}
+
+/**
+@desc Whitelist component
+*/
+class Whitelist {
+  /**
+  @description Initialize the instance.
+  */
+  constructor(email) {
+    this.email = email;
+  }
+  /**
+  @desc Add URL to whitelist.
+
+  @param {string} name - Name for whitelist entry
+  @param {string} url - URL for whitelist entry
+  @return {boolean} Was successfully added to whitelist
+  @throws {Error} URL is already in whitelist.
+  */
+  addURL(name, url) {
+    // Check that URL is not already in whitelist
+    if (this.isAllowed(url)) {
+      // Must already be in whitelist
+      // Throw an error!
+      throw new Error(`URL &apos;${url}&apos; is already in whitelist`);
+    }
+    // Not already in whitelist
+
+    // Get whitelist
+    let whitelist = this.get();
+    // Create new entry
+    let entry = {
+      name,
+      url
+    };
+    // Add entry to whitelist
+    whitelist.push(entry);
+    // Save whitelist
+    set(whitelist);
+    // Return successful
+    return true;
+  }
+  /**
+  @desc Remove URL from whitelist
+  @param {string} url - The URL to remove from the whitelist
+  @return {whitelist} whitelist The updated whitelist
+  */
+  removeURL(url) {
+    // Get whitelist
+    let whitelist = this.get();
+    // Find entry with matching URL in whitelist
+    // Remove entry
+    whitelist = _.remove(whitelist, (entry) =&gt; {
+      return Whitelist.matchURLs(url, entry.url);
+    });
+    // Save new whitelist
+    this.set(whitelist);
+    return whitelist;
+  }
+  /**
+  @desc Check if URL is allowed
+  @param {string} url - The URL to check if whitelist allows.
+  @return {boolean} Whether the URL is allowed.
+  */
+  isAllowed(url) {
+    // Get whitelist
+    let whitelist = this.get();
+    // Find entry with matching URL in whitelist
+    let idx = _.remove(whitelist, (entry) =&gt; {
+      return Whitelist.matchURLs(url, entry.url);
+    });
+    // Allow if not idx isnt -1
+    return idx !== -1;
+  }
+  /**
+  @desc Sync
+
+  @see https://developer.chrome.com/extensions/storage
+  @todo Implement.
+  */
+  sync(callback) {
+    TODO();
+  }
+
+  /**
+  @desc Get the whitelist in localStorage.
+
+  @return {whitelist} The whitelist.
+  */
+  get() {
+    return Whitelist.getWhitelistForEmail(this.email, whitelist);
+  }
+
+  /**
+  @desc Set the whitelist in localStorage.
+
+  @param {whitelist} whitelist - The whitelist to save.
+  @return {boolean} Whether successfully saved.
+  */
+  set(whitelist) {
+    return Whitelist.setWhitelistForEmail(this.email, whitelist);
+  }
+
+  /**
+  @desc Test URLs.
+  @param {string} a - URL to test against. Can be a RegExp.
+  @param {string} b - URL to test with.
+  @return {boolean} If URL `a` matches URL `b`
+  @private
+  @example
+  testURLs(&apos;google.com&apos;,&apos;google.com&apos;); // True
+  testURLs(&apos;google.com&apos;,&apos;google.ca&apos;); // False
+  */
+  testURLs(a, b) {
+    return (new RegExp(a)).test(b);
+  }
+
+  /**
+  @desc Get the key to lookup in localStorage for the whitelist.
+  @private
+  @return {string} localStorage key for the whitelist for the given email.
+  */
+  static getWhitelistKeyForEmail(email) {
+    return &apos;whitelist:&apos;+email;
+  }
+  /**
+  @desc Get the whitelist from localStorage
+  @private
+  @return {whitelist} The whitelist
+  @see https://developer.chrome.com/extensions/storage
+  @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+  */
+  static getWhitelistForEmail(email) {
+    let key = Whitelist.getWhitelistKeyForEmail(email);
+    let whitelist = localStorage[key];
+    if (typeof whitelist === &apos;string&apos;) {
+      return JSON.parse(whitelist);
+    } else if (typeof whitelist === &apos;object&apos;) {
+      return whitelist;
+    } else {
+      console.warn(&apos;Unknown whitelist type: &apos;, typeof whitelist, whitelist);
+      return [];
+    }
+  }
+  /**
+  @desc Set the whitelist in localStorage
+  @private
+  @param {string} email - The admin&apos;s email address.
+  @param {whitelist} whitelist - The whitelist to save.
+  @return {boolean} Whether successfully saved.
+  @see https://developer.chrome.com/extensions/storage
+  @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+  */
+  static setWhitelistForEmail(email, whitelist) {
+    let key = Whitelist.getWhitelistKeyForEmail(email);
+    if (typeof whitelist !== &apos;string&apos;) {
+      whitelist = JSON.stringify(whitelist);
+    }
+    localStorage[key] = whitelist;
+    // Return successful
+    return true;
+  }
+
+}
+
+/**
+@desc Moderator component
+*/
+class Moderator {
+  /**
+  @desc Initialize the instance.
+  */
+  constructors() {
+    // FIXME:
+    let email = &apos;glavin.wiechert@gmail.com&apos;;
+
+    // Initialize related classes
+    this.whitelist = new Whitelist(email);
+
+    // Event listeners
+    this.setupListeners();
+  }
+  /**
+  @desc Setup all event listeners.
+
+  @see https://developer.chrome.com/extensions/webRequest
+  @listens {onBeforeRequest} Listens for before requests
+  @private
+  */
+  setupListeners() {
+    // Request listener
+    chrome.webRequest.onBeforeRequest.addListener(
+      function(info) {
+        var url = info.url;
+        let shouldAllow = this.whitelist.isAllowed(url);
+        console.log(&apos;URL: &apos;, url, shouldAllow);
+        return {
+          cancel: !shouldAllow // (url.search(&quot;/.*\.google\..*/&quot;) == -1)
+        }
+      },
+
+      {
+        urls: [&quot;&lt;all_urls&gt;&quot;]
+      },
+
+      [&quot;blocking&quot;]
+    );
+  }
+}
+
+/**
+===== Main =====
+Start the background script
+
+@ignore
+*/
+let manager = new Manager();
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.5)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

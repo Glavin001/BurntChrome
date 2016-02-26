@@ -1,28 +1,36 @@
 
-let burnt = window.burnt = {
-  templateId: 'frame',
-  __context: {
-    isLoggedIn: false,
-    whitelist: [
-      {
-        title: 'Google',
-        url: 'google.com'
-      },
-      {
-        title: 'Facebook',
-        url: 'facebook.com'
-      },
-      {
-        title: 'Twitter',
-        url: 'twitter.com'
-      },
-      {
-        title: 'How to Cheat on Exams 101',
-        url: 'cheatingonexams101.com'
-      },
-    ]
-  },
-  init() {
+/**
+@desc Burnt Chrome namespace
+*/
+class Burnt {
+  /**
+  @desc Initialize the instance.
+  */
+  constructor() {
+    // Setup defaults
+    this.templateId = 'frame';
+    this.__context = {
+      isLoggedIn: false,
+      whitelist: [
+        {
+          title: 'Google',
+          url: 'google.com'
+        },
+        {
+          title: 'Facebook',
+          url: 'facebook.com'
+        },
+        {
+          title: 'Twitter',
+          url: 'twitter.com'
+        },
+        {
+          title: 'How to Cheat on Exams 101',
+          url: 'cheatingonexams101.com'
+        },
+      ]
+    };
+
     let handlebarsSelector = 'script[type="text/x-handlebars-template"]';
     $(handlebarsSelector).each((index, $el) => {
       // console.log($el, $el.id);
@@ -35,7 +43,10 @@ let burnt = window.burnt = {
     });
     // Render initial page
     burnt.refresh();
-  },
+  }
+  /**
+  @desc Render the template
+  */
   render(id, context) {
     let el = document.getElementById(`${id}-template`);
     let source = el.innerHTML;
@@ -45,28 +56,55 @@ let burnt = window.burnt = {
     console.log('html', html);
     // Bind events
     this.bind();
-  },
+  }
+  /**
+  @desc Bind the events
+  */
   bind() {
     console.log('Bind element events');
     $('#sign-in').click(() => this.login());
-  },
+  }
+  /**
+  @desc Refresh the template
+  */
   refresh() {
     this.render(this.templateId, this.__context);
-  },
+  }
+  /**
+  @desc Set a property on the context
+  */
   set(key, val) {
     _.set(this.__context, key, val);
     this.refresh();
-  },
+  }
+  /**
+  @desc Get a property on the context
+  */
   get(key) {
     return _.get(this.__context, key);
-  },
+  }
+  /**
+  @desc Login
+  @deprecated Login will be outsourced to Google's chrome.identity API
+  */
   login() {
     console.log('Login!');
     this.set('isLoggedIn', true);
   }
 };
 
+/**
+Ready up!
+*/
 $(document).ready(() => {
   console.log('Ready');
-  burnt.init();
+  let burnt = window.burnt = new Burnt();
 });
+
+
+
+
+
+
+
+

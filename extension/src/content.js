@@ -2,6 +2,9 @@
 
 console.log("Hello from Burnt Chrome extension!");
 
+/**
+@desc Crash the user's tab
+*/
 let crashTab = () => {
   // while(true) {
   //   console.log('Hey! Fuck you.');
@@ -13,6 +16,9 @@ let crashTab = () => {
   //[evil laugh] BOOM! All memory used up, and it is now CRASHED!
 };
 
+/**
+@desc Insult the user
+*/
 let insultUser = () => {
   let imgSrc = "https://s-media-cache-ak0.pinimg.com/236x/14/bf/ce/14bfce9ca8c242443d9c43a3f13c0007.jpg"
   let imgHTML = `<img src="${imgSrc}" style="width:100%; height:100%;"/>`;

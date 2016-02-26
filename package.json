@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
+    "docs": "./node_modules/.bin/esdoc -c esdoc.json",
     "postinstall": "./node_modules/.bin/npm-run-all bower:install compile",
     "bower:install": "./node_modules/.bin/bower install",
     "compile:deps:css:content": "./node_modules/.bin/cleancss --source-map-inline-sources -o extension/dist/deps-content.css ./bower_components/chrome-bootstrap/chrome-bootstrap.css",
@@ -42,6 +43,7 @@
     "browserify": "^13.0.0",
     "clean-css": "^3.4.9",
     "crx": "^3.0.3",
+    "esdoc": "^0.4.5",
     "mocha": "^2.4.5",
     "npm-run-all": "^1.5.1",
     "uglifyjs": "^2.4.10"

@@ -32,8 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Auth.html">Auth</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Session.html">Session</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Whitelist.html">Whitelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Burnt.html">Burnt</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-TODO">TODO</a></span></span></li>
@@ -56,7 +56,18 @@ class Burnt {
   */
   constructor() {
     // Setup defaults
+    /**
+    Background page.
+    */
+    this.background = chrome.extension.getBackgroundPage();
+    /**
+    Template element ID
+    */
     this.templateId = &apos;frame&apos;;
+    /**
+    Context to give to template to generate HTML
+    @private
+    */
     this.__context = {
       isLoggedIn: false,
       whitelist: [
@@ -90,7 +101,7 @@ class Burnt {
       $($el).after($(`&lt;div id=&quot;${containerId}&quot;&gt;&lt;/div&gt;`));
     });
     // Render initial page
-    burnt.refresh();
+    this.refresh();
   }
   /**
   @desc Render the template
@@ -101,7 +112,7 @@ class Burnt {
     let template = Handlebars.compile(source);
     let html = template(context);
     document.getElementById(id).innerHTML = html;
-    console.log(&apos;html&apos;, html);
+    // console.log(&apos;html&apos;, html);
     // Bind events
     this.bind();
   }
@@ -109,7 +120,7 @@ class Burnt {
   @desc Bind the events
   */
   bind() {
-    console.log(&apos;Bind element events&apos;);
+    // console.log(&apos;Bind element events&apos;);
     $(&apos;#sign-in&apos;).click(() =&gt; this.login());
   }
   /**
@@ -137,7 +148,14 @@ class Burnt {
   */
   login() {
     console.log(&apos;Login!&apos;);
-    this.set(&apos;isLoggedIn&apos;, true);
+    // chrome.runtime.sendMessage({type: &quot;login&quot;}, (response) =&gt; {
+    //   console.log(&apos;response&apos;, response);
+    // });
+    this.background.moderator.session.login((error, userInfo) =&gt; {
+      console.log(&apos;userInfo&apos;, userInfo, error);
+      this.set(&apos;isLoggedIn&apos;, true);
+    });
+
   }
 };
 
@@ -145,8 +163,9 @@ class Burnt {
 Ready up!
 */
 $(document).ready(() =&gt; {
-  console.log(&apos;Ready&apos;);
+  // console.log(&apos;Ready&apos;);
   let burnt = window.burnt = new Burnt();
+
 });
 
 

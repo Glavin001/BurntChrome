@@ -8,7 +8,18 @@ class Burnt {
   */
   constructor() {
     // Setup defaults
+    /**
+    Background page.
+    */
+    this.background = chrome.extension.getBackgroundPage();
+    /**
+    Template element ID
+    */
     this.templateId = 'frame';
+    /**
+    Context to give to template to generate HTML
+    @private
+    */
     this.__context = {
       isLoggedIn: false,
       whitelist: [
@@ -42,7 +53,7 @@ class Burnt {
       $($el).after($(`<div id="${containerId}"></div>`));
     });
     // Render initial page
-    burnt.refresh();
+    this.refresh();
   }
   /**
   @desc Render the template
@@ -53,7 +64,7 @@ class Burnt {
     let template = Handlebars.compile(source);
     let html = template(context);
     document.getElementById(id).innerHTML = html;
-    console.log('html', html);
+    // console.log('html', html);
     // Bind events
     this.bind();
   }
@@ -61,7 +72,7 @@ class Burnt {
   @desc Bind the events
   */
   bind() {
-    console.log('Bind element events');
+    // console.log('Bind element events');
     $('#sign-in').click(() => this.login());
   }
   /**
@@ -89,7 +100,14 @@ class Burnt {
   */
   login() {
     console.log('Login!');
-    this.set('isLoggedIn', true);
+    // chrome.runtime.sendMessage({type: "login"}, (response) => {
+    //   console.log('response', response);
+    // });
+    this.background.moderator.session.login((error, userInfo) => {
+      console.log('userInfo', userInfo, error);
+      this.set('isLoggedIn', true);
+    });
+
   }
 };
 
@@ -97,8 +115,9 @@ class Burnt {
 Ready up!
 */
 $(document).ready(() => {
-  console.log('Ready');
+  // console.log('Ready');
   let burnt = window.burnt = new Burnt();
+
 });
 
 

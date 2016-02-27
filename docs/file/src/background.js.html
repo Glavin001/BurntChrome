@@ -32,8 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Auth.html">Auth</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Session.html">Session</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Whitelist.html">Whitelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Burnt.html">Burnt</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-TODO">TODO</a></span></span></li>
@@ -48,13 +48,13 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/background.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
 @typedef {Object} whitelist_entry A whitelist entry
-@property {string} name The name of the whitelist entry.
+@property {string} title The title of the whitelist entry.
 @property {string} url The URL for the whitelist entry.
 */
+
 /**
 @typedef {Array&lt;whitelist_entry&gt;} whitelist A whitelist array
 */
-
 
 /**
 @desc TODO helper indicating at runtime that a method is not yet implemented.
@@ -66,48 +66,78 @@ function TODO() {
 }
 
 /**
-@desc Authentication component
+@desc Session component
 */
-class Auth {
+class Session {
+
   /**
   @desc Initialize the instance.
-
-  @todo Not yet implemented.
   */
   constructor() {
-    TODO();
+
   }
+
+  /**
+  @desc Get User&apos;s OAuth 2.0 authentication token
+  @param {function(error: Error, token: string)} callback The callback
+  */
+  getToken(callback) {
+    console.log(&apos;getToken&apos;);
+    return chrome.identity.getAuthToken({
+      interactive: true
+    }, (token) =&gt; {
+      console.log(&apos;token&apos;, token);
+      return callback(chrome.runtime.lastError, token);
+    });
+  }
+
   /**
   @desc Login for the primary administrator.
 
+  @param {function(error: Error, userInfo: Object)} callback The callback function
   @see https://developer.chrome.com/apps/identity
   @see https://developer.chrome.com/apps/app_identity
-  @todo Not yet implemented.
   */
   login(callback) {
-    TODO();
+    console.log(&apos;login&apos;);
+    return this.getToken((error, token) =&gt; {
+      console.log(&apos;token&apos;, token, error);
+      if (error) {
+        return callback(error);
+      }
+      return chrome.identity.getProfileUserInfo((userInfo) =&gt; {
+        console.log(&apos;userInfo&apos;, userInfo);
+        return callback(chrome.runtime.lastError, userInfo);
+      });
+    });
   }
+
 }
 
 /**
 @desc Whitelist component
 */
 class Whitelist {
+
   /**
-  @description Initialize the instance.
+  @desc Initialize the instance.
   */
   constructor(email) {
+    /**
+    @desc Whitelist&apos;s Email
+    */
     this.email = email;
   }
+
   /**
   @desc Add URL to whitelist.
 
-  @param {string} name - Name for whitelist entry
+  @param {string} title - Title for whitelist entry
   @param {string} url - URL for whitelist entry
   @return {boolean} Was successfully added to whitelist
   @throws {Error} URL is already in whitelist.
   */
-  addURL(name, url) {
+  addURL(title, url) {
     // Check that URL is not already in whitelist
     if (this.isAllowed(url)) {
       // Must already be in whitelist
@@ -120,7 +150,7 @@ class Whitelist {
     let whitelist = this.get();
     // Create new entry
     let entry = {
-      name,
+      title,
       url
     };
     // Add entry to whitelist
@@ -130,6 +160,7 @@ class Whitelist {
     // Return successful
     return true;
   }
+
   /**
   @desc Remove URL from whitelist
   @param {string} url - The URL to remove from the whitelist
@@ -147,6 +178,7 @@ class Whitelist {
     this.set(whitelist);
     return whitelist;
   }
+
   /**
   @desc Check if URL is allowed
   @param {string} url - The URL to check if whitelist allows.
@@ -156,12 +188,14 @@ class Whitelist {
     // Get whitelist
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
-    let idx = _.remove(whitelist, (entry) =&gt; {
+    let idx = _.findIndex(whitelist, (entry) =&gt; {
       return Whitelist.matchURLs(url, entry.url);
     });
     // Allow if not idx isnt -1
-    return idx !== -1;
+    // return idx !== -1;
+    return true;
   }
+
   /**
   @desc Sync
 
@@ -178,7 +212,7 @@ class Whitelist {
   @return {whitelist} The whitelist.
   */
   get() {
-    return Whitelist.getWhitelistForEmail(this.email, whitelist);
+    return Whitelist.getWhitelistForEmail(this.email);
   }
 
   /**
@@ -211,8 +245,9 @@ class Whitelist {
   @return {string} localStorage key for the whitelist for the given email.
   */
   static getWhitelistKeyForEmail(email) {
-    return &apos;whitelist:&apos;+email;
+    return &apos;whitelist:&apos; + email;
   }
+
   /**
   @desc Get the whitelist from localStorage
   @private
@@ -225,13 +260,17 @@ class Whitelist {
     let whitelist = localStorage[key];
     if (typeof whitelist === &apos;string&apos;) {
       return JSON.parse(whitelist);
-    } else if (typeof whitelist === &apos;object&apos;) {
+    }
+    /*
+      else if (typeof whitelist === &apos;object&apos;) {
       return whitelist;
-    } else {
-      console.warn(&apos;Unknown whitelist type: &apos;, typeof whitelist, whitelist);
+    } */
+    else {
+      //console.warn(&apos;Unknown whitelist type: &apos;, typeof whitelist, whitelist);
       return [];
     }
   }
+
   /**
   @desc Set the whitelist in localStorage
   @private
@@ -257,19 +296,30 @@ class Whitelist {
 @desc Moderator component
 */
 class Moderator {
+
   /**
   @desc Initialize the instance.
   */
-  constructors() {
-    // FIXME:
-    let email = &apos;glavin.wiechert@gmail.com&apos;;
+  constructor() {
+
+    var email = &apos;glavin.wiechert@gmail.com&apos;;
 
     // Initialize related classes
+    /**
+    @desc Session
+    */
+    this.session = new Session();
+
+    /**
+    @desc Whitelist to moderate
+    */
     this.whitelist = new Whitelist(email);
 
     // Event listeners
     this.setupListeners();
+
   }
+
   /**
   @desc Setup all event listeners.
 
@@ -279,23 +329,36 @@ class Moderator {
   */
   setupListeners() {
     // Request listener
-    chrome.webRequest.onBeforeRequest.addListener(
-      function(info) {
-        var url = info.url;
-        let shouldAllow = this.whitelist.isAllowed(url);
-        console.log(&apos;URL: &apos;, url, shouldAllow);
-        return {
-          cancel: !shouldAllow // (url.search(&quot;/.*\.google\..*/&quot;) == -1)
+    chrome.webRequest.onBeforeRequest.addListener((info) =&gt; {
+      var url = info.url;
+      let shouldAllow = this.whitelist.isAllowed(url);
+      // console.log(&apos;URL: &apos;, url, shouldAllow);
+      return {
+        cancel: !shouldAllow
+      };
+    }, {
+      urls: [&quot;&lt;all_urls&gt;&quot;]
+    }, [&quot;blocking&quot;]);
+
+    // Message Passing listener
+    chrome.runtime.onMessage.addListener(
+      (request, sender, sendResponse) =&gt; {
+        console.log(sender.tab ?
+          &quot;from a content script:&quot; + sender.tab.url :
+          &quot;from the extension&quot;);
+        if (request.type == &quot;login&quot;) {
+          // Login!
+          this.session.login((error, userInfo) =&gt; {
+            console.log(&apos;userInfo&apos;, userInfo, error);
+            sendResponse(userInfo);
+          });
+        } else {
+          console.warn(&apos;Unknown message type&apos;, request);
         }
-      },
+      });
 
-      {
-        urls: [&quot;&lt;all_urls&gt;&quot;]
-      },
-
-      [&quot;blocking&quot;]
-    );
   }
+
 }
 
 /**
@@ -304,8 +367,7 @@ Start the background script
 
 @ignore
 */
-let manager = new Manager();
-</code></pre>
+let moderator = window.moderator = new Moderator();</code></pre>
 
 </div>
 

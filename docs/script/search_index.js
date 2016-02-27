@@ -1,11 +1,5 @@
 window.esdocSearchIndex = [
   [
-    "burntchrome/src/background.js~auth",
-    "class/src/background.js~Auth.html",
-    "<span>Auth</span> <span class=\"search-result-import-path\">burntchrome/src/background.js</span>",
-    "class"
-  ],
-  [
     "burntchrome/src/popup.js~burnt",
     "class/src/popup.js~Burnt.html",
     "<span>Burnt</span> <span class=\"search-result-import-path\">burntchrome/src/popup.js</span>",
@@ -15,6 +9,12 @@ window.esdocSearchIndex = [
     "burntchrome/src/background.js~moderator",
     "class/src/background.js~Moderator.html",
     "<span>Moderator</span> <span class=\"search-result-import-path\">burntchrome/src/background.js</span>",
+    "class"
+  ],
+  [
+    "burntchrome/src/background.js~session",
+    "class/src/background.js~Session.html",
+    "<span>Session</span> <span class=\"search-result-import-path\">burntchrome/src/background.js</span>",
     "class"
   ],
   [
@@ -378,22 +378,16 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/background.js~auth#constructor",
-    "class/src/background.js~Auth.html#instance-constructor-constructor",
-    "src/background.js~Auth#constructor",
+    "src/background.js~moderator#constructor",
+    "class/src/background.js~Moderator.html#instance-constructor-constructor",
+    "src/background.js~Moderator#constructor",
     "method"
   ],
   [
-    "src/background.js~auth#login",
-    "class/src/background.js~Auth.html#instance-method-login",
-    "src/background.js~Auth#login",
-    "method"
-  ],
-  [
-    "src/background.js~moderator#constructors",
-    "class/src/background.js~Moderator.html#instance-method-constructors",
-    "src/background.js~Moderator#constructors",
-    "method"
+    "src/background.js~moderator#session",
+    "class/src/background.js~Moderator.html#instance-member-session",
+    "src/background.js~Moderator#session",
+    "member"
   ],
   [
     "src/background.js~moderator#setuplisteners",
@@ -406,6 +400,24 @@ window.esdocSearchIndex = [
     "class/src/background.js~Moderator.html#instance-member-whitelist",
     "src/background.js~Moderator#whitelist",
     "member"
+  ],
+  [
+    "src/background.js~session#constructor",
+    "class/src/background.js~Session.html#instance-constructor-constructor",
+    "src/background.js~Session#constructor",
+    "method"
+  ],
+  [
+    "src/background.js~session#gettoken",
+    "class/src/background.js~Session.html#instance-method-getToken",
+    "src/background.js~Session#getToken",
+    "method"
+  ],
+  [
+    "src/background.js~session#login",
+    "class/src/background.js~Session.html#instance-method-login",
+    "src/background.js~Session#login",
+    "method"
   ],
   [
     "src/background.js~whitelist#addurl",
@@ -507,6 +519,12 @@ window.esdocSearchIndex = [
     "src/popup.js~burnt#__context",
     "class/src/popup.js~Burnt.html#instance-member-__context",
     "src/popup.js~Burnt#__context",
+    "member"
+  ],
+  [
+    "src/popup.js~burnt#background",
+    "class/src/popup.js~Burnt.html#instance-member-background",
+    "src/popup.js~Burnt#background",
     "member"
   ],
   [

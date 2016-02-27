@@ -1,12 +1,12 @@
 /**
 @typedef {Object} whitelist_entry A whitelist entry
-@property {string} name The name of the whitelist entry.
+@property {string} title The title of the whitelist entry.
 @property {string} url The URL for the whitelist entry.
 */
+
 /**
 @typedef {Array<whitelist_entry>} whitelist A whitelist array
 */
-
 
 /**
 @desc TODO helper indicating at runtime that a method is not yet implemented.
@@ -18,48 +18,78 @@ function TODO() {
 }
 
 /**
-@desc Authentication component
+@desc Session component
 */
-class Auth {
+class Session {
+
   /**
   @desc Initialize the instance.
-
-  @todo Not yet implemented.
   */
   constructor() {
-    TODO();
+
   }
+
+  /**
+  @desc Get User's OAuth 2.0 authentication token
+  @param {function(error: Error, token: string)} callback The callback
+  */
+  getToken(callback) {
+    console.log('getToken');
+    return chrome.identity.getAuthToken({
+      interactive: true
+    }, (token) => {
+      console.log('token', token);
+      return callback(chrome.runtime.lastError, token);
+    });
+  }
+
   /**
   @desc Login for the primary administrator.
 
+  @param {function(error: Error, userInfo: Object)} callback The callback function
   @see https://developer.chrome.com/apps/identity
   @see https://developer.chrome.com/apps/app_identity
-  @todo Not yet implemented.
   */
   login(callback) {
-    TODO();
+    console.log('login');
+    return this.getToken((error, token) => {
+      console.log('token', token, error);
+      if (error) {
+        return callback(error);
+      }
+      return chrome.identity.getProfileUserInfo((userInfo) => {
+        console.log('userInfo', userInfo);
+        return callback(chrome.runtime.lastError, userInfo);
+      });
+    });
   }
+
 }
 
 /**
 @desc Whitelist component
 */
 class Whitelist {
+
   /**
-  @description Initialize the instance.
+  @desc Initialize the instance.
   */
   constructor(email) {
+    /**
+    @desc Whitelist's Email
+    */
     this.email = email;
   }
+
   /**
   @desc Add URL to whitelist.
 
-  @param {string} name - Name for whitelist entry
+  @param {string} title - Title for whitelist entry
   @param {string} url - URL for whitelist entry
   @return {boolean} Was successfully added to whitelist
   @throws {Error} URL is already in whitelist.
   */
-  addURL(name, url) {
+  addURL(title, url) {
     // Check that URL is not already in whitelist
     if (this.isAllowed(url)) {
       // Must already be in whitelist
@@ -72,7 +102,7 @@ class Whitelist {
     let whitelist = this.get();
     // Create new entry
     let entry = {
-      name,
+      title,
       url
     };
     // Add entry to whitelist
@@ -82,6 +112,7 @@ class Whitelist {
     // Return successful
     return true;
   }
+
   /**
   @desc Remove URL from whitelist
   @param {string} url - The URL to remove from the whitelist
@@ -99,6 +130,7 @@ class Whitelist {
     this.set(whitelist);
     return whitelist;
   }
+
   /**
   @desc Check if URL is allowed
   @param {string} url - The URL to check if whitelist allows.
@@ -108,12 +140,14 @@ class Whitelist {
     // Get whitelist
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
-    let idx = _.remove(whitelist, (entry) => {
+    let idx = _.findIndex(whitelist, (entry) => {
       return Whitelist.matchURLs(url, entry.url);
     });
     // Allow if not idx isnt -1
-    return idx !== -1;
+    // return idx !== -1;
+    return true;
   }
+
   /**
   @desc Sync
 
@@ -130,7 +164,7 @@ class Whitelist {
   @return {whitelist} The whitelist.
   */
   get() {
-    return Whitelist.getWhitelistForEmail(this.email, whitelist);
+    return Whitelist.getWhitelistForEmail(this.email);
   }
 
   /**
@@ -163,8 +197,9 @@ class Whitelist {
   @return {string} localStorage key for the whitelist for the given email.
   */
   static getWhitelistKeyForEmail(email) {
-    return 'whitelist:'+email;
+    return 'whitelist:' + email;
   }
+
   /**
   @desc Get the whitelist from localStorage
   @private
@@ -177,13 +212,17 @@ class Whitelist {
     let whitelist = localStorage[key];
     if (typeof whitelist === 'string') {
       return JSON.parse(whitelist);
-    } else if (typeof whitelist === 'object') {
+    }
+    /*
+      else if (typeof whitelist === 'object') {
       return whitelist;
-    } else {
-      console.warn('Unknown whitelist type: ', typeof whitelist, whitelist);
+    } */
+    else {
+      //console.warn('Unknown whitelist type: ', typeof whitelist, whitelist);
       return [];
     }
   }
+
   /**
   @desc Set the whitelist in localStorage
   @private
@@ -209,19 +248,30 @@ class Whitelist {
 @desc Moderator component
 */
 class Moderator {
+
   /**
   @desc Initialize the instance.
   */
-  constructors() {
-    // FIXME:
-    let email = 'glavin.wiechert@gmail.com';
+  constructor() {
+
+    var email = 'glavin.wiechert@gmail.com';
 
     // Initialize related classes
+    /**
+    @desc Session
+    */
+    this.session = new Session();
+
+    /**
+    @desc Whitelist to moderate
+    */
     this.whitelist = new Whitelist(email);
 
     // Event listeners
     this.setupListeners();
+
   }
+
   /**
   @desc Setup all event listeners.
 
@@ -231,23 +281,36 @@ class Moderator {
   */
   setupListeners() {
     // Request listener
-    chrome.webRequest.onBeforeRequest.addListener(
-      function(info) {
-        var url = info.url;
-        let shouldAllow = this.whitelist.isAllowed(url);
-        console.log('URL: ', url, shouldAllow);
-        return {
-          cancel: !shouldAllow // (url.search("/.*\.google\..*/") == -1)
+    chrome.webRequest.onBeforeRequest.addListener((info) => {
+      var url = info.url;
+      let shouldAllow = this.whitelist.isAllowed(url);
+      // console.log('URL: ', url, shouldAllow);
+      return {
+        cancel: !shouldAllow
+      };
+    }, {
+      urls: ["<all_urls>"]
+    }, ["blocking"]);
+
+    // Message Passing listener
+    chrome.runtime.onMessage.addListener(
+      (request, sender, sendResponse) => {
+        console.log(sender.tab ?
+          "from a content script:" + sender.tab.url :
+          "from the extension");
+        if (request.type == "login") {
+          // Login!
+          this.session.login((error, userInfo) => {
+            console.log('userInfo', userInfo, error);
+            sendResponse(userInfo);
+          });
+        } else {
+          console.warn('Unknown message type', request);
         }
-      },
+      });
 
-      {
-        urls: ["<all_urls>"]
-      },
-
-      ["blocking"]
-    );
   }
+
 }
 
 /**
@@ -256,4 +319,4 @@ Start the background script
 
 @ignore
 */
-let manager = new Manager();
+let moderator = window.moderator = new Moderator();

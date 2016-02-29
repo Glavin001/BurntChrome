@@ -26,6 +26,28 @@ class Session {
   @desc Initialize the instance.
   */
   constructor() {
+    /**
+    @desc Whitelist to moderate
+    */
+    this.whitelist = null;
+    /**
+    @desc Administrator's Token
+    */
+    this.token = null;
+
+    this.setup();
+
+  }
+
+  setup() {
+    //
+    if (this.isSetup()) {
+      // Is Setup
+
+    } else {
+      // Is not setup
+
+    }
 
   }
 
@@ -33,36 +55,121 @@ class Session {
   @desc Get User's OAuth 2.0 authentication token
   @param {function(error: Error, token: string)} callback The callback
   */
-  getToken(callback) {
-    console.log('getToken');
+  getAuthToken(callback) {
+    // console.log('getAuthToken');
     return chrome.identity.getAuthToken({
       interactive: true
     }, (token) => {
-      console.log('token', token);
+      // console.log('token', chrome.runtime.lastError, token);
       return callback(chrome.runtime.lastError, token);
+    });
+  }
+
+  /**
+  @desc Get Profile User Info
+  @param {function(error: Error, userInfo: Object)} callback The callback
+  */
+  getProfileUserInfo(callback) {
+    // console.log('getProfileUserInfo');
+    return chrome.identity.getProfileUserInfo((userInfo) => {
+      // console.log('userInfo', userInfo);
+      return callback(chrome.runtime.lastError, userInfo);
     });
   }
 
   /**
   @desc Login for the primary administrator.
 
-  @param {function(error: Error, userInfo: Object)} callback The callback function
+  @param {function(error: Error, whitelist: whitelist)} callback The callback function
   @see https://developer.chrome.com/apps/identity
   @see https://developer.chrome.com/apps/app_identity
   */
   login(callback) {
     console.log('login');
-    return this.getToken((error, token) => {
-      console.log('token', token, error);
+    return this.getAuthToken((error, token) => {
+      console.log('token', error, token);
       if (error) {
         return callback(error);
       }
-      return chrome.identity.getProfileUserInfo((userInfo) => {
-        console.log('userInfo', userInfo);
-        return callback(chrome.runtime.lastError, userInfo);
+      // Save token
+      this.token = token;
+      // Get User info
+      return this.getProfileUserInfo((error, userInfo) => {
+        console.log('userInfo', error, userInfo);
+        if (error) {
+          return callback(error);
+        }
+        let email = userInfo.email;
+        this.setEmail(email);
+        let whitelist = new Whitelist(email);
+        return callback(null, whitelist);
       });
     });
   }
+
+  /**
+  @desc Removes an OAuth2 access token from the Identity API's token cache.
+
+  @param {function(error: Error)} callback The callback function
+  @see https://developer.chrome.com/apps/identity
+  @see http://stackoverflow.com/a/27344088/2578205
+  */
+  logout(callback) {
+    this.getAuthToken((error, token) => {
+      // console.log('token', error, token);
+      if (error) {
+        return callback(error);
+      }
+      // console.log('getAuthToken');
+      // chrome.identity.launchWebAuthFlow(
+      //     {
+      //       'url': 'https://accounts.google.com/logout',
+      //       interactive: true
+      //     },
+      //     function(tokenUrl) {
+      //         this.token = null;
+      //         callback(chrome.runtime.lastError);
+      //     }
+      // );
+      return chrome.identity.removeCachedAuthToken({
+        token: token
+      }, () => {
+        // console.log('token', token);
+        this.token = null;
+        return callback(chrome.runtime.lastError);
+      });
+    });
+  }
+
+  /**
+  @desc Check if already setup with an administrator.
+  @return {boolean} Whether already setup.
+  */
+  isSetup() {
+    return !!this.getEmail();
+  }
+
+  /**
+  @desc Check if admin is logged in.
+  @return {boolean} Whether admin is logged in.
+  */
+  isLoggedIn() {
+    return !!this.token;
+  }
+
+  /**
+  @desc Get administator's email.
+  @return {string} Admin email.
+  */
+  getEmail() {
+    return localStorage['admin:email'];
+  }
+
+  setEmail(email) {
+    localStorage['admin:email'] = email;
+  }
+
+
 
 }
 
@@ -254,18 +361,11 @@ class Moderator {
   */
   constructor() {
 
-    var email = 'glavin.wiechert@gmail.com';
-
     // Initialize related classes
     /**
     @desc Session
     */
     this.session = new Session();
-
-    /**
-    @desc Whitelist to moderate
-    */
-    this.whitelist = new Whitelist(email);
 
     // Event listeners
     this.setupListeners();
@@ -280,10 +380,16 @@ class Moderator {
   @private
   */
   setupListeners() {
+
     // Request listener
     chrome.webRequest.onBeforeRequest.addListener((info) => {
       var url = info.url;
-      let shouldAllow = this.whitelist.isAllowed(url);
+      if (!this.session.whitelist) {
+        return {
+          cancel: false
+        };
+      }
+      let shouldAllow = this.session.whitelist.isAllowed(url);
       // console.log('URL: ', url, shouldAllow);
       return {
         cancel: !shouldAllow
@@ -293,21 +399,21 @@ class Moderator {
     }, ["blocking"]);
 
     // Message Passing listener
-    chrome.runtime.onMessage.addListener(
-      (request, sender, sendResponse) => {
-        console.log(sender.tab ?
-          "from a content script:" + sender.tab.url :
-          "from the extension");
-        if (request.type == "login") {
-          // Login!
-          this.session.login((error, userInfo) => {
-            console.log('userInfo', userInfo, error);
-            sendResponse(userInfo);
-          });
-        } else {
-          console.warn('Unknown message type', request);
-        }
-      });
+    // chrome.runtime.onMessage.addListener(
+    //   (request, sender, sendResponse) => {
+    //     console.log(sender.tab ?
+    //       "from a content script:" + sender.tab.url :
+    //       "from the extension");
+    //     if (request.type == "login") {
+    //       // Login!
+    //       this.session.login((error, userInfo) => {
+    //         console.log('userInfo', userInfo, error);
+    //         sendResponse(userInfo);
+    //       });
+    //     } else {
+    //       console.warn('Unknown message type', request);
+    //     }
+    //   });
 
   }
 

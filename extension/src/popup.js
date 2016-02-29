@@ -16,32 +16,18 @@ class Burnt {
     Template element ID
     */
     this.templateId = 'frame';
-    /**
-    Context to give to template to generate HTML
-    @private
-    */
-    this.__context = {
-      isLoggedIn: false,
-      whitelist: [
-        {
-          title: 'Google',
-          url: 'google.com'
-        },
-        {
-          title: 'Facebook',
-          url: 'facebook.com'
-        },
-        {
-          title: 'Twitter',
-          url: 'twitter.com'
-        },
-        {
-          title: 'How to Cheat on Exams 101',
-          url: 'cheatingonexams101.com'
-        },
-      ]
-    };
 
+    //
+    this.setupTemplates();
+
+    // Render initial page
+    this.refresh();
+  }
+
+  /**
+  @desc Setup handlebars views to render compiled templates to.
+  */
+  setupTemplates() {
     let handlebarsSelector = 'script[type="text/x-handlebars-template"]';
     $(handlebarsSelector).each((index, $el) => {
       // console.log($el, $el.id);
@@ -52,13 +38,22 @@ class Burnt {
       let containerId = templateId.split('-template')[0];
       $($el).after($(`<div id="${containerId}"></div>`));
     });
-    // Render initial page
-    this.refresh();
   }
+
+  getContext() {
+    return {
+      isSetup: this.background.moderator.session.isSetup(),
+      isLoggedIn: this.background.moderator.session.isLoggedIn(),
+      whitelist: this.background.moderator.session.whitelist ? this.background.moderator.session.whitelist.get() : [],
+      adminEmail: this.background.moderator.session.getEmail()
+    };
+  }
+
   /**
   @desc Render the template
   */
   render(id, context) {
+    console.log('render', context);
     let el = document.getElementById(`${id}-template`);
     let source = el.innerHTML;
     let template = Handlebars.compile(source);
@@ -73,26 +68,21 @@ class Burnt {
   */
   bind() {
     // console.log('Bind element events');
+    $('#setup').click(() => this.login());
     $('#sign-in').click(() => this.login());
+    $('#logout').click(() => this.logout());
   }
   /**
   @desc Refresh the template
   */
   refresh() {
-    this.render(this.templateId, this.__context);
-  }
-  /**
-  @desc Set a property on the context
-  */
-  set(key, val) {
-    _.set(this.__context, key, val);
-    this.refresh();
+    this.render(this.templateId, this.getContext());
   }
   /**
   @desc Get a property on the context
   */
   get(key) {
-    return _.get(this.__context, key);
+    return _.get(this.getContext(), key);
   }
   /**
   @desc Login
@@ -105,10 +95,18 @@ class Burnt {
     // });
     this.background.moderator.session.login((error, userInfo) => {
       console.log('userInfo', userInfo, error);
-      this.set('isLoggedIn', true);
+      this.refresh();
     });
-
   }
+
+  logout() {
+    console.log('logout!');
+    this.background.moderator.session.logout((error) => {
+      console.log('error', error);
+      this.refresh();
+    });
+  }
+
 };
 
 /**

@@ -115,30 +115,32 @@ class Session {
   @see http://stackoverflow.com/a/27344088/2578205
   */
   logout(callback) {
-    this.getAuthToken((error, token) => {
-      // console.log('token', error, token);
-      if (error) {
-        return callback(error);
-      }
+    // this.getAuthToken((error, token) => {
+    //   console.log('logout token', error, token);
+    //   if (error) {
+    //     return callback(error);
+    //   }
       // console.log('getAuthToken');
-      // chrome.identity.launchWebAuthFlow(
-      //     {
-      //       'url': 'https://accounts.google.com/logout',
-      //       interactive: true
-      //     },
-      //     function(tokenUrl) {
-      //         this.token = null;
-      //         callback(chrome.runtime.lastError);
-      //     }
-      // );
       return chrome.identity.removeCachedAuthToken({
-        token: token
+        token: this.token
       }, () => {
+        chrome.identity.launchWebAuthFlow(
+            {
+              'url': 'https://accounts.google.com/logout',
+              interactive: true
+              // url: `https://accounts.google.com/o/oauth2/revoke?token=${token}`,
+              // interactive: false
+            },
+            (tokenUrl) => {
+                this.token = null;
+                callback(chrome.runtime.lastError);
+            }
+        );
         // console.log('token', token);
-        this.token = null;
-        return callback(chrome.runtime.lastError);
+        // this.token = null;
+        // return callback(chrome.runtime.lastError);
       });
-    });
+    // });
   }
 
   /**
@@ -154,6 +156,7 @@ class Session {
   @return {boolean} Whether admin is logged in.
   */
   isLoggedIn() {
+    console.log('isLoggedIn', this.token);
     return !!this.token;
   }
 

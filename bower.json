@@ -21,6 +21,7 @@
     "jquery": "~2.2.0",
     "lodash": "~4.3.0",
     "chrome-bootstrap": "~1.5.0",
-    "handlebars": "~4.0.5"
+    "handlebars": "~4.0.5",
+    "glob": "~4.0.6"
   }
 }

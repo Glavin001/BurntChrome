@@ -12,12 +12,6 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "burntchrome/src/background.js~session",
-    "class/src/background.js~Session.html",
-    "<span>Session</span> <span class=\"search-result-import-path\">burntchrome/src/background.js</span>",
-    "class"
-  ],
-  [
     "burntchrome/src/background.js~todo",
     "function/index.html#static-function-TODO",
     "<span>TODO</span> <span class=\"search-result-import-path\">burntchrome/src/background.js</span>",
@@ -378,16 +372,94 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "src/background.js~moderator#addtowhitelist",
+    "class/src/background.js~Moderator.html#instance-method-addToWhitelist",
+    "src/background.js~Moderator#addToWhitelist",
+    "method"
+  ],
+  [
     "src/background.js~moderator#constructor",
     "class/src/background.js~Moderator.html#instance-constructor-constructor",
     "src/background.js~Moderator#constructor",
     "method"
   ],
   [
-    "src/background.js~moderator#session",
-    "class/src/background.js~Moderator.html#instance-member-session",
-    "src/background.js~Moderator#session",
+    "src/background.js~moderator#getemail",
+    "class/src/background.js~Moderator.html#instance-method-getEmail",
+    "src/background.js~Moderator#getEmail",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#getpassword",
+    "class/src/background.js~Moderator.html#instance-method-getPassword",
+    "src/background.js~Moderator#getPassword",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#getwhitelist",
+    "class/src/background.js~Moderator.html#instance-method-getWhitelist",
+    "src/background.js~Moderator#getWhitelist",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#getwhitelistjson",
+    "class/src/background.js~Moderator.html#instance-method-getWhitelistJSON",
+    "src/background.js~Moderator#getWhitelistJSON",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#islocked",
+    "class/src/background.js~Moderator.html#instance-method-isLocked",
+    "src/background.js~Moderator#isLocked",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#isunlocked",
+    "class/src/background.js~Moderator.html#instance-method-isUnlocked",
+    "src/background.js~Moderator#isUnlocked",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#lock",
+    "class/src/background.js~Moderator.html#instance-method-lock",
+    "src/background.js~Moderator#lock",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#loggedin",
+    "class/src/background.js~Moderator.html#instance-member-loggedIn",
+    "src/background.js~Moderator#loggedIn",
     "member"
+  ],
+  [
+    "src/background.js~moderator#login",
+    "class/src/background.js~Moderator.html#instance-method-login",
+    "src/background.js~Moderator#login",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#logout",
+    "class/src/background.js~Moderator.html#instance-method-logout",
+    "src/background.js~Moderator#logout",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#removefromwhitelist",
+    "class/src/background.js~Moderator.html#instance-method-removeFromWhitelist",
+    "src/background.js~Moderator#removeFromWhitelist",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#setemail",
+    "class/src/background.js~Moderator.html#instance-method-setEmail",
+    "src/background.js~Moderator#setEmail",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#setpassword",
+    "class/src/background.js~Moderator.html#instance-method-setPassword",
+    "src/background.js~Moderator#setPassword",
+    "method"
   ],
   [
     "src/background.js~moderator#setuplisteners",
@@ -396,28 +468,16 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/background.js~moderator#unlock",
+    "class/src/background.js~Moderator.html#instance-method-unlock",
+    "src/background.js~Moderator#unlock",
+    "method"
+  ],
+  [
     "src/background.js~moderator#whitelist",
     "class/src/background.js~Moderator.html#instance-member-whitelist",
     "src/background.js~Moderator#whitelist",
     "member"
-  ],
-  [
-    "src/background.js~session#constructor",
-    "class/src/background.js~Session.html#instance-constructor-constructor",
-    "src/background.js~Session#constructor",
-    "method"
-  ],
-  [
-    "src/background.js~session#gettoken",
-    "class/src/background.js~Session.html#instance-method-getToken",
-    "src/background.js~Session#getToken",
-    "method"
-  ],
-  [
-    "src/background.js~session#login",
-    "class/src/background.js~Session.html#instance-method-login",
-    "src/background.js~Session#login",
-    "method"
   ],
   [
     "src/background.js~whitelist#addurl",
@@ -462,18 +522,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/background.js~whitelist#sync",
-    "class/src/background.js~Whitelist.html#instance-method-sync",
-    "src/background.js~Whitelist#sync",
-    "method"
-  ],
-  [
-    "src/background.js~whitelist#testurls",
-    "class/src/background.js~Whitelist.html#instance-method-testURLs",
-    "src/background.js~Whitelist#testURLs",
-    "method"
-  ],
-  [
     "src/background.js~whitelist.getwhitelistforemail",
     "class/src/background.js~Whitelist.html#static-method-getWhitelistForEmail",
     "src/background.js~Whitelist.getWhitelistForEmail",
@@ -489,6 +537,12 @@ window.esdocSearchIndex = [
     "src/background.js~whitelist.setwhitelistforemail",
     "class/src/background.js~Whitelist.html#static-method-setWhitelistForEmail",
     "src/background.js~Whitelist.setWhitelistForEmail",
+    "method"
+  ],
+  [
+    "src/background.js~whitelist.testurls",
+    "class/src/background.js~Whitelist.html#static-method-testURLs",
+    "src/background.js~Whitelist.testURLs",
     "method"
   ],
   [
@@ -516,10 +570,10 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/popup.js~burnt#__context",
-    "class/src/popup.js~Burnt.html#instance-member-__context",
-    "src/popup.js~Burnt#__context",
-    "member"
+    "src/popup.js~burnt#addtowhitelist",
+    "class/src/popup.js~Burnt.html#instance-method-addToWhitelist",
+    "src/popup.js~Burnt#addToWhitelist",
+    "method"
   ],
   [
     "src/popup.js~burnt#background",
@@ -546,9 +600,21 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/popup.js~burnt#login",
-    "class/src/popup.js~Burnt.html#instance-method-login",
-    "src/popup.js~Burnt#login",
+    "src/popup.js~burnt#getcontext",
+    "class/src/popup.js~Burnt.html#instance-method-getContext",
+    "src/popup.js~Burnt#getContext",
+    "method"
+  ],
+  [
+    "src/popup.js~burnt#lock",
+    "class/src/popup.js~Burnt.html#instance-method-lock",
+    "src/popup.js~Burnt#lock",
+    "method"
+  ],
+  [
+    "src/popup.js~burnt#logout",
+    "class/src/popup.js~Burnt.html#instance-method-logout",
+    "src/popup.js~Burnt#logout",
     "method"
   ],
   [
@@ -564,9 +630,9 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/popup.js~burnt#set",
-    "class/src/popup.js~Burnt.html#instance-method-set",
-    "src/popup.js~Burnt#set",
+    "src/popup.js~burnt#setuptemplates",
+    "class/src/popup.js~Burnt.html#instance-method-setupTemplates",
+    "src/popup.js~Burnt#setupTemplates",
     "method"
   ],
   [
@@ -574,5 +640,11 @@ window.esdocSearchIndex = [
     "class/src/popup.js~Burnt.html#instance-member-templateId",
     "src/popup.js~Burnt#templateId",
     "member"
+  ],
+  [
+    "src/popup.js~burnt#unlock",
+    "class/src/popup.js~Burnt.html#instance-method-unlock",
+    "src/popup.js~Burnt#unlock",
+    "method"
   ]
 ]

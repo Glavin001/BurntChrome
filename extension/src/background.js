@@ -18,165 +18,6 @@ function TODO() {
 }
 
 /**
-@desc Session component
-*/
-class Session {
-
-  /**
-  @desc Initialize the instance.
-  */
-  constructor() {
-    /**
-    @desc Whitelist to moderate
-    */
-    this.whitelist = null;
-    /**
-    @desc Administrator's Token
-    */
-    this.token = null;
-
-    this.setup();
-
-  }
-
-  setup() {
-    //
-    if (this.isSetup()) {
-      // Is Setup
-
-    } else {
-      // Is not setup
-
-    }
-
-  }
-
-  /**
-  @desc Get User's OAuth 2.0 authentication token
-  @param {function(error: Error, token: string)} callback The callback
-  */
-  getAuthToken(callback) {
-    // console.log('getAuthToken');
-    return chrome.identity.getAuthToken({
-      interactive: true
-    }, (token) => {
-      // console.log('token', chrome.runtime.lastError, token);
-      return callback(chrome.runtime.lastError, token);
-    });
-  }
-
-  /**
-  @desc Get Profile User Info
-  @param {function(error: Error, userInfo: Object)} callback The callback
-  */
-  getProfileUserInfo(callback) {
-    // console.log('getProfileUserInfo');
-    return chrome.identity.getProfileUserInfo((userInfo) => {
-      // console.log('userInfo', userInfo);
-      return callback(chrome.runtime.lastError, userInfo);
-    });
-  }
-
-  /**
-  @desc Login for the primary administrator.
-
-  @param {function(error: Error, whitelist: whitelist)} callback The callback function
-  @see https://developer.chrome.com/apps/identity
-  @see https://developer.chrome.com/apps/app_identity
-  */
-  login(callback) {
-    console.log('login');
-    return this.getAuthToken((error, token) => {
-      console.log('token', error, token);
-      if (error) {
-        return callback(error);
-      }
-      // Save token
-      this.token = token;
-      // Get User info
-      return this.getProfileUserInfo((error, userInfo) => {
-        console.log('userInfo', error, userInfo);
-        if (error) {
-          return callback(error);
-        }
-        let email = userInfo.email;
-        this.setEmail(email);
-        let whitelist = new Whitelist(email);
-        return callback(null, whitelist);
-      });
-    });
-  }
-
-  /**
-  @desc Removes an OAuth2 access token from the Identity API's token cache.
-
-  @param {function(error: Error)} callback The callback function
-  @see https://developer.chrome.com/apps/identity
-  @see http://stackoverflow.com/a/27344088/2578205
-  */
-  logout(callback) {
-    // this.getAuthToken((error, token) => {
-    //   console.log('logout token', error, token);
-    //   if (error) {
-    //     return callback(error);
-    //   }
-      // console.log('getAuthToken');
-      return chrome.identity.removeCachedAuthToken({
-        token: this.token
-      }, () => {
-        chrome.identity.launchWebAuthFlow(
-            {
-              'url': 'https://accounts.google.com/logout',
-              interactive: true
-              // url: `https://accounts.google.com/o/oauth2/revoke?token=${token}`,
-              // interactive: false
-            },
-            (tokenUrl) => {
-                this.token = null;
-                callback(chrome.runtime.lastError);
-            }
-        );
-        // console.log('token', token);
-        // this.token = null;
-        // return callback(chrome.runtime.lastError);
-      });
-    // });
-  }
-
-  /**
-  @desc Check if already setup with an administrator.
-  @return {boolean} Whether already setup.
-  */
-  isSetup() {
-    return !!this.getEmail();
-  }
-
-  /**
-  @desc Check if admin is logged in.
-  @return {boolean} Whether admin is logged in.
-  */
-  isLoggedIn() {
-    console.log('isLoggedIn', this.token);
-    return !!this.token;
-  }
-
-  /**
-  @desc Get administator's email.
-  @return {string} Admin email.
-  */
-  getEmail() {
-    return localStorage['admin:email'];
-  }
-
-  setEmail(email) {
-    localStorage['admin:email'] = email;
-  }
-
-
-
-}
-
-/**
 @desc Whitelist component
 */
 class Whitelist {
@@ -200,17 +41,19 @@ class Whitelist {
   @throws {Error} URL is already in whitelist.
   */
   addURL(title, url) {
+    // Get whitelist
+    let whitelist = this.get();
+
     // Check that URL is not already in whitelist
-    if (this.isAllowed(url)) {
+    if (_.findIndex(whitelist, (entry) => { return entry.url === url; }) !== -1) {
       // Must already be in whitelist
       // Throw an error!
       throw new Error(`URL '${url}' is already in whitelist`);
     }
     // Not already in whitelist
 
-    // Get whitelist
-    let whitelist = this.get();
     // Create new entry
+    title = title || url;
     let entry = {
       title,
       url
@@ -218,7 +61,7 @@ class Whitelist {
     // Add entry to whitelist
     whitelist.push(entry);
     // Save whitelist
-    set(whitelist);
+    this.set(whitelist);
     // Return successful
     return true;
   }
@@ -234,7 +77,7 @@ class Whitelist {
     // Find entry with matching URL in whitelist
     // Remove entry
     whitelist = _.remove(whitelist, (entry) => {
-      return Whitelist.matchURLs(url, entry.url);
+      return Whitelist.testURLs(url, entry.url);
     });
     // Save new whitelist
     this.set(whitelist);
@@ -247,25 +90,19 @@ class Whitelist {
   @return {boolean} Whether the URL is allowed.
   */
   isAllowed(url) {
+    // Check if Chrome extension
+    if (url.indexOf('chrome-extension://') !== -1) {
+      return true;
+    }
     // Get whitelist
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     let idx = _.findIndex(whitelist, (entry) => {
-      return Whitelist.matchURLs(url, entry.url);
+      return Whitelist.testURLs(url, entry.url);
     });
     // Allow if not idx isnt -1
-    // return idx !== -1;
-    return true;
-  }
-
-  /**
-  @desc Sync
-
-  @see https://developer.chrome.com/extensions/storage
-  @todo Implement.
-  */
-  sync(callback) {
-    TODO();
+    console.log('isAllowed', url, idx !== -1);
+    return idx !== -1;
   }
 
   /**
@@ -294,11 +131,11 @@ class Whitelist {
   @return {boolean} If URL `a` matches URL `b`
   @private
   @example
-  testURLs('google.com','google.com'); // True
-  testURLs('google.com','google.ca'); // False
+  testURLs('https://google.com','google.com'); // True
+  testURLs('https://google.com','google.ca'); // False
   */
-  testURLs(a, b) {
-    return (new RegExp(a)).test(b);
+  static testURLs(a, b) {
+    return (a.indexOf(b) !== -1) || (new RegExp(a)).test(b);
   }
 
   /**
@@ -364,14 +201,14 @@ class Moderator {
   */
   constructor() {
 
-    // Initialize related classes
     /**
-    @desc Session
+    @desc Logged in state
     */
-    this.session = new Session();
+    this.loggedIn = false;
 
     // Event listeners
     this.setupListeners();
+
 
   }
 
@@ -387,12 +224,13 @@ class Moderator {
     // Request listener
     chrome.webRequest.onBeforeRequest.addListener((info) => {
       var url = info.url;
-      if (!this.session.whitelist) {
+      let whitelist = this.getWhitelist();
+      if (!whitelist) {
         return {
           cancel: false
         };
       }
-      let shouldAllow = this.session.whitelist.isAllowed(url);
+      let shouldAllow = whitelist.isAllowed(url);
       // console.log('URL: ', url, shouldAllow);
       return {
         cancel: !shouldAllow
@@ -419,6 +257,148 @@ class Moderator {
     //   });
 
   }
+
+  /**
+  @desc Check if Chrome is locked.
+        Locked means that an admin has signed in with their email.
+  @return {boolean} Whether Chrome is locked.
+  */
+  isLocked() {
+    return !this.isUnlocked();
+  }
+
+  /**
+  @desc Check if Chrome is unlocked.
+        Locked means that an admin has signed in with their email.
+  @return {boolean} Whether Chrome is unlocked.
+  */
+  isUnlocked() {
+    return !this.getEmail();
+  }
+
+  lock(email, password) {
+    // Check to make sure it is not already locked
+    if (this.isUnlocked()) {
+      // Not already locked
+      this.setEmail(email);
+      this.setPassword(password);
+      return this.login(email, password);
+    } else {
+      return this.login(email, password);
+    }
+  }
+
+  unlock(email, password) {
+    if (this.login(email, password)) {
+      // Logged in now
+      this.setEmail(null);
+      this.setPassword(null);
+      return this.logout();
+    } else {
+      // Could not login to unlock
+      return false;
+    }
+  }
+
+  login(email, password) {
+    if (email === this.getEmail() && password === this.getPassword()) {
+      this.loggedIn = true;
+      this.whitelist = new Whitelist(this.getEmail());
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  logout() {
+    this.loggedIn = false;
+    this.whitelist = null;
+  }
+
+  /**
+  @desc Get administator's email.
+  @private
+  @return {string} Admin email.
+  */
+  getEmail() {
+    return localStorage['admin:email'];
+  }
+  /**
+  @desc Set administrator's email.
+  @private
+  @param {string} email - The new email.
+  @return {void} Void.
+  */
+  setEmail(email) {
+    if (email === null) {
+      delete localStorage['admin:email'];
+    } else {
+      localStorage['admin:email'] = email;
+    }
+  }
+
+  /**
+  @desc Get administator's password.
+  @private
+  @return {string} Admin password.
+  */
+  getPassword() {
+    return localStorage['admin:password'];
+  }
+  /**
+  @desc Set administrator's password.
+  @private
+  @param {string} password - The new password.
+  @return {void} Void.
+  */
+  setPassword(password) {
+    if (password === null) {
+      delete localStorage['admin:password'];
+    } else {
+      localStorage['admin:password'] = password;
+    }
+  }
+
+  /**
+  @desc Get the serialized JSON form of the Whitelist.
+  @return {whitelist} The whitelist JSON.
+  */
+  getWhitelist() {
+    return this.whitelist;
+    // if (this.isLocked()) {
+    //   return new Whitelist(this.getEmail());
+    // } else {
+    //   return null;
+    // }
+  }
+
+  getWhitelistJSON() {
+    let whitelist = this.getWhitelist();
+    if (whitelist) {
+      return whitelist.get();
+    } else {
+      return [];
+    }
+  }
+
+  addToWhitelist(title, url) {
+    if (this.loggedIn && this.whitelist) {
+      this.whitelist.addURL(title, url);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  removeFromWhitelist(url) {
+    if (this.loggedIn && this.whitelist) {
+      this.whitelist.removeURL(url);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 
 }
 

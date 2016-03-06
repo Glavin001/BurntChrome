@@ -33,7 +33,6 @@
   <ul>
     
   <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Session.html">Session</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Whitelist.html">Whitelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Burnt.html">Burnt</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-TODO">TODO</a></span></span></li>
@@ -66,55 +65,6 @@ function TODO() {
 }
 
 /**
-@desc Session component
-*/
-class Session {
-
-  /**
-  @desc Initialize the instance.
-  */
-  constructor() {
-
-  }
-
-  /**
-  @desc Get User&apos;s OAuth 2.0 authentication token
-  @param {function(error: Error, token: string)} callback The callback
-  */
-  getToken(callback) {
-    console.log(&apos;getToken&apos;);
-    return chrome.identity.getAuthToken({
-      interactive: true
-    }, (token) =&gt; {
-      console.log(&apos;token&apos;, token);
-      return callback(chrome.runtime.lastError, token);
-    });
-  }
-
-  /**
-  @desc Login for the primary administrator.
-
-  @param {function(error: Error, userInfo: Object)} callback The callback function
-  @see https://developer.chrome.com/apps/identity
-  @see https://developer.chrome.com/apps/app_identity
-  */
-  login(callback) {
-    console.log(&apos;login&apos;);
-    return this.getToken((error, token) =&gt; {
-      console.log(&apos;token&apos;, token, error);
-      if (error) {
-        return callback(error);
-      }
-      return chrome.identity.getProfileUserInfo((userInfo) =&gt; {
-        console.log(&apos;userInfo&apos;, userInfo);
-        return callback(chrome.runtime.lastError, userInfo);
-      });
-    });
-  }
-
-}
-
-/**
 @desc Whitelist component
 */
 class Whitelist {
@@ -138,17 +88,19 @@ class Whitelist {
   @throws {Error} URL is already in whitelist.
   */
   addURL(title, url) {
+    // Get whitelist
+    let whitelist = this.get();
+
     // Check that URL is not already in whitelist
-    if (this.isAllowed(url)) {
+    if (_.findIndex(whitelist, (entry) =&gt; { return entry.url === url; }) !== -1) {
       // Must already be in whitelist
       // Throw an error!
       throw new Error(`URL &apos;${url}&apos; is already in whitelist`);
     }
     // Not already in whitelist
 
-    // Get whitelist
-    let whitelist = this.get();
     // Create new entry
+    title = title || url;
     let entry = {
       title,
       url
@@ -156,7 +108,7 @@ class Whitelist {
     // Add entry to whitelist
     whitelist.push(entry);
     // Save whitelist
-    set(whitelist);
+    this.set(whitelist);
     // Return successful
     return true;
   }
@@ -172,7 +124,7 @@ class Whitelist {
     // Find entry with matching URL in whitelist
     // Remove entry
     whitelist = _.remove(whitelist, (entry) =&gt; {
-      return Whitelist.matchURLs(url, entry.url);
+      return Whitelist.testURLs(url, entry.url);
     });
     // Save new whitelist
     this.set(whitelist);
@@ -185,25 +137,19 @@ class Whitelist {
   @return {boolean} Whether the URL is allowed.
   */
   isAllowed(url) {
+    // Check if Chrome extension
+    if (url.indexOf(&apos;chrome-extension://&apos;) !== -1) {
+      return true;
+    }
     // Get whitelist
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     let idx = _.findIndex(whitelist, (entry) =&gt; {
-      return Whitelist.matchURLs(url, entry.url);
+      return Whitelist.testURLs(url, entry.url);
     });
     // Allow if not idx isnt -1
-    // return idx !== -1;
-    return true;
-  }
-
-  /**
-  @desc Sync
-
-  @see https://developer.chrome.com/extensions/storage
-  @todo Implement.
-  */
-  sync(callback) {
-    TODO();
+    console.log(&apos;isAllowed&apos;, url, idx !== -1);
+    return idx !== -1;
   }
 
   /**
@@ -232,11 +178,11 @@ class Whitelist {
   @return {boolean} If URL `a` matches URL `b`
   @private
   @example
-  testURLs(&apos;google.com&apos;,&apos;google.com&apos;); // True
-  testURLs(&apos;google.com&apos;,&apos;google.ca&apos;); // False
+  testURLs(&apos;https://google.com&apos;,&apos;google.com&apos;); // True
+  testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False
   */
-  testURLs(a, b) {
-    return (new RegExp(a)).test(b);
+  static testURLs(a, b) {
+    return (a.indexOf(b) !== -1) || (new RegExp(a)).test(b);
   }
 
   /**
@@ -302,21 +248,14 @@ class Moderator {
   */
   constructor() {
 
-    var email = &apos;glavin.wiechert@gmail.com&apos;;
-
-    // Initialize related classes
     /**
-    @desc Session
+    @desc Logged in state
     */
-    this.session = new Session();
-
-    /**
-    @desc Whitelist to moderate
-    */
-    this.whitelist = new Whitelist(email);
+    this.loggedIn = false;
 
     // Event listeners
     this.setupListeners();
+
 
   }
 
@@ -328,10 +267,17 @@ class Moderator {
   @private
   */
   setupListeners() {
+
     // Request listener
     chrome.webRequest.onBeforeRequest.addListener((info) =&gt; {
       var url = info.url;
-      let shouldAllow = this.whitelist.isAllowed(url);
+      let whitelist = this.getWhitelist();
+      if (!whitelist) {
+        return {
+          cancel: false
+        };
+      }
+      let shouldAllow = whitelist.isAllowed(url);
       // console.log(&apos;URL: &apos;, url, shouldAllow);
       return {
         cancel: !shouldAllow
@@ -341,23 +287,165 @@ class Moderator {
     }, [&quot;blocking&quot;]);
 
     // Message Passing listener
-    chrome.runtime.onMessage.addListener(
-      (request, sender, sendResponse) =&gt; {
-        console.log(sender.tab ?
-          &quot;from a content script:&quot; + sender.tab.url :
-          &quot;from the extension&quot;);
-        if (request.type == &quot;login&quot;) {
-          // Login!
-          this.session.login((error, userInfo) =&gt; {
-            console.log(&apos;userInfo&apos;, userInfo, error);
-            sendResponse(userInfo);
-          });
-        } else {
-          console.warn(&apos;Unknown message type&apos;, request);
-        }
-      });
+    // chrome.runtime.onMessage.addListener(
+    //   (request, sender, sendResponse) =&gt; {
+    //     console.log(sender.tab ?
+    //       &quot;from a content script:&quot; + sender.tab.url :
+    //       &quot;from the extension&quot;);
+    //     if (request.type == &quot;login&quot;) {
+    //       // Login!
+    //       this.session.login((error, userInfo) =&gt; {
+    //         console.log(&apos;userInfo&apos;, userInfo, error);
+    //         sendResponse(userInfo);
+    //       });
+    //     } else {
+    //       console.warn(&apos;Unknown message type&apos;, request);
+    //     }
+    //   });
 
   }
+
+  /**
+  @desc Check if Chrome is locked.
+        Locked means that an admin has signed in with their email.
+  @return {boolean} Whether Chrome is locked.
+  */
+  isLocked() {
+    return !this.isUnlocked();
+  }
+
+  /**
+  @desc Check if Chrome is unlocked.
+        Locked means that an admin has signed in with their email.
+  @return {boolean} Whether Chrome is unlocked.
+  */
+  isUnlocked() {
+    return !this.getEmail();
+  }
+
+  lock(email, password) {
+    // Check to make sure it is not already locked
+    if (this.isUnlocked()) {
+      // Not already locked
+      this.setEmail(email);
+      this.setPassword(password);
+      return this.login(email, password);
+    } else {
+      return this.login(email, password);
+    }
+  }
+
+  unlock(email, password) {
+    if (this.login(email, password)) {
+      // Logged in now
+      this.setEmail(null);
+      this.setPassword(null);
+      return this.logout();
+    } else {
+      // Could not login to unlock
+      return false;
+    }
+  }
+
+  login(email, password) {
+    if (email === this.getEmail() &amp;&amp; password === this.getPassword()) {
+      this.loggedIn = true;
+      this.whitelist = new Whitelist(this.getEmail());
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  logout() {
+    this.loggedIn = false;
+    this.whitelist = null;
+  }
+
+  /**
+  @desc Get administator&apos;s email.
+  @private
+  @return {string} Admin email.
+  */
+  getEmail() {
+    return localStorage[&apos;admin:email&apos;];
+  }
+  /**
+  @desc Set administrator&apos;s email.
+  @private
+  @param {string} email - The new email.
+  @return {void} Void.
+  */
+  setEmail(email) {
+    if (email === null) {
+      delete localStorage[&apos;admin:email&apos;];
+    } else {
+      localStorage[&apos;admin:email&apos;] = email;
+    }
+  }
+
+  /**
+  @desc Get administator&apos;s password.
+  @private
+  @return {string} Admin password.
+  */
+  getPassword() {
+    return localStorage[&apos;admin:password&apos;];
+  }
+  /**
+  @desc Set administrator&apos;s password.
+  @private
+  @param {string} password - The new password.
+  @return {void} Void.
+  */
+  setPassword(password) {
+    if (password === null) {
+      delete localStorage[&apos;admin:password&apos;];
+    } else {
+      localStorage[&apos;admin:password&apos;] = password;
+    }
+  }
+
+  /**
+  @desc Get the serialized JSON form of the Whitelist.
+  @return {whitelist} The whitelist JSON.
+  */
+  getWhitelist() {
+    return this.whitelist;
+    // if (this.isLocked()) {
+    //   return new Whitelist(this.getEmail());
+    // } else {
+    //   return null;
+    // }
+  }
+
+  getWhitelistJSON() {
+    let whitelist = this.getWhitelist();
+    if (whitelist) {
+      return whitelist.get();
+    } else {
+      return [];
+    }
+  }
+
+  addToWhitelist(title, url) {
+    if (this.loggedIn &amp;&amp; this.whitelist) {
+      this.whitelist.addURL(title, url);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  removeFromWhitelist(url) {
+    if (this.loggedIn &amp;&amp; this.whitelist) {
+      this.whitelist.removeURL(url);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 
 }
 

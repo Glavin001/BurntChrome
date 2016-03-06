@@ -33,7 +33,6 @@
   <ul>
     
   <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Session.html">Session</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Whitelist.html">Whitelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Burnt.html">Burnt</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-TODO">TODO</a></span></span></li>
@@ -46,8 +45,7 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/popup.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">
-/**
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
 @desc Burnt Chrome namespace
 */
 class Burnt {
@@ -64,32 +62,18 @@ class Burnt {
     Template element ID
     */
     this.templateId = &apos;frame&apos;;
-    /**
-    Context to give to template to generate HTML
-    @private
-    */
-    this.__context = {
-      isLoggedIn: false,
-      whitelist: [
-        {
-          title: &apos;Google&apos;,
-          url: &apos;google.com&apos;
-        },
-        {
-          title: &apos;Facebook&apos;,
-          url: &apos;facebook.com&apos;
-        },
-        {
-          title: &apos;Twitter&apos;,
-          url: &apos;twitter.com&apos;
-        },
-        {
-          title: &apos;How to Cheat on Exams 101&apos;,
-          url: &apos;cheatingonexams101.com&apos;
-        },
-      ]
-    };
 
+    //
+    this.setupTemplates();
+
+    // Render initial page
+    this.refresh();
+  }
+
+  /**
+  @desc Setup handlebars views to render compiled templates to.
+  */
+  setupTemplates() {
     let handlebarsSelector = &apos;script[type=&quot;text/x-handlebars-template&quot;]&apos;;
     $(handlebarsSelector).each((index, $el) =&gt; {
       // console.log($el, $el.id);
@@ -100,63 +84,102 @@ class Burnt {
       let containerId = templateId.split(&apos;-template&apos;)[0];
       $($el).after($(`&lt;div id=&quot;${containerId}&quot;&gt;&lt;/div&gt;`));
     });
-    // Render initial page
-    this.refresh();
   }
+
+  getContext() {
+    return {
+      isLoggedIn: this.background.moderator.loggedIn,
+      isLocked: this.background.moderator.isLocked(),
+      isUnlocked: this.background.moderator.isUnlocked(),
+      whitelist: this.background.moderator.getWhitelistJSON(),
+      email: this.background.moderator.getEmail()
+    };
+  }
+
   /**
   @desc Render the template
   */
   render(id, context) {
-    let el = document.getElementById(`${id}-template`);
-    let source = el.innerHTML;
-    let template = Handlebars.compile(source);
-    let html = template(context);
-    document.getElementById(id).innerHTML = html;
-    // console.log(&apos;html&apos;, html);
-    // Bind events
-    this.bind();
-  }
-  /**
-  @desc Bind the events
-  */
+      console.log(&apos;render&apos;, context);
+      let el = document.getElementById(`${id}-template`);
+      let source = el.innerHTML;
+      let template = Handlebars.compile(source);
+      let html = template(context);
+      document.getElementById(id).innerHTML = html;
+      // console.log(&apos;html&apos;, html);
+      // Bind events
+      this.bind();
+    }
+    /**
+    @desc Bind the events
+    */
   bind() {
-    // console.log(&apos;Bind element events&apos;);
-    $(&apos;#sign-in&apos;).click(() =&gt; this.login());
-  }
-  /**
-  @desc Refresh the template
-  */
+      // console.log(&apos;Bind element events&apos;);
+      $(&apos;#lock&apos;).click(() =&gt; this.lock());
+      $(&apos;#logout&apos;).click(() =&gt; this.logout());
+      $(&apos;#unlock&apos;).click(() =&gt; this.unlock());
+      $(&apos;#add-to-whitelist&apos;).click(() =&gt; this.addToWhitelist());
+    }
+    /**
+    @desc Refresh the template
+    */
   refresh() {
-    this.render(this.templateId, this.__context);
-  }
-  /**
-  @desc Set a property on the context
-  */
-  set(key, val) {
-    _.set(this.__context, key, val);
-    this.refresh();
-  }
-  /**
-  @desc Get a property on the context
-  */
+      this.render(this.templateId, this.getContext());
+    }
+    /**
+    @desc Get a property on the context
+    */
   get(key) {
-    return _.get(this.__context, key);
-  }
-  /**
-  @desc Login
-  @deprecated Login will be outsourced to Google&apos;s chrome.identity API
-  */
-  login() {
-    console.log(&apos;Login!&apos;);
+      return _.get(this.getContext(), key);
+    }
+    /**
+    @desc Lock
+    */
+  lock() {
+    console.log(&apos;Lock!&apos;);
     // chrome.runtime.sendMessage({type: &quot;login&quot;}, (response) =&gt; {
     //   console.log(&apos;response&apos;, response);
     // });
-    this.background.moderator.session.login((error, userInfo) =&gt; {
-      console.log(&apos;userInfo&apos;, userInfo, error);
-      this.set(&apos;isLoggedIn&apos;, true);
-    });
-
+    let context = this.getContext();
+    let email = $(&apos;input[name=&quot;email&quot;]&apos;).val() || context.email;
+    let password = $(&apos;input[name=&quot;password&quot;]&apos;).val();
+    console.log(email, password);
+    let successful = this.background.moderator.lock(email, password);
+    console.log(&apos;successful&apos;, successful);
+    this.refresh();
   }
+
+  logout() {
+    console.log(&apos;logout!&apos;);
+    let successful = this.background.moderator.logout();
+    console.log(&apos;successful&apos;, successful);
+    this.refresh();
+  }
+
+  unlock() {
+    console.log(&apos;Unlock!&apos;);
+    // chrome.runtime.sendMessage({type: &quot;login&quot;}, (response) =&gt; {
+    //   console.log(&apos;response&apos;, response);
+    // });
+    let context = this.getContext();
+    let email = $(&apos;input[name=&quot;email&quot;]&apos;).val() || context.email;
+    let password = $(&apos;input[name=&quot;password&quot;]&apos;).val(); // || prompt(&apos;Please confirm that you want to unlock Chrome by entering your password&apos;);
+    console.log(email, password);
+    if (email &amp;&amp; password) {
+      let successful = this.background.moderator.unlock(email, password);
+      console.log(&apos;successful&apos;, successful);
+      this.refresh();
+    }
+  }
+
+  addToWhitelist() {
+    console.log(&apos;addToWhitelist&apos;);
+    let title = $(&apos;input[name=&quot;entry-title&quot;]&apos;).val();
+    let url = $(&apos;input[name=&quot;entry-url&quot;]&apos;).val();
+    let successful = this.background.moderator.addToWhitelist(title, url);
+    if (successful) this.refresh();
+  }
+
 };
 
 /**
@@ -166,16 +189,7 @@ $(document).ready(() =&gt; {
   // console.log(&apos;Ready&apos;);
   let burnt = window.burnt = new Burnt();
 
-});
-
-
-
-
-
-
-
-
-</code></pre>
+});</code></pre>
 
 </div>
 

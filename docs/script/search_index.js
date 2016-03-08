@@ -18,18 +18,6 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "burntchrome/src/content.js~crashtab",
-    "variable/index.html#static-variable-crashTab",
-    "<span>crashTab</span> <span class=\"search-result-import-path\">burntchrome/src/content.js</span>",
-    "variable"
-  ],
-  [
-    "burntchrome/src/content.js~insultuser",
-    "variable/index.html#static-variable-insultUser",
-    "<span>insultUser</span> <span class=\"search-result-import-path\">burntchrome/src/content.js</span>",
-    "variable"
-  ],
-  [
     "builtinexternal/ecmascriptexternal.js~array",
     "external/index.html",
     "BuiltinExternal/ECMAScriptExternal.js~Array",
@@ -550,12 +538,6 @@ window.esdocSearchIndex = [
     "typedef/index.html#static-typedef-whitelist_entry",
     "src/background.js~whitelist_entry",
     "typedef"
-  ],
-  [
-    "src/content.js",
-    "file/src/content.js.html",
-    "src/content.js",
-    "file"
   ],
   [
     "src/popup.js",

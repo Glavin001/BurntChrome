@@ -17,8 +17,7 @@
         "<all_urls>"
       ],
       "js": [
-        "dist/deps-content.js",
-        "dist/content.js"
+        "dist/deps-content.js"
       ],
       "css": [
         "dist/deps-content.css"

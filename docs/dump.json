@@ -1027,59 +1027,6 @@
     "kind": "file",
     "static": true,
     "variation": null,
-    "name": "src/content.js",
-    "memberof": null,
-    "longname": "src/content.js",
-    "access": null,
-    "description": null,
-    "lineNumber": 3,
-    "content": "// content.js\n\nconsole.log(\"Hello from Burnt Chrome extension!\");\n\n/**\n@desc Crash the user's tab\n*/\nlet crashTab = () => {\n  // while(true) {\n  //   console.log('Hey! Fuck you.');\n  // }\n  var txt = \"a\";\n  while(1){\n      txt = txt += \"a\";    //add as much as the browser can handle\n  }\n  //[evil laugh] BOOM! All memory used up, and it is now CRASHED!\n};\n\n/**\n@desc Insult the user\n*/\nlet insultUser = () => {\n  let imgSrc = \"https://s-media-cache-ak0.pinimg.com/236x/14/bf/ce/14bfce9ca8c242443d9c43a3f13c0007.jpg\"\n  let imgHTML = `<img src=\"${imgSrc}\" style=\"width:100%; height:100%;\"/>`;\n  document.body.innerHTML = imgHTML;\n};\n\n// check if it's open\nconsole.log('is DevTools open?', window.devtools.open);\n// check it's orientation, null if not open\nconsole.log('and DevTools orientation?', window.devtools.orientation);\n\n// get notified when it's opened/closed or orientation changes\nwindow.addEventListener('devtoolschange', function (e) {\n    console.log('is DevTools open?', e.detail.open);\n    console.log('and DevTools orientation?', e.detail.orientation);\n    if (e.detail.open) {\n\n      // insultUser();\n      // crashTab();\n\n    }\n});\n"
-  },
-  {
-    "__docId__": 40,
-    "kind": "variable",
-    "static": true,
-    "variation": null,
-    "name": "crashTab",
-    "memberof": "src/content.js",
-    "longname": "src/content.js~crashTab",
-    "access": null,
-    "export": false,
-    "importPath": "burntchrome/src/content.js",
-    "importStyle": null,
-    "description": "Crash the user's tab",
-    "lineNumber": 8,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 41,
-    "kind": "variable",
-    "static": true,
-    "variation": null,
-    "name": "insultUser",
-    "memberof": "src/content.js",
-    "longname": "src/content.js~insultUser",
-    "access": null,
-    "export": false,
-    "importPath": "burntchrome/src/content.js",
-    "importStyle": null,
-    "description": "Insult the user",
-    "lineNumber": 22,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 42,
-    "kind": "file",
-    "static": true,
-    "variation": null,
     "name": "src/popup.js",
     "memberof": null,
     "longname": "src/popup.js",
@@ -1089,7 +1036,7 @@
     "content": "/**\n@desc Popup view for Burnt Chrome\n*/\nclass Popup {\n  /**\n  @desc Initialize the instance.\n  @private\n  */\n  constructor() {\n    // Setup defaults\n    /**\n    Background page.\n    */\n    this.background = chrome.extension.getBackgroundPage();\n    /**\n    Template element ID\n    */\n    this.templateId = 'frame';\n\n    //\n    this.setupTemplates();\n\n    // Render initial page\n    this.refresh();\n  }\n\n  /**\n  @desc Setup handlebars views to render compiled templates to.\n  @private\n  */\n  setupTemplates() {\n    let handlebarsSelector = 'script[type=\"text/x-handlebars-template\"]';\n    $(handlebarsSelector).each((index, $el) => {\n      // console.log($el, $el.id);\n      var templateId = $el.id;\n      if (!templateId) {\n        return console.warn(\"Unknown id for element: \", $el);\n      }\n      let containerId = templateId.split('-template')[0];\n      $($el).after($(`<div id=\"${containerId}\"></div>`));\n    });\n  }\n\n  /**\n  @desc Generate the context to pass to the template to render.\n  @private\n  */\n  getContext() {\n    return {\n      isLoggedIn: this.background.moderator.loggedIn,\n      isLocked: this.background.moderator.isLocked(),\n      isUnlocked: this.background.moderator.isUnlocked(),\n      whitelist: this.background.moderator.getWhitelistJSON(),\n      email: this.background.moderator.getEmail()\n    };\n  }\n\n  /**\n  @desc Render the template with a context\n  @private\n  */\n  render(id, context) {\n    console.log('render', context);\n    let el = document.getElementById(`${id}-template`);\n    let source = el.innerHTML;\n    let template = Handlebars.compile(source);\n    let html = template(context);\n    document.getElementById(id).innerHTML = html;\n    // console.log('html', html);\n    // Bind events\n    this.bind();\n  }\n\n  /**\n  @desc Bind the events\n  @private\n  */\n  bind() {\n    // console.log('Bind element events');\n    $('#lock').click(() => this.lock());\n    $('#logout').click(() => this.logout());\n    $('#unlock').click(() => this.unlock());\n    $('#add-to-whitelist').click(() => this.addToWhitelist());\n  }\n\n  /**\n  @desc Refresh the template\n  @private\n  */\n  refresh() {\n    this.render(this.templateId, this.getContext());\n  }\n\n  /**\n  @desc Lock\n  @public\n  */\n  lock() {\n    // console.log('Lock!');\n    let context = this.getContext();\n    let email = $('input[name=\"email\"]').val() || context.email;\n    let password = $('input[name=\"password\"]').val();\n    // console.log(email, password);\n    let successful = this.background.moderator.lock(email, password);\n    console.log('successful', successful);\n    this.refresh();\n  }\n\n  /**\n  @desc Logout\n  @public\n  */\n  logout() {\n    // console.log('logout!');\n    let successful = this.background.moderator.logout();\n    // console.log('successful', successful);\n    this.refresh();\n  }\n\n  /**\n  @desc Unlock\n  @public\n  */\n  unlock() {\n    // console.log('Unlock!');\n    let context = this.getContext();\n    let email = $('input[name=\"email\"]').val() || context.email;\n    let password = $('input[name=\"password\"]').val(); // || prompt('Please confirm that you want to unlock Chrome by entering your password');\n    // console.log(email, password);\n    if (email && password) {\n      let successful = this.background.moderator.unlock(email, password);\n      // console.log('successful', successful);\n      this.refresh();\n    }\n  }\n\n  /**\n  @desc Add to Whitelist\n  @public\n  */\n  addToWhitelist() {\n    // console.log('addToWhitelist');\n    let title = $('input[name=\"entry-title\"]').val();\n    let url = $('input[name=\"entry-url\"]').val();\n    let successful = this.background.moderator.addToWhitelist(title, url);\n    if (successful) this.refresh();\n  }\n\n};\n\n/**\nReady up!\n\n@ignore\n*/\n$(document).ready(() => {\n  // console.log('Ready');\n  let burnt = window.burnt = new Popup();\n\n});"
   },
   {
-    "__docId__": 43,
+    "__docId__": 40,
     "kind": "class",
     "static": true,
     "variation": null,
@@ -1105,7 +1052,7 @@
     "interface": false
   },
   {
-    "__docId__": 44,
+    "__docId__": 41,
     "kind": "constructor",
     "static": false,
     "variation": null,
@@ -1119,7 +1066,7 @@
     "generator": false
   },
   {
-    "__docId__": 45,
+    "__docId__": 42,
     "kind": "member",
     "static": false,
     "variation": null,
@@ -1136,7 +1083,7 @@
     }
   },
   {
-    "__docId__": 46,
+    "__docId__": 43,
     "kind": "member",
     "static": false,
     "variation": null,
@@ -1153,7 +1100,7 @@
     }
   },
   {
-    "__docId__": 47,
+    "__docId__": 44,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1167,7 +1114,7 @@
     "generator": false
   },
   {
-    "__docId__": 48,
+    "__docId__": 45,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1186,7 +1133,7 @@
     "generator": false
   },
   {
-    "__docId__": 49,
+    "__docId__": 46,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1213,7 +1160,7 @@
     "generator": false
   },
   {
-    "__docId__": 50,
+    "__docId__": 47,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1227,7 +1174,7 @@
     "generator": false
   },
   {
-    "__docId__": 51,
+    "__docId__": 48,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1241,7 +1188,7 @@
     "generator": false
   },
   {
-    "__docId__": 52,
+    "__docId__": 49,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1255,7 +1202,7 @@
     "generator": false
   },
   {
-    "__docId__": 53,
+    "__docId__": 50,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1269,7 +1216,7 @@
     "generator": false
   },
   {
-    "__docId__": 54,
+    "__docId__": 51,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1283,7 +1230,7 @@
     "generator": false
   },
   {
-    "__docId__": 55,
+    "__docId__": 52,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1297,7 +1244,7 @@
     "generator": false
   },
   {
-    "__docId__": 57,
+    "__docId__": 54,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1310,7 +1257,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 58,
+    "__docId__": 55,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1323,7 +1270,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 59,
+    "__docId__": 56,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1336,7 +1283,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 60,
+    "__docId__": 57,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1349,7 +1296,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 61,
+    "__docId__": 58,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1362,7 +1309,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 62,
+    "__docId__": 59,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1375,7 +1322,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 63,
+    "__docId__": 60,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1388,7 +1335,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 64,
+    "__docId__": 61,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1401,7 +1348,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 65,
+    "__docId__": 62,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1414,7 +1361,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 66,
+    "__docId__": 63,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1427,7 +1374,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 67,
+    "__docId__": 64,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1440,7 +1387,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 68,
+    "__docId__": 65,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1453,7 +1400,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 69,
+    "__docId__": 66,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1466,7 +1413,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 70,
+    "__docId__": 67,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1479,7 +1426,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 71,
+    "__docId__": 68,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1492,7 +1439,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 72,
+    "__docId__": 69,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1505,7 +1452,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 73,
+    "__docId__": 70,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1518,7 +1465,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 74,
+    "__docId__": 71,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1531,7 +1478,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 75,
+    "__docId__": 72,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1544,7 +1491,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 76,
+    "__docId__": 73,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1557,7 +1504,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 77,
+    "__docId__": 74,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1570,7 +1517,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 78,
+    "__docId__": 75,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1583,7 +1530,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 79,
+    "__docId__": 76,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1596,7 +1543,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 80,
+    "__docId__": 77,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1609,7 +1556,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 81,
+    "__docId__": 78,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1622,7 +1569,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 82,
+    "__docId__": 79,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1635,7 +1582,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 83,
+    "__docId__": 80,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1648,7 +1595,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 84,
+    "__docId__": 81,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1661,7 +1608,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 85,
+    "__docId__": 82,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1674,7 +1621,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 86,
+    "__docId__": 83,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1687,7 +1634,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 87,
+    "__docId__": 84,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1700,7 +1647,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 88,
+    "__docId__": 85,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1713,7 +1660,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 89,
+    "__docId__": 86,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1726,7 +1673,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 90,
+    "__docId__": 87,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1739,7 +1686,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 91,
+    "__docId__": 88,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1752,7 +1699,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 92,
+    "__docId__": 89,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1765,7 +1712,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 93,
+    "__docId__": 90,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1778,7 +1725,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 94,
+    "__docId__": 91,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1791,7 +1738,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 95,
+    "__docId__": 92,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1804,7 +1751,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 96,
+    "__docId__": 93,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1817,7 +1764,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 97,
+    "__docId__": 94,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1830,7 +1777,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 98,
+    "__docId__": 95,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1843,7 +1790,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 99,
+    "__docId__": 96,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1856,7 +1803,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 100,
+    "__docId__": 97,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1869,7 +1816,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 101,
+    "__docId__": 98,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1882,7 +1829,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 102,
+    "__docId__": 99,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1895,7 +1842,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 103,
+    "__docId__": 100,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1908,7 +1855,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 105,
+    "__docId__": 102,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1921,7 +1868,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 106,
+    "__docId__": 103,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1934,7 +1881,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 107,
+    "__docId__": 104,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1947,7 +1894,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 108,
+    "__docId__": 105,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1960,7 +1907,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 109,
+    "__docId__": 106,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1973,7 +1920,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 110,
+    "__docId__": 107,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1986,7 +1933,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 111,
+    "__docId__": 108,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1999,7 +1946,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 112,
+    "__docId__": 109,
     "kind": "external",
     "static": true,
     "variation": null,

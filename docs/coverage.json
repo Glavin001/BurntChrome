@@ -1,7 +1,7 @@
 {
   "coverage": "100%",
-  "expectCount": 46,
-  "actualCount": 46,
+  "expectCount": 44,
+  "actualCount": 44,
   "files": {
     "src/background.js": {
       "expectCount": 31,
@@ -11,11 +11,6 @@
     "src/popup.js": {
       "expectCount": 13,
       "actualCount": 13,
-      "undocumentLines": []
-    },
-    "src/content.js": {
-      "expectCount": 2,
-      "actualCount": 2,
       "undocumentLines": []
     }
   }

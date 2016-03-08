@@ -1,21 +1,15 @@
 window.esdocSearchIndex = [
   [
-    "burntchrome/src/popup.js~burnt",
-    "class/src/popup.js~Burnt.html",
-    "<span>Burnt</span> <span class=\"search-result-import-path\">burntchrome/src/popup.js</span>",
-    "class"
-  ],
-  [
     "burntchrome/src/background.js~moderator",
     "class/src/background.js~Moderator.html",
     "<span>Moderator</span> <span class=\"search-result-import-path\">burntchrome/src/background.js</span>",
     "class"
   ],
   [
-    "burntchrome/src/background.js~todo",
-    "function/index.html#static-function-TODO",
-    "<span>TODO</span> <span class=\"search-result-import-path\">burntchrome/src/background.js</span>",
-    "function"
+    "burntchrome/src/popup.js~popup",
+    "class/src/popup.js~Popup.html",
+    "<span>Popup</span> <span class=\"search-result-import-path\">burntchrome/src/popup.js</span>",
+    "class"
   ],
   [
     "burntchrome/src/background.js~whitelist",
@@ -570,81 +564,75 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/popup.js~burnt#addtowhitelist",
-    "class/src/popup.js~Burnt.html#instance-method-addToWhitelist",
-    "src/popup.js~Burnt#addToWhitelist",
+    "src/popup.js~popup#addtowhitelist",
+    "class/src/popup.js~Popup.html#instance-method-addToWhitelist",
+    "src/popup.js~Popup#addToWhitelist",
     "method"
   ],
   [
-    "src/popup.js~burnt#background",
-    "class/src/popup.js~Burnt.html#instance-member-background",
-    "src/popup.js~Burnt#background",
+    "src/popup.js~popup#background",
+    "class/src/popup.js~Popup.html#instance-member-background",
+    "src/popup.js~Popup#background",
     "member"
   ],
   [
-    "src/popup.js~burnt#bind",
-    "class/src/popup.js~Burnt.html#instance-method-bind",
-    "src/popup.js~Burnt#bind",
+    "src/popup.js~popup#bind",
+    "class/src/popup.js~Popup.html#instance-method-bind",
+    "src/popup.js~Popup#bind",
     "method"
   ],
   [
-    "src/popup.js~burnt#constructor",
-    "class/src/popup.js~Burnt.html#instance-constructor-constructor",
-    "src/popup.js~Burnt#constructor",
+    "src/popup.js~popup#constructor",
+    "class/src/popup.js~Popup.html#instance-constructor-constructor",
+    "src/popup.js~Popup#constructor",
     "method"
   ],
   [
-    "src/popup.js~burnt#get",
-    "class/src/popup.js~Burnt.html#instance-method-get",
-    "src/popup.js~Burnt#get",
+    "src/popup.js~popup#getcontext",
+    "class/src/popup.js~Popup.html#instance-method-getContext",
+    "src/popup.js~Popup#getContext",
     "method"
   ],
   [
-    "src/popup.js~burnt#getcontext",
-    "class/src/popup.js~Burnt.html#instance-method-getContext",
-    "src/popup.js~Burnt#getContext",
+    "src/popup.js~popup#lock",
+    "class/src/popup.js~Popup.html#instance-method-lock",
+    "src/popup.js~Popup#lock",
     "method"
   ],
   [
-    "src/popup.js~burnt#lock",
-    "class/src/popup.js~Burnt.html#instance-method-lock",
-    "src/popup.js~Burnt#lock",
+    "src/popup.js~popup#logout",
+    "class/src/popup.js~Popup.html#instance-method-logout",
+    "src/popup.js~Popup#logout",
     "method"
   ],
   [
-    "src/popup.js~burnt#logout",
-    "class/src/popup.js~Burnt.html#instance-method-logout",
-    "src/popup.js~Burnt#logout",
+    "src/popup.js~popup#refresh",
+    "class/src/popup.js~Popup.html#instance-method-refresh",
+    "src/popup.js~Popup#refresh",
     "method"
   ],
   [
-    "src/popup.js~burnt#refresh",
-    "class/src/popup.js~Burnt.html#instance-method-refresh",
-    "src/popup.js~Burnt#refresh",
+    "src/popup.js~popup#render",
+    "class/src/popup.js~Popup.html#instance-method-render",
+    "src/popup.js~Popup#render",
     "method"
   ],
   [
-    "src/popup.js~burnt#render",
-    "class/src/popup.js~Burnt.html#instance-method-render",
-    "src/popup.js~Burnt#render",
+    "src/popup.js~popup#setuptemplates",
+    "class/src/popup.js~Popup.html#instance-method-setupTemplates",
+    "src/popup.js~Popup#setupTemplates",
     "method"
   ],
   [
-    "src/popup.js~burnt#setuptemplates",
-    "class/src/popup.js~Burnt.html#instance-method-setupTemplates",
-    "src/popup.js~Burnt#setupTemplates",
-    "method"
-  ],
-  [
-    "src/popup.js~burnt#templateid",
-    "class/src/popup.js~Burnt.html#instance-member-templateId",
-    "src/popup.js~Burnt#templateId",
+    "src/popup.js~popup#templateid",
+    "class/src/popup.js~Popup.html#instance-member-templateId",
+    "src/popup.js~Popup#templateId",
     "member"
   ],
   [
-    "src/popup.js~burnt#unlock",
-    "class/src/popup.js~Burnt.html#instance-method-unlock",
-    "src/popup.js~Burnt#unlock",
+    "src/popup.js~popup#unlock",
+    "class/src/popup.js~Popup.html#instance-method-unlock",
+    "src/popup.js~Popup#unlock",
     "method"
   ]
 ]

@@ -9,25 +9,18 @@
 */
 
 /**
-@desc TODO helper indicating at runtime that a method is not yet implemented.
-
-@throws {Error} Not yet implemented.
-*/
-function TODO() {
-  throw new Error('Not yet implemented.');
-}
-
-/**
 @desc Whitelist component
 */
 class Whitelist {
 
   /**
   @desc Initialize the instance.
+  @private
   */
   constructor(email) {
     /**
     @desc Whitelist's Email
+    @private
     */
     this.email = email;
   }
@@ -39,6 +32,7 @@ class Whitelist {
   @param {string} url - URL for whitelist entry
   @return {boolean} Was successfully added to whitelist
   @throws {Error} URL is already in whitelist.
+  @public
   */
   addURL(title, url) {
     // Get whitelist
@@ -70,6 +64,7 @@ class Whitelist {
   @desc Remove URL from whitelist
   @param {string} url - The URL to remove from the whitelist
   @return {whitelist} whitelist The updated whitelist
+  @public
   */
   removeURL(url) {
     // Get whitelist
@@ -88,6 +83,7 @@ class Whitelist {
   @desc Check if URL is allowed
   @param {string} url - The URL to check if whitelist allows.
   @return {boolean} Whether the URL is allowed.
+  @public
   */
   isAllowed(url) {
     // Check if Chrome extension
@@ -109,6 +105,7 @@ class Whitelist {
   @desc Get the whitelist in localStorage.
 
   @return {whitelist} The whitelist.
+  @private
   */
   get() {
     return Whitelist.getWhitelistForEmail(this.email);
@@ -119,6 +116,7 @@ class Whitelist {
 
   @param {whitelist} whitelist - The whitelist to save.
   @return {boolean} Whether successfully saved.
+  @private
   */
   set(whitelist) {
     return Whitelist.setWhitelistForEmail(this.email, whitelist);
@@ -140,8 +138,8 @@ class Whitelist {
 
   /**
   @desc Get the key to lookup in localStorage for the whitelist.
-  @private
   @return {string} localStorage key for the whitelist for the given email.
+  @private
   */
   static getWhitelistKeyForEmail(email) {
     return 'whitelist:' + email;
@@ -198,6 +196,7 @@ class Moderator {
 
   /**
   @desc Initialize the instance.
+  @private
   */
   constructor() {
 
@@ -205,6 +204,11 @@ class Moderator {
     @desc Logged in state
     */
     this.loggedIn = false;
+    /**
+    @desc The Whitelist instance
+    @private
+    */
+    this.whitelist = null;
 
     // Event listeners
     this.setupListeners();
@@ -262,6 +266,7 @@ class Moderator {
   @desc Check if Chrome is locked.
         Locked means that an admin has signed in with their email.
   @return {boolean} Whether Chrome is locked.
+  @public
   */
   isLocked() {
     return !this.isUnlocked();
@@ -271,11 +276,17 @@ class Moderator {
   @desc Check if Chrome is unlocked.
         Locked means that an admin has signed in with their email.
   @return {boolean} Whether Chrome is unlocked.
+  @public
   */
   isUnlocked() {
     return !this.getEmail();
   }
 
+  /**
+  @desc Lock
+  @return {boolean} Whether successfully locked
+  @public
+  */
   lock(email, password) {
     // Check to make sure it is not already locked
     if (this.isUnlocked()) {
@@ -288,6 +299,11 @@ class Moderator {
     }
   }
 
+  /**
+  @desc Unlock
+  @return {boolean} Whether successfully unlocked
+  @public
+  */
   unlock(email, password) {
     if (this.login(email, password)) {
       // Logged in now
@@ -300,6 +316,11 @@ class Moderator {
     }
   }
 
+  /**
+  @desc Login
+  @return {boolean} Whether successfully logged in
+  @public
+  */
   login(email, password) {
     if (email === this.getEmail() && password === this.getPassword()) {
       this.loggedIn = true;
@@ -310,9 +331,15 @@ class Moderator {
     }
   }
 
+  /**
+  @desc logout
+  @return {boolean} Whether successfully logged out
+  @public
+  */
   logout() {
     this.loggedIn = false;
     this.whitelist = null;
+    return true;
   }
 
   /**
@@ -360,18 +387,19 @@ class Moderator {
   }
 
   /**
-  @desc Get the serialized JSON form of the Whitelist.
-  @return {whitelist} The whitelist JSON.
+  @desc Get the current Whitelist instance.
+  @return {Object} The whitelist instance.
+  @private
   */
   getWhitelist() {
     return this.whitelist;
-    // if (this.isLocked()) {
-    //   return new Whitelist(this.getEmail());
-    // } else {
-    //   return null;
-    // }
   }
 
+  /**
+  @desc Get the serialized JSON form of the Whitelist.
+  @return {whitelist} The whitelist JSON.
+  @public
+  */
   getWhitelistJSON() {
     let whitelist = this.getWhitelist();
     if (whitelist) {
@@ -381,6 +409,11 @@ class Moderator {
     }
   }
 
+  /**
+  @desc Add to Whitelist
+  @return {boolean} Whether successfully added to whitelist.
+  @public
+  */
   addToWhitelist(title, url) {
     if (this.loggedIn && this.whitelist) {
       this.whitelist.addURL(title, url);
@@ -390,6 +423,11 @@ class Moderator {
     }
   }
 
+  /**
+  @desc Remove from Whitelist
+  @return {boolean} Whether successfully removed from whitelist.
+  @public
+  */
   removeFromWhitelist(url) {
     if (this.loggedIn && this.whitelist) {
       this.whitelist.removeURL(url);

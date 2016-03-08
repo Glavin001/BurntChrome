@@ -34,8 +34,7 @@
     
   <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Whitelist.html">Whitelist</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Burnt.html">Burnt</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-TODO">TODO</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Popup.html">Popup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-crashTab">crashTab</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-insultUser">insultUser</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
@@ -46,11 +45,12 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/popup.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
-@desc Burnt Chrome namespace
+@desc Popup view for Burnt Chrome
 */
-class Burnt {
+class Popup {
   /**
   @desc Initialize the instance.
+  @private
   */
   constructor() {
     // Setup defaults
@@ -72,6 +72,7 @@ class Burnt {
 
   /**
   @desc Setup handlebars views to render compiled templates to.
+  @private
   */
   setupTemplates() {
     let handlebarsSelector = &apos;script[type=&quot;text/x-handlebars-template&quot;]&apos;;
@@ -86,6 +87,10 @@ class Burnt {
     });
   }
 
+  /**
+  @desc Generate the context to pass to the template to render.
+  @private
+  */
   getContext() {
     return {
       isLoggedIn: this.background.moderator.loggedIn,
@@ -97,83 +102,90 @@ class Burnt {
   }
 
   /**
-  @desc Render the template
+  @desc Render the template with a context
+  @private
   */
   render(id, context) {
-      console.log(&apos;render&apos;, context);
-      let el = document.getElementById(`${id}-template`);
-      let source = el.innerHTML;
-      let template = Handlebars.compile(source);
-      let html = template(context);
-      document.getElementById(id).innerHTML = html;
-      // console.log(&apos;html&apos;, html);
-      // Bind events
-      this.bind();
-    }
-    /**
-    @desc Bind the events
-    */
+    console.log(&apos;render&apos;, context);
+    let el = document.getElementById(`${id}-template`);
+    let source = el.innerHTML;
+    let template = Handlebars.compile(source);
+    let html = template(context);
+    document.getElementById(id).innerHTML = html;
+    // console.log(&apos;html&apos;, html);
+    // Bind events
+    this.bind();
+  }
+
+  /**
+  @desc Bind the events
+  @private
+  */
   bind() {
-      // console.log(&apos;Bind element events&apos;);
-      $(&apos;#lock&apos;).click(() =&gt; this.lock());
-      $(&apos;#logout&apos;).click(() =&gt; this.logout());
-      $(&apos;#unlock&apos;).click(() =&gt; this.unlock());
-      $(&apos;#add-to-whitelist&apos;).click(() =&gt; this.addToWhitelist());
-    }
-    /**
-    @desc Refresh the template
-    */
+    // console.log(&apos;Bind element events&apos;);
+    $(&apos;#lock&apos;).click(() =&gt; this.lock());
+    $(&apos;#logout&apos;).click(() =&gt; this.logout());
+    $(&apos;#unlock&apos;).click(() =&gt; this.unlock());
+    $(&apos;#add-to-whitelist&apos;).click(() =&gt; this.addToWhitelist());
+  }
+
+  /**
+  @desc Refresh the template
+  @private
+  */
   refresh() {
-      this.render(this.templateId, this.getContext());
-    }
-    /**
-    @desc Get a property on the context
-    */
-  get(key) {
-      return _.get(this.getContext(), key);
-    }
-    /**
-    @desc Lock
-    */
+    this.render(this.templateId, this.getContext());
+  }
+
+  /**
+  @desc Lock
+  @public
+  */
   lock() {
-    console.log(&apos;Lock!&apos;);
-    // chrome.runtime.sendMessage({type: &quot;login&quot;}, (response) =&gt; {
-    //   console.log(&apos;response&apos;, response);
-    // });
+    // console.log(&apos;Lock!&apos;);
     let context = this.getContext();
     let email = $(&apos;input[name=&quot;email&quot;]&apos;).val() || context.email;
     let password = $(&apos;input[name=&quot;password&quot;]&apos;).val();
-    console.log(email, password);
+    // console.log(email, password);
     let successful = this.background.moderator.lock(email, password);
     console.log(&apos;successful&apos;, successful);
     this.refresh();
   }
 
+  /**
+  @desc Logout
+  @public
+  */
   logout() {
-    console.log(&apos;logout!&apos;);
+    // console.log(&apos;logout!&apos;);
     let successful = this.background.moderator.logout();
-    console.log(&apos;successful&apos;, successful);
+    // console.log(&apos;successful&apos;, successful);
     this.refresh();
   }
 
+  /**
+  @desc Unlock
+  @public
+  */
   unlock() {
-    console.log(&apos;Unlock!&apos;);
-    // chrome.runtime.sendMessage({type: &quot;login&quot;}, (response) =&gt; {
-    //   console.log(&apos;response&apos;, response);
-    // });
+    // console.log(&apos;Unlock!&apos;);
     let context = this.getContext();
     let email = $(&apos;input[name=&quot;email&quot;]&apos;).val() || context.email;
     let password = $(&apos;input[name=&quot;password&quot;]&apos;).val(); // || prompt(&apos;Please confirm that you want to unlock Chrome by entering your password&apos;);
-    console.log(email, password);
+    // console.log(email, password);
     if (email &amp;&amp; password) {
       let successful = this.background.moderator.unlock(email, password);
-      console.log(&apos;successful&apos;, successful);
+      // console.log(&apos;successful&apos;, successful);
       this.refresh();
     }
   }
 
+  /**
+  @desc Add to Whitelist
+  @public
+  */
   addToWhitelist() {
-    console.log(&apos;addToWhitelist&apos;);
+    // console.log(&apos;addToWhitelist&apos;);
     let title = $(&apos;input[name=&quot;entry-title&quot;]&apos;).val();
     let url = $(&apos;input[name=&quot;entry-url&quot;]&apos;).val();
     let successful = this.background.moderator.addToWhitelist(title, url);
@@ -184,10 +196,12 @@ class Burnt {
 
 /**
 Ready up!
+
+@ignore
 */
 $(document).ready(() =&gt; {
   // console.log(&apos;Ready&apos;);
-  let burnt = window.burnt = new Burnt();
+  let burnt = window.burnt = new Popup();
 
 });</code></pre>
 

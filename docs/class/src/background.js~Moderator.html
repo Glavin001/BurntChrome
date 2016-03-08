@@ -34,8 +34,7 @@
     
   <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Whitelist.html">Whitelist</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Burnt.html">Burnt</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-TODO">TODO</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Popup.html">Popup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-crashTab">crashTab</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-insultUser">insultUser</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
@@ -51,7 +50,7 @@
   
   
   
-  <span data-ice="source">| <span><a href="file/src/background.js.html#lineNumber197">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/background.js.html#lineNumber195">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -86,12 +85,12 @@
 
 
 <div data-ice="constructorSummary"><h2>Constructor Summary</h2><table class="summary" data-ice="summary">
-  <thead><tr><td data-ice="title" colspan="3">Public Constructor</td></tr></thead>
+  <thead><tr><td data-ice="title" colspan="3">Private Constructor</td></tr></thead>
   <tbody>
   
   <tr data-ice="target">
     <td>
-      <span class="access" data-ice="access">public</span>
+      <span class="access" data-ice="access">private</span>
       
       
       
@@ -148,9 +147,15 @@
       
     </td>
   </tr>
-<tr data-ice="target">
+</tbody>
+</table>
+<table class="summary" data-ice="summary">
+  <thead><tr><td data-ice="title" colspan="3">Private Members</td></tr></thead>
+  <tbody>
+  
+  <tr data-ice="target">
     <td>
-      <span class="access" data-ice="access">public</span>
+      <span class="access" data-ice="access">private</span>
       
       
       
@@ -165,7 +170,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>The Whitelist instance</p>
+</div>
       </div>
     </td>
     <td>
@@ -197,32 +203,7 @@
       <div>
         
         
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-           <span data-ice="name"><span><a href="class/src/background.js~Moderator.html#instance-method-getWhitelist">getWhitelist</a></span></span><span data-ice="signature">(): <span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Get the serialized JSON form of the Whitelist.</p>
+        <div data-ice="description"><p>Add to Whitelist</p>
 </div>
       </div>
     </td>
@@ -242,13 +223,14 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/background.js~Moderator.html#instance-method-getWhitelistJSON">getWhitelistJSON</a></span></span><span data-ice="signature">(): <span>*</span></span>
+           <span data-ice="name"><span><a href="class/src/background.js~Moderator.html#instance-method-getWhitelistJSON">getWhitelistJSON</a></span></span><span data-ice="signature">(): <span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>Get the serialized JSON form of the Whitelist.</p>
+</div>
       </div>
     </td>
     <td>
@@ -319,13 +301,14 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/background.js~Moderator.html#instance-method-lock">lock</a></span></span><span data-ice="signature">(email: <span>*</span>, password: <span>*</span>): <span>*</span></span>
+           <span data-ice="name"><span><a href="class/src/background.js~Moderator.html#instance-method-lock">lock</a></span></span><span data-ice="signature">(email: <span>*</span>, password: <span>*</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>Lock</p>
+</div>
       </div>
     </td>
     <td>
@@ -350,7 +333,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>Login</p>
+</div>
       </div>
     </td>
     <td>
@@ -369,13 +353,14 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/background.js~Moderator.html#instance-method-logout">logout</a></span></span><span data-ice="signature">()</span>
+           <span data-ice="name"><span><a href="class/src/background.js~Moderator.html#instance-method-logout">logout</a></span></span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>logout</p>
+</div>
       </div>
     </td>
     <td>
@@ -400,7 +385,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>Remove from Whitelist</p>
+</div>
       </div>
     </td>
     <td>
@@ -425,7 +411,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>Unlock</p>
+</div>
       </div>
     </td>
     <td>
@@ -483,6 +470,32 @@
         
         
         <div data-ice="description"><p>Get administator&apos;s password.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">private</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/background.js~Moderator.html#instance-method-getWhitelist">getWhitelist</a></span></span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Get the current Whitelist instance.</p>
 </div>
       </div>
     </td>
@@ -577,11 +590,11 @@
 
 
 
-<div data-ice="constructorDetails"><h2 data-ice="title">Public Constructors</h2>
+<div data-ice="constructorDetails"><h2 data-ice="title">Private Constructors</h2>
 
 <div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-constructor-constructor">
-    <span class="access" data-ice="access">public</span>
+    <span class="access" data-ice="access">private</span>
     
     
     
@@ -590,7 +603,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber202">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber201">source</a></span></span>
     </span>
   </h3>
 
@@ -634,7 +647,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber207">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber206">source</a></span></span>
     </span>
   </h3>
 
@@ -664,9 +677,11 @@
   
   
 </div>
+<h2 data-ice="title">Private Members</h2>
+
 <div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-member-whitelist">
-    <span class="access" data-ice="access">public</span>
+    <span class="access" data-ice="access">private</span>
     
     
     
@@ -675,14 +690,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber306">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber211">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>The Whitelist instance</p>
+</div>
 
   
 
@@ -718,14 +734,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber384">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber417">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Add to Whitelist</p>
+</div>
 
   
 
@@ -759,7 +776,8 @@
     <table>
       <tr>
         <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
-        
+        <td class="return-desc" data-ice="returnDescription"><p>Whether successfully added to whitelist.</p>
+</td>
       </tr>
     </table>
     <div data-ice="returnProperties">
@@ -780,17 +798,17 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-getWhitelist">
+  <h3 data-ice="anchor" id="instance-method-getWhitelistJSON">
     <span class="access" data-ice="access">public</span>
     
     
     
     
-    <span data-ice="name">getWhitelist</span><span data-ice="signature">(): <span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span>
+    <span data-ice="name">getWhitelistJSON</span><span data-ice="signature">(): <span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber366">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber403">source</a></span></span>
     </span>
   </h3>
 
@@ -832,56 +850,6 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-getWhitelistJSON">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    <span data-ice="name">getWhitelistJSON</span><span data-ice="signature">(): <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber375">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>*</span></td>
-        
-      </tr>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-isLocked">
     <span class="access" data-ice="access">public</span>
     
@@ -892,7 +860,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber266">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber271">source</a></span></span>
     </span>
   </h3>
 
@@ -945,7 +913,7 @@ Locked means that an admin has signed in with their email.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber275">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber281">source</a></span></span>
     </span>
   </h3>
 
@@ -994,18 +962,19 @@ Locked means that an admin has signed in with their email.</p>
     
     
     
-    <span data-ice="name">lock</span><span data-ice="signature">(email: <span>*</span>, password: <span>*</span>): <span>*</span></span>
+    <span data-ice="name">lock</span><span data-ice="signature">(email: <span>*</span>, password: <span>*</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber279">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber290">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Lock</p>
+</div>
 
   
 
@@ -1038,8 +1007,9 @@ Locked means that an admin has signed in with their email.</p>
     <h4>Return:</h4>
     <table>
       <tr>
-        <td class="return-type" data-ice="returnType"><span>*</span></td>
-        
+        <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
+        <td class="return-desc" data-ice="returnDescription"><p>Whether successfully locked</p>
+</td>
       </tr>
     </table>
     <div data-ice="returnProperties">
@@ -1070,14 +1040,15 @@ Locked means that an admin has signed in with their email.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber303">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber324">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Login</p>
+</div>
 
   
 
@@ -1111,7 +1082,8 @@ Locked means that an admin has signed in with their email.</p>
     <table>
       <tr>
         <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
-        
+        <td class="return-desc" data-ice="returnDescription"><p>Whether successfully logged in</p>
+</td>
       </tr>
     </table>
     <div data-ice="returnProperties">
@@ -1138,25 +1110,37 @@ Locked means that an admin has signed in with their email.</p>
     
     
     
-    <span data-ice="name">logout</span><span data-ice="signature">()</span>
+    <span data-ice="name">logout</span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber313">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber339">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>logout</p>
+</div>
 
   
 
   <div data-ice="properties">
 </div>
 
-  
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tr>
+        <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
+        <td class="return-desc" data-ice="returnDescription"><p>Whether successfully logged out</p>
+</td>
+      </tr>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
 
   
 
@@ -1182,14 +1166,15 @@ Locked means that an admin has signed in with their email.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber393">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber431">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Remove from Whitelist</p>
+</div>
 
   
 
@@ -1217,7 +1202,8 @@ Locked means that an admin has signed in with their email.</p>
     <table>
       <tr>
         <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
-        
+        <td class="return-desc" data-ice="returnDescription"><p>Whether successfully removed from whitelist.</p>
+</td>
       </tr>
     </table>
     <div data-ice="returnProperties">
@@ -1248,14 +1234,15 @@ Locked means that an admin has signed in with their email.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber291">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber307">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Unlock</p>
+</div>
 
   
 
@@ -1289,7 +1276,8 @@ Locked means that an admin has signed in with their email.</p>
     <table>
       <tr>
         <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
-        
+        <td class="return-desc" data-ice="returnDescription"><p>Whether successfully unlocked</p>
+</td>
       </tr>
     </table>
     <div data-ice="returnProperties">
@@ -1322,7 +1310,7 @@ Locked means that an admin has signed in with their email.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber323">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber350">source</a></span></span>
     </span>
   </h3>
 
@@ -1374,7 +1362,7 @@ Locked means that an admin has signed in with their email.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber345">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber372">source</a></span></span>
     </span>
   </h3>
 
@@ -1416,6 +1404,58 @@ Locked means that an admin has signed in with their email.</p>
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getWhitelist">
+    <span class="access" data-ice="access">private</span>
+    
+    
+    
+    
+    <span data-ice="name">getWhitelist</span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber394">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Get the current Whitelist instance.</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tr>
+        <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></td>
+        <td class="return-desc" data-ice="returnDescription"><p>The whitelist instance.</p>
+</td>
+      </tr>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-setEmail">
     <span class="access" data-ice="access">private</span>
     
@@ -1426,7 +1466,7 @@ Locked means that an admin has signed in with their email.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber332">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber359">source</a></span></span>
     </span>
   </h3>
 
@@ -1495,7 +1535,7 @@ Locked means that an admin has signed in with their email.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber354">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber381">source</a></span></span>
     </span>
   </h3>
 
@@ -1564,7 +1604,7 @@ Locked means that an admin has signed in with their email.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber222">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber226">source</a></span></span>
     </span>
   </h3>
 

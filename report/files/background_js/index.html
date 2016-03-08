@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - background.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>background.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">72.21</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">486</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">52.19</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">2.22</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">&#039;use strict&#039;;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i &lt; props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (&quot;value&quot; in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(&quot;Cannot call a class as a function&quot;); } }
+
+/**
+@typedef {Object} whitelist_entry A whitelist entry
+@property {string} title The title of the whitelist entry.
+@property {string} url The URL for the whitelist entry.
+*/
+
+/**
+@typedef {Array&lt;whitelist_entry&gt;} whitelist A whitelist array
+*/
+
+/**
+@desc TODO helper indicating at runtime that a method is not yet implemented.
+
+@throws {Error} Not yet implemented.
+*/
+function TODO() {
+  throw new Error(&#039;Not yet implemented.&#039;);
+}
+
+/**
+@desc Whitelist component
+*/
+
+var Whitelist = function () {
+
+  /**
+  @desc Initialize the instance.
+  */
+
+  function Whitelist(email) {
+    _classCallCheck(this, Whitelist);
+
+    /**
+    @desc Whitelist&#039;s Email
+    */
+    this.email = email;
+  }
+
+  /**
+  @desc Add URL to whitelist.
+   @param {string} title - Title for whitelist entry
+  @param {string} url - URL for whitelist entry
+  @return {boolean} Was successfully added to whitelist
+  @throws {Error} URL is already in whitelist.
+  */
+
+
+  _createClass(Whitelist, [{
+    key: &#039;addURL&#039;,
+    value: function addURL(title, url) {
+      // Get whitelist
+      var whitelist = this.get();
+
+      // Check that URL is not already in whitelist
+      if (_.findIndex(whitelist, function (entry) {
+        return entry.url === url;
+      }) !== -1) {
+        // Must already be in whitelist
+        // Throw an error!
+        throw new Error(&#039;URL \&#039;&#039; + url + &#039;\&#039; is already in whitelist&#039;);
+      }
+      // Not already in whitelist
+
+      // Create new entry
+      title = title || url;
+      var entry = {
+        title: title,
+        url: url
+      };
+      // Add entry to whitelist
+      whitelist.push(entry);
+      // Save whitelist
+      this.set(whitelist);
+      // Return successful
+      return true;
+    }
+
+    /**
+    @desc Remove URL from whitelist
+    @param {string} url - The URL to remove from the whitelist
+    @return {whitelist} whitelist The updated whitelist
+    */
+
+  }, {
+    key: &#039;removeURL&#039;,
+    value: function removeURL(url) {
+      // Get whitelist
+      var whitelist = this.get();
+      // Find entry with matching URL in whitelist
+      // Remove entry
+      whitelist = _.remove(whitelist, function (entry) {
+        return Whitelist.testURLs(url, entry.url);
+      });
+      // Save new whitelist
+      this.set(whitelist);
+      return whitelist;
+    }
+
+    /**
+    @desc Check if URL is allowed
+    @param {string} url - The URL to check if whitelist allows.
+    @return {boolean} Whether the URL is allowed.
+    */
+
+  }, {
+    key: &#039;isAllowed&#039;,
+    value: function isAllowed(url) {
+      // Check if Chrome extension
+      if (url.indexOf(&#039;chrome-extension://&#039;) !== -1) {
+        return true;
+      }
+      // Get whitelist
+      var whitelist = this.get();
+      // Find entry with matching URL in whitelist
+      var idx = _.findIndex(whitelist, function (entry) {
+        return Whitelist.testURLs(url, entry.url);
+      });
+      // Allow if not idx isnt -1
+      console.log(&#039;isAllowed&#039;, url, idx !== -1);
+      return idx !== -1;
+    }
+
+    /**
+    @desc Get the whitelist in localStorage.
+     @return {whitelist} The whitelist.
+    */
+
+  }, {
+    key: &#039;get&#039;,
+    value: function get() {
+      return Whitelist.getWhitelistForEmail(this.email);
+    }
+
+    /**
+    @desc Set the whitelist in localStorage.
+     @param {whitelist} whitelist - The whitelist to save.
+    @return {boolean} Whether successfully saved.
+    */
+
+  }, {
+    key: &#039;set&#039;,
+    value: function set(whitelist) {
+      return Whitelist.setWhitelistForEmail(this.email, whitelist);
+    }
+
+    /**
+    @desc Test URLs.
+    @param {string} a - URL to test against. Can be a RegExp.
+    @param {string} b - URL to test with.
+    @return {boolean} If URL `a` matches URL `b`
+    @private
+    @example
+    testURLs(&#039;https://google.com&#039;,&#039;google.com&#039;); // True
+    testURLs(&#039;https://google.com&#039;,&#039;google.ca&#039;); // False
+    */
+
+  }], [{
+    key: &#039;testURLs&#039;,
+    value: function testURLs(a, b) {
+      return a.indexOf(b) !== -1 || new RegExp(a).test(b);
+    }
+
+    /**
+    @desc Get the key to lookup in localStorage for the whitelist.
+    @private
+    @return {string} localStorage key for the whitelist for the given email.
+    */
+
+  }, {
+    key: &#039;getWhitelistKeyForEmail&#039;,
+    value: function getWhitelistKeyForEmail(email) {
+      return &#039;whitelist:&#039; + email;
+    }
+
+    /**
+    @desc Get the whitelist from localStorage
+    @private
+    @return {whitelist} The whitelist
+    @see https://developer.chrome.com/extensions/storage
+    @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+    */
+
+  }, {
+    key: &#039;getWhitelistForEmail&#039;,
+    value: function getWhitelistForEmail(email) {
+      var key = Whitelist.getWhitelistKeyForEmail(email);
+      var whitelist = localStorage[key];
+      if (typeof whitelist === &#039;string&#039;) {
+        return JSON.parse(whitelist);
+      }
+      /*
+        else if (typeof whitelist === &#039;object&#039;) {
+        return whitelist;
+      } */
+      else {
+          //console.warn(&#039;Unknown whitelist type: &#039;, typeof whitelist, whitelist);
+          return [];
+        }
+    }
+
+    /**
+    @desc Set the whitelist in localStorage
+    @private
+    @param {string} email - The admin&#039;s email address.
+    @param {whitelist} whitelist - The whitelist to save.
+    @return {boolean} Whether successfully saved.
+    @see https://developer.chrome.com/extensions/storage
+    @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+    */
+
+  }, {
+    key: &#039;setWhitelistForEmail&#039;,
+    value: function setWhitelistForEmail(email, whitelist) {
+      var key = Whitelist.getWhitelistKeyForEmail(email);
+      if (typeof whitelist !== &#039;string&#039;) {
+        whitelist = JSON.stringify(whitelist);
+      }
+      localStorage[key] = whitelist;
+      // Return successful
+      return true;
+    }
+  }]);
+
+  return Whitelist;
+}();
+
+/**
+@desc Moderator component
+*/
+
+
+var Moderator = function () {
+
+  /**
+  @desc Initialize the instance.
+  */
+
+  function Moderator() {
+    _classCallCheck(this, Moderator);
+
+    /**
+    @desc Logged in state
+    */
+    this.loggedIn = false;
+
+    // Event listeners
+    this.setupListeners();
+  }
+
+  /**
+  @desc Setup all event listeners.
+   @see https://developer.chrome.com/extensions/webRequest
+  @listens {onBeforeRequest} Listens for before requests
+  @private
+  */
+
+
+  _createClass(Moderator, [{
+    key: &#039;setupListeners&#039;,
+    value: function setupListeners() {
+      var _this = this;
+
+      // Request listener
+      chrome.webRequest.onBeforeRequest.addListener(function (info) {
+        var url = info.url;
+        var whitelist = _this.getWhitelist();
+        if (!whitelist) {
+          return {
+            cancel: false
+          };
+        }
+        var shouldAllow = whitelist.isAllowed(url);
+        // console.log(&#039;URL: &#039;, url, shouldAllow);
+        return {
+          cancel: !shouldAllow
+        };
+      }, {
+        urls: [&quot;&lt;all_urls&gt;&quot;]
+      }, [&quot;blocking&quot;]);
+
+      // Message Passing listener
+      // chrome.runtime.onMessage.addListener(
+      //   (request, sender, sendResponse) =&gt; {
+      //     console.log(sender.tab ?
+      //       &quot;from a content script:&quot; + sender.tab.url :
+      //       &quot;from the extension&quot;);
+      //     if (request.type == &quot;login&quot;) {
+      //       // Login!
+      //       this.session.login((error, userInfo) =&gt; {
+      //         console.log(&#039;userInfo&#039;, userInfo, error);
+      //         sendResponse(userInfo);
+      //       });
+      //     } else {
+      //       console.warn(&#039;Unknown message type&#039;, request);
+      //     }
+      //   });
+    }
+
+    /**
+    @desc Check if Chrome is locked.
+          Locked means that an admin has signed in with their email.
+    @return {boolean} Whether Chrome is locked.
+    */
+
+  }, {
+    key: &#039;isLocked&#039;,
+    value: function isLocked() {
+      return !this.isUnlocked();
+    }
+
+    /**
+    @desc Check if Chrome is unlocked.
+          Locked means that an admin has signed in with their email.
+    @return {boolean} Whether Chrome is unlocked.
+    */
+
+  }, {
+    key: &#039;isUnlocked&#039;,
+    value: function isUnlocked() {
+      return !this.getEmail();
+    }
+  }, {
+    key: &#039;lock&#039;,
+    value: function lock(email, password) {
+      // Check to make sure it is not already locked
+      if (this.isUnlocked()) {
+        // Not already locked
+        this.setEmail(email);
+        this.setPassword(password);
+        return this.login(email, password);
+      } else {
+        return this.login(email, password);
+      }
+    }
+  }, {
+    key: &#039;unlock&#039;,
+    value: function unlock(email, password) {
+      if (this.login(email, password)) {
+        // Logged in now
+        this.setEmail(null);
+        this.setPassword(null);
+        return this.logout();
+      } else {
+        // Could not login to unlock
+        return false;
+      }
+    }
+  }, {
+    key: &#039;login&#039;,
+    value: function login(email, password) {
+      if (email === this.getEmail() &amp;&amp; password === this.getPassword()) {
+        this.loggedIn = true;
+        this.whitelist = new Whitelist(this.getEmail());
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: &#039;logout&#039;,
+    value: function logout() {
+      this.loggedIn = false;
+      this.whitelist = null;
+    }
+
+    /**
+    @desc Get administator&#039;s email.
+    @private
+    @return {string} Admin email.
+    */
+
+  }, {
+    key: &#039;getEmail&#039;,
+    value: function getEmail() {
+      return localStorage[&#039;admin:email&#039;];
+    }
+    /**
+    @desc Set administrator&#039;s email.
+    @private
+    @param {string} email - The new email.
+    @return {void} Void.
+    */
+
+  }, {
+    key: &#039;setEmail&#039;,
+    value: function setEmail(email) {
+      if (email === null) {
+        delete localStorage[&#039;admin:email&#039;];
+      } else {
+        localStorage[&#039;admin:email&#039;] = email;
+      }
+    }
+
+    /**
+    @desc Get administator&#039;s password.
+    @private
+    @return {string} Admin password.
+    */
+
+  }, {
+    key: &#039;getPassword&#039;,
+    value: function getPassword() {
+      return localStorage[&#039;admin:password&#039;];
+    }
+    /**
+    @desc Set administrator&#039;s password.
+    @private
+    @param {string} password - The new password.
+    @return {void} Void.
+    */
+
+  }, {
+    key: &#039;setPassword&#039;,
+    value: function setPassword(password) {
+      if (password === null) {
+        delete localStorage[&#039;admin:password&#039;];
+      } else {
+        localStorage[&#039;admin:password&#039;] = password;
+      }
+    }
+
+    /**
+    @desc Get the serialized JSON form of the Whitelist.
+    @return {whitelist} The whitelist JSON.
+    */
+
+  }, {
+    key: &#039;getWhitelist&#039;,
+    value: function getWhitelist() {
+      return this.whitelist;
+      // if (this.isLocked()) {
+      //   return new Whitelist(this.getEmail());
+      // } else {
+      //   return null;
+      // }
+    }
+  }, {
+    key: &#039;getWhitelistJSON&#039;,
+    value: function getWhitelistJSON() {
+      var whitelist = this.getWhitelist();
+      if (whitelist) {
+        return whitelist.get();
+      } else {
+        return [];
+      }
+    }
+  }, {
+    key: &#039;addToWhitelist&#039;,
+    value: function addToWhitelist(title, url) {
+      if (this.loggedIn &amp;&amp; this.whitelist) {
+        this.whitelist.addURL(title, url);
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: &#039;removeFromWhitelist&#039;,
+    value: function removeFromWhitelist(url) {
+      if (this.loggedIn &amp;&amp; this.whitelist) {
+        this.whitelist.removeURL(url);
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }]);
+
+  return Moderator;
+}();
+
+/**
+===== Main =====
+Start the background script
+
+@ignore
+*/
+
+
+var moderator = window.moderator = new Moderator();
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9iYWNrZ3JvdW5kLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQWVBLFNBQVMsSUFBVCxHQUFnQjtBQUNkLFFBQU0sSUFBSSxLQUFKLENBQVUsc0JBQVYsQ0FBTixDQURjO0NBQWhCOzs7Ozs7SUFPTTs7Ozs7O0FBS0osV0FMSSxTQUtKLENBQVksS0FBWixFQUFtQjswQkFMZixXQUtlOzs7OztBQUlqQixTQUFLLEtBQUwsR0FBYSxLQUFiLENBSmlCO0dBQW5COzs7Ozs7Ozs7OztlQUxJOzsyQkFvQkcsT0FBTyxLQUFLOztBQUVqQixVQUFJLFlBQVksS0FBSyxHQUFMLEVBQVo7OztBQUZhLFVBS2IsRUFBRSxTQUFGLENBQVksU0FBWixFQUF1QixVQUFDLEtBQUQsRUFBVztBQUFFLGVBQU8sTUFBTSxHQUFOLEtBQWMsR0FBZCxDQUFUO09BQVgsQ0FBdkIsS0FBcUUsQ0FBQyxDQUFELEVBQUk7OztBQUczRSxjQUFNLElBQUksS0FBSixZQUFrQixrQ0FBbEIsQ0FBTixDQUgyRTtPQUE3RTs7OztBQUxpQixXQWFqQixHQUFRLFNBQVMsR0FBVCxDQWJTO0FBY2pCLFVBQUksUUFBUTtBQUNWLG9CQURVO0FBRVYsZ0JBRlU7T0FBUjs7QUFkYSxlQW1CakIsQ0FBVSxJQUFWLENBQWUsS0FBZjs7QUFuQmlCLFVBcUJqQixDQUFLLEdBQUwsQ0FBUyxTQUFUOztBQXJCaUIsYUF1QlYsSUFBUCxDQXZCaUI7Ozs7Ozs7Ozs7OzhCQStCVCxLQUFLOztBQUViLFVBQUksWUFBWSxLQUFLLEdBQUwsRUFBWjs7O0FBRlMsZUFLYixHQUFZLEVBQUUsTUFBRixDQUFTLFNBQVQsRUFBb0IsVUFBQyxLQUFELEVBQVc7QUFDekMsZUFBTyxVQUFVLFFBQVYsQ0FBbUIsR0FBbkIsRUFBd0IsTUFBTSxHQUFOLENBQS9CLENBRHlDO09BQVgsQ0FBaEM7O0FBTGEsVUFTYixDQUFLLEdBQUwsQ0FBUyxTQUFULEVBVGE7QUFVYixhQUFPLFNB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LElBQThCLEtBQTlCLENBREs7T0FGUDs7Ozs7Ozs7Ozs7a0NBWVk7QUFDWixhQUFPLGFBQWEsZ0JBQWIsQ0FBUCxDQURZOzs7Ozs7Ozs7OztnQ0FTRixVQUFVO0FBQ3BCLFVBQUksYUFBYSxJQUFiLEVBQW1CO0FBQ3JCLGVBQU8sYUFBYSxnQkFBYixDQUFQLENBRHFCO09BQXZCLE1BRU87QUFDTCxxQkFBYSxnQkFBYixJQUFpQyxRQUFqQyxDQURLO09BRlA7Ozs7Ozs7Ozs7bUNBV2E7QUFDYixhQUFPLEtBQUssU0FBTDs7Ozs7O0FBRE07Ozt1Q0FTSTtBQUNqQixVQUFJLFlBQVksS0FBSyxZQUFMLEVBQVosQ0FEYTtBQUVqQixVQUFJLFNBQUosRUFBZTtBQUNiLGVBQU8sVUFBVSxHQUFWLEVBQVAsQ0FEYTtPQUFmLE1BRU87QUFDTCxlQUFPLEVBQVAsQ0FESztPQUZQOzs7O21DQU9hLE9BQU8sS0FBSztBQUN6QixVQUFJLEtBQUssUUFBTCxJQUFpQixLQUFLLFNBQUwsRUFBZ0I7QUFDbkMsYUFBSyxTQUFMLENBQWUsTUFBZixDQUFzQixLQUF0QixFQUE2QixHQUE3QixFQURtQztBQUVuQyxlQUFPLElBQVAsQ0FGbUM7T0FBckMsTUFHTztBQUNMLGVBQU8sS0FBUCxDQURLO09BSFA7Ozs7d0NBUWtCLEtBQUs7QUFDdkIsVUFBSSxLQUFLLFFBQUwsSUFBaUIsS0FBSyxTQUFMLEVBQWdCO0FBQ25DLGFBQUssU0FBTCxDQUFlLFNBQWYsQ0FBeUIsR0FBekIsRUFEbUM7QUFFbkMsZUFBTyxJQUFQLENBRm1DO09BQXJDLE1BR087QUFDTCxlQUFPLEtBQVAsQ0FESztPQUhQOzs7O1NBck1FOzs7Ozs7Ozs7OztBQXNOTixJQUFJLFlBQVksT0FBTyxTQUFQLEdBQW1CLElBQUksU0FBSixFQUFuQiIsImZpbGUiOiJiYWNrZ3JvdW5kLmpzIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG5AdHlwZWRlZiB7T2JqZWN0fSB3aGl0ZWxpc3RfZW50cnkgQSB3aGl0ZWxpc3QgZW50cnlcbkBwcm9wZXJ0eSB7c3RyaW5nfSB0aXRsZSBUaGUgdGl0bGUgb2YgdGhlIHdoaXRlbGlzdCBlbnRyeS5cbkBwcm9wZXJ0eSB7c3RyaW5nfSB1cmwgVGhlIFVSTCBmb3IgdGhlIHdoaXRlbGlzdCBlbnRyeS5cbiovXG5cbi8qKlxuQHR5cGVkZWYge0FycmF5PHdoaXRlbGlzdF9lbnRyeT59IHdoaXRlbGlzdCBBIHdoaXRlbGlzdCBhcnJheVxuKi9cblxuLyoqXG5AZGVzYyBUT0RPIGhlbHBlciBpbmRpY2F0aW5nIGF0IHJ1bnRpbWUgdGhhdCBhIG1ldGhvZCBpcyBub3QgeWV0IGltcGxlbWVudGVkLlxuXG5AdGhyb3dzIHtFcnJvcn0gTm90IHlldCBpbXBsZW1lbnRlZC5cbiovXG5mdW5jdGlvbiBUT0RPKCkge1xuICB0aHJvdyBuZXcgRXJyb3IoJ05vdCB5ZXQgaW1wbGVtZW50ZWQuJyk7XG59XG5cbi8qKlxuQGRlc2MgV2hpdGVsaXN0IGNvbXBvbmVudFxuKi9cbmNsYXNzIFdoaXRlbGlzdCB7XG5cbiAgLyoqXG4gIEBkZXNjIEluaXRpYWxpemUgdGhlIGluc3RhbmNlLlxuICAqL1xuICBjb25zdHJ1Y3RvcihlbWFpbCkge1xuICAgIC8qKlxuICAgIEBkZXNjIFdoaXRlbGlzdCdzIEVtYWlsXG4gICAgKi9cbiAgICB0aGlzLmVtYWlsID0gZW1haWw7XG4gIH1cblxuICAvKipcbiAgQGRlc2MgQWRkIFVSTCB0byB3aGl0ZWxpc3QuXG5cbiAgQHBhcmFtIHtzdHJpbmd9IHRpdGxlIC0gVGl0bGUgZm9yIHdoaXRlbGlzdCBlbnRyeVxuICBAcGFyYW0ge3N0cmluZ30gdXJsIC0gVVJMIGZvciB3aGl0ZWxpc3QgZW50cnlcbiAgQHJldHVybiB7Ym9vbGVhbn0gV2FzIHN1Y2Nlc3NmdWxseSBhZGRlZCB0byB3aGl0ZWxpc3RcbiAgQHRocm93cyB7RXJyb3J9IFVSTCBpcyBhbHJlYWR5IGluIHdoaXRlbGlzdC5cbiAgKi9cbiAgYWRkVVJMKHRpdGxlLCB1cmwpIHtcbiAgICAvLyBHZXQgd2hpdGVsaXN0XG4gICAgbGV0IHdoaXRlbGlzdCA9IHRoaXMuZ2V0KCk7XG5cbiAgICAvLyBDaGVjayB0aGF0IFVSTCBpcyBub3QgYWxyZWFkeSBpbiB3aGl0ZWxpc3RcbiAgICBpZiAoXy5maW5kSW5kZXgod2hpdGVsaXN0LCAoZW50cnkpID0+IHsgcmV0dXJuIGVudHJ5LnVybCA9PT0gdXJsOyB9KSAhPT0gLTEpIHtcbiAgICAgIC8vIE11c3QgYWxyZWFkeSBiZSBpbiB3aGl0ZWxpc3RcbiAgICAgIC8vIFRocm93IGFuIGVycm9yIVxuICAgICAgdGhyb3cgbmV3IEVycm9yKGBVUkwgJyR7dXJsfScgaXMgYWxyZWFkeSBpbiB3aGl0ZWxpc3RgKTtcbiAgICB9XG4gICAgLy8gTm90IGFscmVhZHkgaW4gd2hpdGVsaXN0XG5cbiAgICAvLyBDcmVhdGUgbmV3IGVudHJ5XG4gICAgdGl0bGUgPSB0aXRsZSB8fCB1cmw7XG4gICAgbGV0IGVudHJ5ID0ge1xuICAgICAgdGl0bGUsXG4gICAgICB1cmxcbiAgICB9O1xuICAgIC8vIEFkZCBlbnRyeSB0byB3aGl0ZWxpc3RcbiAgICB3aGl0ZWxpc3QucHVzaChlbnRyeSk7XG4gICAgLy8gU2F2ZSB3aGl0ZWxpc3RcbiAgICB0aGlzLnNldCh3aGl0ZWxpc3QpO1xuICAgIC8vIFJldHVybiBzdWNjZXNzZnVsXG4gICAgcmV0dXJuIHRydWU7XG4gIH1cblxuICAvKipcbiAgQGRlc2MgUmVtb3ZlIFVSTCBmcm9tIHdoaXRlbGlzdFxuICBAcGFyYW0ge3N0cmluZ30gdXJsIC0gVGhlIFVSTCB0byByZW1vdmUgZnJvbSB0aGUgd2hpdGVsaXN0XG4gIEByZXR1cm4ge3doaXRlbGlzdH0gd2hpdGVsaXN0IFRoZSB1cGRhdGVkIHdoaXRlbGlzdFxuICAqL1xuICByZW1vdmVVUkwodXJsKSB7XG4gICAgLy8gR2V0IHdoaXRlbGlzdFxuICAgIGxldCB3aGl0ZWxpc3QgPSB0aGlzLmdldCgpO1xuICAgIC8vIEZpbmQgZW50cnkgd2l0aCBtYXRjaGluZyBVUkwgaW4gd2hpdGVsaXN0XG4gICAgLy8gUmVtb3ZlIGVudHJ5XG4gICAgd2hpdGVsaXN0ID0gXy5yZW1vdmUod2hpdGVsaXN0LCAoZW50cnkpID0+IHtcbiAgICAgIHJldHVybiBXaGl0ZWxpc3QudGVzdFVSTHModXJsLCBlbnRyeS51cmwpO1xuICAgIH0pO1xuICAgIC8vIFNhdmUgbmV3IHdoaXRlbGlzdFxuICAgIHRoaXMuc2V0KHdoaXRlbGlzdCk7XG4gICAgcmV0dXJuIHdoaXRlbGlzdDtcbiAgfVxuXG4gIC8qKlxuICBAZGVzYyBDaGVjayBpZiBVUkwgaXMgYWxsb3dlZFxuICBAcGFyYW0ge3N0cmluZ30gdXJsIC0gVGhlIFVSTCB0byBjaGVjayBpZiB3aGl0ZWxpc3QgYWxsb3dzLlxuICBAcmV0dXJuIHtib29sZWFufSBXaGV0aGVyIHRoZSBVUkwgaXMgYWxsb3dlZC5cbiAgKi9cbiAgaXNBbGxvd2VkKHVybCkge1xuICAgIC8vIENoZWNrIGlmIENocm9tZSBleHRlbnNpb25cbiAgICBpZiAodXJsLmluZGV4T2YoJ2Nocm9tZS1leHRlbnNpb246Ly8nKSAhPT0gLTEpIHtcbiAgICAgIHJldHVybiB0cnVlO1xuICAgIH1cbiAgICAvLyBHZXQgd2hpdGVsaXN0XG4gICAgbGV0IHdoaXRlbGlzdCA9IHRoaXMuZ2V0KCk7XG4gICAgLy8gRmluZCBlbnRyeSB3aXRoIG1hdGNoaW5nIFVSTCBpbiB3aGl0ZWxpc3RcbiAgICBsZXQgaWR4ID0gXy5maW5kSW5kZXgod2hpdGVsaXN0LCAoZW50cnkpID0+IHtcbiAgICAgIHJldHVybiBXaGl0ZWxpc3QudGVzdFVSTHModXJsLCBlbnRyeS51cmwpO1xuICAgIH0pO1xuICAgIC8vIEFsbG93IGlmIG5vdCBpZHggaXNudCAtMVxuICAgIGNvbnNvbGUubG9nKCdpc0FsbG93ZWQnLCB1cmwsIGlkeCAhPT0gLTEpO1xuICAgIHJldHVybiBpZHggIT09IC0xO1xuICB9XG5cbiAgLyoqXG4gIEBkZXNjIEdldCB0aGUgd2hpdGVsaXN0IGluIGxvY2FsU3RvcmFnZS5cblxuICBAcmV0dXJuIHt3aGl0ZWxpc3R9IFRoZSB3aGl0ZWxpc3QuXG4gICovXG4gIGdldCgpIHtcbiAgICByZXR1cm4gV2hpdGVsaXN0LmdldFdoaXRlbGlzdEZvckVtYWlsKHRoaXMuZW1haWwpO1xuICB9XG5cbiAgLyoqXG4gIEBkZXNjIFNldCB0aGUgd2hpdGVsaXN0IGluIGxvY2FsU3RvcmFnZS5cblxuICBAcGFyYW0ge3doaXRlbGlzdH0gd2hpdGVsaXN0IC0gVGhlIHdoaXRlbGlzdCB0byBzYXZlLlxuICBAcmV0dXJuIHtib29sZWFufSBXaGV0aGVyIHN1Y2Nlc3NmdWxseSBzYXZlZC5cbiAgKi9cbiAgc2V0KHdoaXRlbGlzdCkge1xuICAgIHJldHVybiBXaGl0ZWxpc3Quc2V0V2hpdGVsaXN0Rm9yRW1haWwodGhpcy5lbWFpbCwgd2hpdGVsaXN0KTtcbiAgfVxuXG4gIC8qKlxuICBAZGVzYyBUZXN0IFVSTHMuXG4gIEBwYXJhbSB7c3RyaW5nfSBhIC0gVVJMIHRvIHRlc3QgYWdhaW5zdC4gQ2FuIGJlIGEgUmVnRXhwLlxuICBAcGFyYW0ge3N0cmluZ30gYiAtIFVSTCB0byB0ZXN0IHdpdGguXG4gIEByZXR1cm4ge2Jvb2xlYW59IElmIFVSTCBgYWAgbWF0Y2hlcyBVUkwgYGJgXG4gIEBwcml2YXRlXG4gIEBleGFtcGxlXG4gIHRlc3RVUkxzKCdodHRwczovL2dvb2dsZS5jb20nLCdnb29nbGUuY29tJyk7IC8vIFRydWVcbiAgdGVzdFVSTHMoJ2h0dHBzOi8vZ29vZ2xlLmNvbScsJ2dvb2dsZS5jYScpOyAvLyBGYWxzZVxuICAqL1xuICBzdGF0aWMgdGVzdFVSTHMoYSwgYikge1xuICAgIHJldHVybiAoYS5pbmRleE9mKGIpICE9PSAtMSkgfHwgKG5ldyBSZWdFeHAoYSkpLnRlc3QoYik7XG4gIH1cblxuICAvKipcbiAgQGRlc2MgR2V0IHRoZSBrZXkgdG8gbG9va3VwIGluIGxvY2FsU3RvcmFnZSBmb3IgdGhlIHdoaXRlbGlzdC5cbiAgQHByaXZhdGVcbiAgQHJldHVybiB7c3RyaW5nfSBsb2NhbFN0b3JhZ2Uga2V5IGZvciB0aGUgd2hpdGVsaXN0IGZvciB0aGUgZ2l2ZW4gZW1haWwuXG4gICovXG4gIHN0YXRpYyBnZXRXaGl0ZWxpc3RLZXlGb3JFbWFpbChlbWFpbCkge1xuICAgIHJldHVybiAnd2hpdGVsaXN0OicgKyBlbWFpbDtcbiAgfVxuXG4gIC8qKlxuICBAZGVzYyBHZXQgdGhlIHdoaXRlbGlzdCBmcm9tIGxvY2FsU3RvcmFnZVxuICBAcHJpdmF0ZVxuICBAcmV0dXJuIHt3aGl0ZWxpc3R9IFRoZSB3aGl0ZWxpc3RcbiAgQHNlZSBodHRwczovL2RldmVsb3Blci5jaHJvbWUuY29tL2V4dGVuc2lvbnMvc3RvcmFnZVxuICBAc2VlIGh0dHBzOi8vZGV2ZWxvcGVyLm1vemlsbGEub3JnL2VuLVVTL2RvY3MvV2ViL0FQSS9XZWJfU3RvcmFnZV9BUEkvVXNpbmdfdGhlX1dlYl9TdG9yYWdlX0FQSVxuICAqL1xuICBzdGF0aWMgZ2V0V2hpdGVsaXN0Rm9yRW1haWwoZW1haWwpIHtcbiAgICBsZXQga2V5ID0gV2hpdGVsaXN0LmdldFdoaXRlbGlzdEtleUZvckVtYWlsKGVtYWlsKTtcbiAgICBsZXQgd2hpdGVsaXN0ID0gbG9jYWxTdG9yYWdlW2tleV07XG4gICAgaWYgKHR5cGVvZiB3aGl0ZWxpc3QgPT09ICdzdHJpbmcnKSB7XG4gICAgICByZXR1cm4gSlNPTi5wYXJzZSh3aGl0ZWxpc3QpO1xuICAgIH1cbiAgICAvKlxuICAgICAgZWxzZSBpZiAodHlwZW9mIHdoaXRlbGlzdCA9PT0gJ29iamVjdCcpIHtcbiAgICAgIHJldHVybiB3aGl0ZWxpc3Q7XG4gICAgfSAqL1xuICAgIGVsc2Uge1xuICAgICAgLy9jb25zb2xlLndhcm4oJ1Vua25vd24gd2hpdGVsaXN0IHR5cGU6ICcsIHR5cGVvZiB3aGl0ZWxpc3QsIHdoaXRlbGlzdCk7XG4gICAgICByZXR1cm4gW107XG4gICAgfVxuICB9XG5cbiAgLyoqXG4gIEBkZXNjIFNldCB0aGUgd2hpdGVsaXN0IGluIGxvY2FsU3RvcmFnZVxuICBAcHJpdmF0ZVxuICBAcGFyYW0ge3N0cmluZ30gZW1haWwgLSBUaGUgYWRtaW4ncyBlbWFpbCBhZGRyZXNzLlxuICBAcGFyYW0ge3doaXRlbGlzdH0gd2hpdGVsaXN0IC0gVGhlIHdoaXRlbGlzdCB0byBzYXZlLlxuICBAcmV0dXJuIHtib29sZWFufSBXaGV0aGVyIHN1Y2Nlc3NmdWxseSBzYXZlZC5cbiAgQHNlZSBodHRwczovL2RldmVsb3Blci5jaHJvbWUuY29tL2V4dGVuc2lvbnMvc3RvcmFnZVxuICBAc2VlIGh0dHBzOi8vZGV2ZWxvcGVyLm1vemlsbGEub3JnL2VuLVVTL2RvY3MvV2ViL0FQSS9XZWJfU3RvcmFnZV9BUEkvVXNpbmdfdGhlX1dlYl9TdG9yYWdlX0FQSVxuICAqL1xuICBzdGF0aWMgc2V0V2hpdGVsaXN0Rm9yRW1haWwoZW1haWwsIHdoaXRlbGlzdCkge1xuICAgIGxldCBrZXkgPSBXaGl0ZWxpc3QuZ2V0V2hpdGVsaXN0S2V5Rm9yRW1haWwoZW1haWwpO1xuICAgIGlmICh0eXBlb2Ygd2hpdGVsaXN0ICE9PSAnc3RyaW5nJykge1xuICAgICAgd2hpdGVsaXN0ID0gSlNPTi5zdHJpbmdpZnkod2hpdGVsaXN0KTtcbiAgICB9XG4gICAgbG9jYWxTdG9yYWdlW2tleV0gPSB3aGl0ZWxpc3Q7XG4gICAgLy8gUmV0dXJuIHN1Y2Nlc3NmdWxcbiAgICByZXR1cm4gdHJ1ZTtcbiAgfVxuXG59XG5cbi8qKlxuQGRlc2MgTW9kZXJhdG9yIGNvbXBvbmVudFxuKi9cbmNsYXNzIE1vZGVyYXRvciB7XG5cbiAgLyoqXG4gIEBkZXNjIEluaXRpYWxpemUgdGhlIGluc3RhbmNlLlxuICAqL1xuICBjb25zdHJ1Y3RvcigpIHtcblxuICAgIC8qKlxuICAgIEBkZXNjIExvZ2dlZCBpbiBzdGF0ZVxuICAgICovXG4gICAgdGhpcy5sb2dnZWRJbiA9IGZhbHNlO1xuXG4gICAgLy8gRXZlbnQgbGlzdGVuZXJzXG4gICAgdGhpcy5zZXR1cExpc3RlbmVycygpO1xuXG5cbiAgfVxuXG4gIC8qKlxuICBAZGVzYyBTZXR1cCBhbGwgZXZlbnQgbGlzdGVuZXJzLlxuXG4gIEBzZWUgaHR0cHM6Ly9kZXZlbG9wZXIuY2hyb21lLmNvbS9leHRlbnNpb25zL3dlYlJlcXVlc3RcbiAgQGxpc3RlbnMge29uQmVmb3JlUmVxdWVzdH0gTGlzdGVucyBmb3IgYmVmb3JlIHJlcXVlc3RzXG4gIEBwcml2YXRlXG4gICovXG4gIHNldHVwTGlzdGVuZXJzKCkge1xuXG4gICAgLy8gUmVxdWVzdCBsaXN0ZW5lclxuICAgIGNocm9tZS53ZWJSZXF1ZXN0Lm9uQmVmb3JlUmVxdWVzdC5hZGRMaXN0ZW5lcigoaW5mbykgPT4ge1xuICAgICAgdmFyIHVybCA9IGluZm8udXJsO1xuICAgICAgbGV0IHdoaXRlbGlzdCA9IHRoaXMuZ2V0V2hpdGVsaXN0KCk7XG4gICAgICBpZiAoIXdoaXRlbGlzdCkge1xuICAgICAgICByZXR1cm4ge1xuICAgICAgICAgIGNhbmNlbDogZmFsc2VcbiAgICAgICAgfTtcbiAgICAgIH1cbiAgICAgIGxldCBzaG91bGRBbGxvdyA9IHdoaXRlbGlzdC5pc0FsbG93ZWQodXJsKTtcbiAgICAgIC8vIGNvbnNvbGUubG9nKCdVUkw6ICcsIHVybCwgc2hvdWxkQWxsb3cpO1xuICAgICAgcmV0dXJuIHtcbiAgICAgICAgY2FuY2VsOiAhc2hvdWxkQWxsb3dcbiAgICAgIH07XG4gICAgfSwge1xuICAgICAgdXJsczogW1wiPGFsbF91cmxzPlwiXVxuICAgIH0sIFtcImJsb2NraW5nXCJdKTtcblxuICAgIC8vIE1lc3NhZ2UgUGFzc2luZyBsaXN0ZW5lclxuICAgIC8vIGNocm9tZS5ydW50aW1lLm9uTWVzc2FnZS5hZGRMaXN0ZW5lcihcbiAgICAvLyAgIChyZXF1ZXN0LCBzZW5kZXIsIHNlbmRSZXNwb25zZSkgPT4ge1xuICAgIC8vICAgICBjb25zb2xlLmxvZyhzZW5kZXIudGFiID9cbiAgICAvLyAgICAgICBcImZyb20gYSBjb250ZW50IHNjcmlwdDpcIiArIHNlbmRlci50YWIudXJsIDpcbiAgICAvLyAgICAgICBcImZyb20gdGhlIGV4dGVuc2lvblwiKTtcbiAgICAvLyAgICAgaWYgKHJlcXVlc3QudHlwZSA9PSBcImxvZ2luXCIpIHtcbiAgICAvLyAgICAgICAvLyBMb2dpbiFcbiAgICAvLyAgICAgICB0aGlzLnNlc3Npb24ubG9naW4oKGVycm9yLCB1c2VySW5mbykgPT4ge1xuICAgIC8vICAgICAgICAgY29uc29sZS5sb2coJ3VzZXJJbmZvJywgdXNlckluZm8sIGVycm9yKTtcbiAgICAvLyAgICAgICAgIHNlbmRSZXNwb25zZSh1c2VySW5mbyk7XG4gICAgLy8gICAgICAgfSk7XG4gICAgLy8gICAgIH0gZWxzZSB7XG4gICAgLy8gICAgICAgY29uc29sZS53YXJuKCdVbmtub3duIG1lc3NhZ2UgdHlwZScsIHJlcXVlc3QpO1xuICAgIC8vICAgICB9XG4gICAgLy8gICB9KTtcblxuICB9XG5cbiAgLyoqXG4gIEBkZXNjIENoZWNrIGlmIENocm9tZSBpcyBsb2NrZWQuXG4gICAgICAgIExvY2tlZCBtZWFucyB0aGF0IGFuIGFkbWluIGhhcyBzaWduZWQgaW4gd2l0aCB0aGVpciBlbWFpbC5cbiAgQHJldHVybiB7Ym9vbGVhbn0gV2hldGhlciBDaHJvbWUgaXMgbG9ja2VkLlxuICAqL1xuICBpc0xvY2tlZCgpIHtcbiAgICByZXR1cm4gIXRoaXMuaXNVbmxvY2tlZCgpO1xuICB9XG5cbiAgLyoqXG4gIEBkZXNjIENoZWNrIGlmIENocm9tZSBpcyB1bmxvY2tlZC5cbiAgICAgICAgTG9ja2VkIG1lYW5zIHRoYXQgYW4gYWRtaW4gaGFzIHNpZ25lZCBpbiB3aXRoIHRoZWlyIGVtYWlsLlxuICBAcmV0dXJuIHtib29sZWFufSBXaGV0aGVyIENocm9tZSBpcyB1bmxvY2tlZC5cbiAgKi9cbiAgaXNVbmxvY2tlZCgpIHtcbiAgICByZXR1cm4gIXRoaXMuZ2V0RW1haWwoKTtcbiAgfVxuXG4gIGxvY2soZW1haWwsIHBhc3N3b3JkKSB7XG4gICAgLy8gQ2hlY2sgdG8gbWFrZSBzdXJlIGl0IGlzIG5vdCBhbHJlYWR5IGxvY2tlZFxuICAgIGlmICh0aGlzLmlzVW5sb2NrZWQoKSkge1xuICAgICAgLy8gTm90IGFscmVhZHkgbG9ja2VkXG4gICAgICB0aGlzLnNldEVtYWlsKGVtYWlsKTtcbiAgICAgIHRoaXMuc2V0UGFzc3dvcmQocGFzc3dvcmQpO1xuICAgICAgcmV0dXJuIHRoaXMubG9naW4oZW1haWwsIHBhc3N3b3JkKTtcbiAgICB9IGVsc2Uge1xuICAgICAgcmV0dXJuIHRoaXMubG9naW4oZW1haWwsIHBhc3N3b3JkKTtcbiAgICB9XG4gIH1cblxuICB1bmxvY2soZW1haWwsIHBhc3N3b3JkKSB7XG4gICAgaWYgKHRoaXMubG9naW4oZW1haWwsIHBhc3N3b3JkKSkge1xuICAgICAgLy8gTG9nZ2VkIGluIG5vd1xuICAgICAgdGhpcy5zZXRFbWFpbChudWxsKTtcbiAgICAgIHRoaXMuc2V0UGFzc3dvcmQobnVsbCk7XG4gICAgICByZXR1cm4gdGhpcy5sb2dvdXQoKTtcbiAgICB9IGVsc2Uge1xuICAgICAgLy8gQ291bGQgbm90IGxvZ2luIHRvIHVubG9ja1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cbiAgfVxuXG4gIGxvZ2luKGVtYWlsLCBwYXNzd29yZCkge1xuICAgIGlmIChlbWFpbCA9PT0gdGhpcy5nZXRFbWFpbCgpICYmIHBhc3N3b3JkID09PSB0aGlzLmdldFBhc3N3b3JkKCkpIHtcbiAgICAgIHRoaXMubG9nZ2VkSW4gPSB0cnVlO1xuICAgICAgdGhpcy53aGl0ZWxpc3QgPSBuZXcgV2hpdGVsaXN0KHRoaXMuZ2V0RW1haWwoKSk7XG4gICAgICByZXR1cm4gdHJ1ZTtcbiAgICB9IGVsc2Uge1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cbiAgfVxuXG4gIGxvZ291dCgpIHtcbiAgICB0aGlzLmxvZ2dlZEluID0gZmFsc2U7XG4gICAgdGhpcy53aGl0ZWxpc3QgPSBudWxsO1xuICB9XG5cbiAgLyoqXG4gIEBkZXNjIEdldCBhZG1pbmlzdGF0b3IncyBlbWFpbC5cbiAgQHByaXZhdGVcbiAgQHJldHVybiB7c3RyaW5nfSBBZG1pbiBlbWFpbC5cbiAgKi9cbiAgZ2V0RW1haWwoKSB7XG4gICAgcmV0dXJuIGxvY2FsU3RvcmFnZVsnYWRtaW46ZW1haWwnXTtcbiAgfVxuICAvKipcbiAgQGRlc2MgU2V0IGFkbWluaXN0cmF0b3IncyBlbWFpbC5cbiAgQHByaXZhdGVcbiAgQHBhcmFtIHtzdHJpbmd9IGVtYWlsIC0gVGhlIG5ldyBlbWFpbC5cbiAgQHJldHVybiB7dm9pZH0gVm9pZC5cbiAgKi9cbiAgc2V0RW1haWwoZW1haWwpIHtcbiAgICBpZiAoZW1haWwgPT09IG51bGwpIHtcbiAgICAgIGRlbGV0ZSBsb2NhbFN0b3JhZ2VbJ2FkbWluOmVtYWlsJ107XG4gICAgfSBlbHNlIHtcbiAgICAgIGxvY2FsU3RvcmFnZVsnYWRtaW46ZW1haWwnXSA9IGVtYWlsO1xuICAgIH1cbiAgfVxuXG4gIC8qKlxuICBAZGVzYyBHZXQgYWRtaW5pc3RhdG9yJ3MgcGFzc3dvcmQuXG4gIEBwcml2YXRlXG4gIEByZXR1cm4ge3N0cmluZ30gQWRtaW4gcGFzc3dvcmQuXG4gICovXG4gIGdldFBhc3N3b3JkKCkge1xuICAgIHJldHVybiBsb2NhbFN0b3JhZ2VbJ2FkbWluOnBhc3N3b3JkJ107XG4gIH1cbiAgLyoqXG4gIEBkZXNjIFNldCBhZG1pbmlzdHJhdG9yJ3MgcGFzc3dvcmQuXG4gIEBwcml2YXRlXG4gIEBwYXJhbSB7c3RyaW5nfSBwYXNzd29yZCAtIFRoZSBuZXcgcGFzc3dvcmQuXG4gIEByZXR1cm4ge3ZvaWR9IFZvaWQuXG4gICovXG4gIHNldFBhc3N3b3JkKHBhc3N3b3JkKSB7XG4gICAgaWYgKHBhc3N3b3JkID09PSBudWxsKSB7XG4gICAgICBkZWxldGUgbG9jYWxTdG9yYWdlWydhZG1pbjpwYXNzd29yZCddO1xuICAgIH0gZWxzZSB7XG4gICAgICBsb2NhbFN0b3JhZ2VbJ2FkbWluOnBhc3N3b3JkJ10gPSBwYXNzd29yZDtcbiAgICB9XG4gIH1cblxuICAvKipcbiAgQGRlc2MgR2V0IHRoZSBzZXJpYWxpemVkIEpTT04gZm9ybSBvZiB0aGUgV2hpdGVsaXN0LlxuICBAcmV0dXJuIHt3aGl0ZWxpc3R9IFRoZSB3aGl0ZWxpc3QgSlNPTi5cbiAgKi9cbiAgZ2V0V2hpdGVsaXN0KCkge1xuICAgIHJldHVybiB0aGlzLndoaXRlbGlzdDtcbiAgICAvLyBpZiAodGhpcy5pc0xvY2tlZCgpKSB7XG4gICAgLy8gICByZXR1cm4gbmV3IFdoaXRlbGlzdCh0aGlzLmdldEVtYWlsKCkpO1xuICAgIC8vIH0gZWxzZSB7XG4gICAgLy8gICByZXR1cm4gbnVsbDtcbiAgICAvLyB9XG4gIH1cblxuICBnZXRXaGl0ZWxpc3RKU09OKCkge1xuICAgIGxldCB3aGl0ZWxpc3QgPSB0aGlzLmdldFdoaXRlbGlzdCgpO1xuICAgIGlmICh3aGl0ZWxpc3QpIHtcbiAgICAgIHJldHVybiB3aGl0ZWxpc3QuZ2V0KCk7XG4gICAgfSBlbHNlIHtcbiAgICAgIHJldHVybiBbXTtcbiAgICB9XG4gIH1cblxuICBhZGRUb1doaXRlbGlzdCh0aXRsZSwgdXJsKSB7XG4gICAgaWYgKHRoaXMubG9nZ2VkSW4gJiYgdGhpcy53aGl0ZWxpc3QpIHtcbiAgICAgIHRoaXMud2hpdGVsaXN0LmFkZFVSTCh0aXRsZSwgdXJsKTtcbiAgICAgIHJldHVybiB0cnVlO1xuICAgIH0gZWxzZSB7XG4gICAgICByZXR1cm4gZmFsc2U7XG4gICAgfVxuICB9XG5cbiAgcmVtb3ZlRnJvbVdoaXRlbGlzdCh1cmwpIHtcbiAgICBpZiAodGhpcy5sb2dnZWRJbiAmJiB0aGlzLndoaXRlbGlzdCkge1xuICAgICAgdGhpcy53aGl0ZWxpc3QucmVtb3ZlVVJMKHVybCk7XG4gICAgICByZXR1cm4gdHJ1ZTtcbiAgICB9IGVsc2Uge1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cbiAgfVxuXG5cbn1cblxuLyoqXG49PT09PSBNYWluID09PT09XG5TdGFydCB0aGUgYmFja2dyb3VuZCBzY3JpcHRcblxuQGlnbm9yZVxuKi9cbmxldCBtb2RlcmF0b3IgPSB3aW5kb3cubW9kZXJhdG9yID0gbmV3IE1vZGVyYXRvcigpOyJdfQ==</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

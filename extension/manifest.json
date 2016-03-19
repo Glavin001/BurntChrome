@@ -2,6 +2,7 @@
   "manifest_version": 2,
   "name": "Burnt Chrome",
   "version": "0.1.0",
+  "minimum_chrome_version": "29",
   "browser_action": {
     "default_icon": "src/icon.png",
     "default_title": "Burnt Chrome",
@@ -16,8 +17,7 @@
         "<all_urls>"
       ],
       "js": [
-        "dist/deps-content.js",
-        "dist/content.js"
+        "dist/deps-content.js"
       ],
       "css": [
         "dist/deps-content.css"
@@ -30,7 +30,19 @@
   "permissions": [
     "webRequest",
     "webRequestBlocking",
-    "<all_urls>"
+    "<all_urls>",
+    "identity",
+    "identity.email",
+    "https://accounts.google.com/*",
+    "https://www.googleapis.com/*"
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsE4+Xexiri8gvx+Dly36huGmkFCegXjOnPVtm+gjbznIh6pKARNSCsr5opG6Wwah+omPq6WUnWVCKKSRXRUIRiOiONv6LerATvYKQt4QX/2xx8QSjG/IkPopcexy0voZt8U0mr31cZnMA8EXfNePAjlqcIHpI6VVgeUe0iJ0PLk1e6BUqHQdNgkL6l5+vlYHirhWmy/mGfZm8YRfQlmmWn9KkGfL/ksZKzy/LntSZf37SU6U81mreP/eXdz+neo4qpKFga2lpFEl0mfiQmANdy8FtlepsZt0x7dLbDRQ+ruOsO6xBdulLa+l6PR8WLjLS/QefQowTVCo6SGoMMKPoQIDAQAB",
+  "oauth2": {
+        "client_id": "549765151683-cqqdd87k29vgjufif2s2asonscf6o4e6.apps.googleusercontent.com",
+        "scopes": [
+            "https://www.googleapis.com/auth/plus.login",
+            "https://www.googleapis.com/auth/userinfo.email"
+        ]
+    }
 }

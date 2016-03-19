@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - content.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>content.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">79.02</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">45</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">9.00</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">0.17</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">&quot;use strict&quot;;
+
+// content.js
+
+console.log(&quot;Hello from Burnt Chrome extension!&quot;);
+
+/**
+@desc Crash the user&#039;s tab
+*/
+var crashTab = function crashTab() {
+  // while(true) {
+  //   console.log(&#039;Hey! Fuck you.&#039;);
+  // }
+  var txt = &quot;a&quot;;
+  while (1) {
+    txt = txt += &quot;a&quot;; //add as much as the browser can handle
+  }
+  //[evil laugh] BOOM! All memory used up, and it is now CRASHED!
+};
+
+/**
+@desc Insult the user
+*/
+var insultUser = function insultUser() {
+  var imgSrc = &quot;https://s-media-cache-ak0.pinimg.com/236x/14/bf/ce/14bfce9ca8c242443d9c43a3f13c0007.jpg&quot;;
+  var imgHTML = &quot;&lt;img src=\&quot;&quot; + imgSrc + &quot;\&quot; style=\&quot;width:100%; height:100%;\&quot;/&gt;&quot;;
+  document.body.innerHTML = imgHTML;
+};
+
+// check if it&#039;s open
+console.log(&#039;is DevTools open?&#039;, window.devtools.open);
+// check it&#039;s orientation, null if not open
+console.log(&#039;and DevTools orientation?&#039;, window.devtools.orientation);
+
+// get notified when it&#039;s opened/closed or orientation changes
+window.addEventListener(&#039;devtoolschange&#039;, function (e) {
+  console.log(&#039;is DevTools open?&#039;, e.detail.open);
+  console.log(&#039;and DevTools orientation?&#039;, e.detail.orientation);
+  if (e.detail.open) {
+
+    // insultUser();
+    // crashTab();
+
+  }
+});
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9jb250ZW50LmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7QUFFQSxRQUFRLEdBQVIsQ0FBWSxvQ0FBWjs7Ozs7QUFLQSxJQUFJLFdBQVcsU0FBWCxRQUFXLEdBQU07Ozs7QUFJbkIsTUFBSSxNQUFNLEdBQU4sQ0FKZTtBQUtuQixTQUFNLENBQU4sRUFBUTtBQUNKLFVBQU0sT0FBTyxHQUFQO0FBREYsR0FBUjs7QUFMbUIsQ0FBTjs7Ozs7QUFjZixJQUFJLGFBQWEsU0FBYixVQUFhLEdBQU07QUFDckIsTUFBSSxTQUFTLHlGQUFULENBRGlCO0FBRXJCLE1BQUksMEJBQXVCLGtEQUF2QixDQUZpQjtBQUdyQixXQUFTLElBQVQsQ0FBYyxTQUFkLEdBQTBCLE9BQTFCLENBSHFCO0NBQU47OztBQU9qQixRQUFRLEdBQVIsQ0FBWSxtQkFBWixFQUFpQyxPQUFPLFFBQVAsQ0FBZ0IsSUFBaEIsQ0FBakM7O0FBRUEsUUFBUSxHQUFSLENBQVksMkJBQVosRUFBeUMsT0FBTyxRQUFQLENBQWdCLFdBQWhCLENBQXpDOzs7QUFHQSxPQUFPLGdCQUFQLENBQXdCLGdCQUF4QixFQUEwQyxVQUFVLENBQVYsRUFBYTtBQUNuRCxVQUFRLEdBQVIsQ0FBWSxtQkFBWixFQUFpQyxFQUFFLE1BQUYsQ0FBUyxJQUFULENBQWpDLENBRG1EO0FBRW5ELFVBQVEsR0FBUixDQUFZLDJCQUFaLEVBQXlDLEVBQUUsTUFBRixDQUFTLFdBQVQsQ0FBekMsQ0FGbUQ7QUFHbkQsTUFBSSxFQUFFLE1BQUYsQ0FBUyxJQUFULEVBQWU7Ozs7O0dBQW5CO0NBSHNDLENBQTFDIiwiZmlsZSI6ImNvbnRlbnQuanMiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBjb250ZW50LmpzXG5cbmNvbnNvbGUubG9nKFwiSGVsbG8gZnJvbSBCdXJudCBDaHJvbWUgZXh0ZW5zaW9uIVwiKTtcblxuLyoqXG5AZGVzYyBDcmFzaCB0aGUgdXNlcidzIHRhYlxuKi9cbmxldCBjcmFzaFRhYiA9ICgpID0+IHtcbiAgLy8gd2hpbGUodHJ1ZSkge1xuICAvLyAgIGNvbnNvbGUubG9nKCdIZXkhIEZ1Y2sgeW91LicpO1xuICAvLyB9XG4gIHZhciB0eHQgPSBcImFcIjtcbiAgd2hpbGUoMSl7XG4gICAgICB0eHQgPSB0eHQgKz0gXCJhXCI7ICAgIC8vYWRkIGFzIG11Y2ggYXMgdGhlIGJyb3dzZXIgY2FuIGhhbmRsZVxuICB9XG4gIC8vW2V2aWwgbGF1Z2hdIEJPT00hIEFsbCBtZW1vcnkgdXNlZCB1cCwgYW5kIGl0IGlzIG5vdyBDUkFTSEVEIVxufTtcblxuLyoqXG5AZGVzYyBJbnN1bHQgdGhlIHVzZXJcbiovXG5sZXQgaW5zdWx0VXNlciA9ICgpID0+IHtcbiAgbGV0IGltZ1NyYyA9IFwiaHR0cHM6Ly9zLW1lZGlhLWNhY2hlLWFrMC5waW5pbWcuY29tLzIzNngvMTQvYmYvY2UvMTRiZmNlOWNhOGMyNDI0NDNkOWM0M2EzZjEzYzAwMDcuanBnXCJcbiAgbGV0IGltZ0hUTUwgPSBgPGltZyBzcmM9XCIke2ltZ1NyY31cIiBzdHlsZT1cIndpZHRoOjEwMCU7IGhlaWdodDoxMDAlO1wiLz5gO1xuICBkb2N1bWVudC5ib2R5LmlubmVySFRNTCA9IGltZ0hUTUw7XG59O1xuXG4vLyBjaGVjayBpZiBpdCdzIG9wZW5cbmNvbnNvbGUubG9nKCdpcyBEZXZUb29scyBvcGVuPycsIHdpbmRvdy5kZXZ0b29scy5vcGVuKTtcbi8vIGNoZWNrIGl0J3Mgb3JpZW50YXRpb24sIG51bGwgaWYgbm90IG9wZW5cbmNvbnNvbGUubG9nKCdhbmQgRGV2VG9vbHMgb3JpZW50YXRpb24/Jywgd2luZG93LmRldnRvb2xzLm9yaWVudGF0aW9uKTtcblxuLy8gZ2V0IG5vdGlmaWVkIHdoZW4gaXQncyBvcGVuZWQvY2xvc2VkIG9yIG9yaWVudGF0aW9uIGNoYW5nZXNcbndpbmRvdy5hZGRFdmVudExpc3RlbmVyKCdkZXZ0b29sc2NoYW5nZScsIGZ1bmN0aW9uIChlKSB7XG4gICAgY29uc29sZS5sb2coJ2lzIERldlRvb2xzIG9wZW4/JywgZS5kZXRhaWwub3Blbik7XG4gICAgY29uc29sZS5sb2coJ2FuZCBEZXZUb29scyBvcmllbnRhdGlvbj8nLCBlLmRldGFpbC5vcmllbnRhdGlvbik7XG4gICAgaWYgKGUuZGV0YWlsLm9wZW4pIHtcblxuICAgICAgLy8gaW5zdWx0VXNlcigpO1xuICAgICAgLy8gY3Jhc2hUYWIoKTtcblxuICAgIH1cbn0pO1xuIl19</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

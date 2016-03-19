@@ -53,5 +53,5 @@ See https://github.com/lukehoban/es6features for a detailed list of features sup
 
 - `npm run compile`: Compile `extension/src/` to `extension/dist/` directory.
 - `npm start` (or `npm run start`): Watch for file changes in `extension/src/` directory and compile changes to `extension/dist/` directory.
-
+- `npm run docs`: Build documentation for source code to `docs/` directory. Open `docs/index.html` in your web browser to view after built.
 

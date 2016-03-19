@@ -1,11 +1,55 @@
-/**
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">src/background.js | Burnt Chrome API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="git+https://github.com/Glavin001/BurntChrome.git">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Moderator.html">Moderator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/background.js~Whitelist.html">Whitelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Popup.html">Popup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist_entry">whitelist_entry</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/background.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
 @typedef {Object} whitelist_entry A whitelist entry
 @property {string} title The title of the whitelist entry.
 @property {string} url The URL for the whitelist entry.
 */
 
 /**
-@typedef {Array<whitelist_entry>} whitelist A whitelist array
+@typedef {Array&lt;whitelist_entry&gt;} whitelist A whitelist array
 */
 
 /**
@@ -19,7 +63,7 @@ class Whitelist {
   */
   constructor(email) {
     /**
-    @desc Whitelist's Email
+    @desc Whitelist&apos;s Email
     @private
     */
     this.email = email;
@@ -39,10 +83,10 @@ class Whitelist {
     let whitelist = this.get();
 
     // Check that URL is not already in whitelist
-    if (_.findIndex(whitelist, (entry) => { return entry.url === url; }) !== -1) {
+    if (_.findIndex(whitelist, (entry) =&gt; { return entry.url === url; }) !== -1) {
       // Must already be in whitelist
       // Throw an error!
-      throw new Error(`URL '${url}' is already in whitelist`);
+      throw new Error(`URL &apos;${url}&apos; is already in whitelist`);
     }
     // Not already in whitelist
 
@@ -71,7 +115,7 @@ class Whitelist {
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     // Remove entry
-    whitelist = _.remove(whitelist, (entry) => {
+    whitelist = _.remove(whitelist, (entry) =&gt; {
       return Whitelist.testURLs(url, entry.url);
     });
     // Save new whitelist
@@ -87,17 +131,17 @@ class Whitelist {
   */
   isAllowed(url) {
     // Check if Chrome extension
-    if (url.indexOf('chrome-extension://') !== -1) {
+    if (url.indexOf(&apos;chrome-extension://&apos;) !== -1) {
       return true;
     }
     // Get whitelist
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
-    let idx = _.findIndex(whitelist, (entry) => {
+    let idx = _.findIndex(whitelist, (entry) =&gt; {
       return Whitelist.testURLs(url, entry.url);
     });
     // Allow if not idx isnt -1
-    console.log('isAllowed', url, idx !== -1);
+    console.log(&apos;isAllowed&apos;, url, idx !== -1);
     return idx !== -1;
   }
 
@@ -129,8 +173,8 @@ class Whitelist {
   @return {boolean} If URL `a` matches URL `b`
   @private
   @example
-  testURLs('https://google.com','google.com'); // True
-  testURLs('https://google.com','google.ca'); // False
+  testURLs(&apos;https://google.com&apos;,&apos;google.com&apos;); // True
+  testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False
   */
   static testURLs(a, b) {
     return (a.indexOf(b) !== -1) || (new RegExp(a)).test(b);
@@ -142,7 +186,7 @@ class Whitelist {
   @private
   */
   static getWhitelistKeyForEmail(email) {
-    return 'whitelist:' + email;
+    return &apos;whitelist:&apos; + email;
   }
 
   /**
@@ -155,15 +199,15 @@ class Whitelist {
   static getWhitelistForEmail(email) {
     let key = Whitelist.getWhitelistKeyForEmail(email);
     let whitelist = localStorage[key];
-    if (typeof whitelist === 'string') {
+    if (typeof whitelist === &apos;string&apos;) {
       return JSON.parse(whitelist);
     }
     /*
-      else if (typeof whitelist === 'object') {
+      else if (typeof whitelist === &apos;object&apos;) {
       return whitelist;
     } */
     else {
-      //console.warn('Unknown whitelist type: ', typeof whitelist, whitelist);
+      //console.warn(&apos;Unknown whitelist type: &apos;, typeof whitelist, whitelist);
       return [];
     }
   }
@@ -171,7 +215,7 @@ class Whitelist {
   /**
   @desc Set the whitelist in localStorage
   @private
-  @param {string} email - The admin's email address.
+  @param {string} email - The admin&apos;s email address.
   @param {whitelist} whitelist - The whitelist to save.
   @return {boolean} Whether successfully saved.
   @see https://developer.chrome.com/extensions/storage
@@ -179,7 +223,7 @@ class Whitelist {
   */
   static setWhitelistForEmail(email, whitelist) {
     let key = Whitelist.getWhitelistKeyForEmail(email);
-    if (typeof whitelist !== 'string') {
+    if (typeof whitelist !== &apos;string&apos;) {
       whitelist = JSON.stringify(whitelist);
     }
     localStorage[key] = whitelist;
@@ -226,7 +270,7 @@ class Moderator {
   setupListeners() {
 
     // Request listener
-    chrome.webRequest.onBeforeRequest.addListener((info) => {
+    chrome.webRequest.onBeforeRequest.addListener((info) =&gt; {
       var url = info.url;
       let whitelist = this.getWhitelist();
       if (!whitelist) {
@@ -235,28 +279,28 @@ class Moderator {
         };
       }
       let shouldAllow = whitelist.isAllowed(url);
-      // console.log('URL: ', url, shouldAllow);
+      // console.log(&apos;URL: &apos;, url, shouldAllow);
       return {
         cancel: !shouldAllow
       };
     }, {
-      urls: ["<all_urls>"]
-    }, ["blocking"]);
+      urls: [&quot;&lt;all_urls&gt;&quot;]
+    }, [&quot;blocking&quot;]);
 
     // Message Passing listener
     // chrome.runtime.onMessage.addListener(
-    //   (request, sender, sendResponse) => {
+    //   (request, sender, sendResponse) =&gt; {
     //     console.log(sender.tab ?
-    //       "from a content script:" + sender.tab.url :
-    //       "from the extension");
-    //     if (request.type == "login") {
+    //       &quot;from a content script:&quot; + sender.tab.url :
+    //       &quot;from the extension&quot;);
+    //     if (request.type == &quot;login&quot;) {
     //       // Login!
-    //       this.session.login((error, userInfo) => {
-    //         console.log('userInfo', userInfo, error);
+    //       this.session.login((error, userInfo) =&gt; {
+    //         console.log(&apos;userInfo&apos;, userInfo, error);
     //         sendResponse(userInfo);
     //       });
     //     } else {
-    //       console.warn('Unknown message type', request);
+    //       console.warn(&apos;Unknown message type&apos;, request);
     //     }
     //   });
 
@@ -322,7 +366,7 @@ class Moderator {
   @public
   */
   login(email, password) {
-    if (email === this.getEmail() && password === this.getPassword()) {
+    if (email === this.getEmail() &amp;&amp; password === this.getPassword()) {
       this.loggedIn = true;
       this.whitelist = new Whitelist(this.getEmail());
       return true;
@@ -343,46 +387,46 @@ class Moderator {
   }
 
   /**
-  @desc Get administator's email.
+  @desc Get administator&apos;s email.
   @private
   @return {string} Admin email.
   */
   getEmail() {
-    return localStorage['admin:email'];
+    return localStorage[&apos;admin:email&apos;];
   }
   /**
-  @desc Set administrator's email.
+  @desc Set administrator&apos;s email.
   @private
   @param {string} email - The new email.
   @return {void} Void.
   */
   setEmail(email) {
     if (email === null) {
-      delete localStorage['admin:email'];
+      delete localStorage[&apos;admin:email&apos;];
     } else {
-      localStorage['admin:email'] = email;
+      localStorage[&apos;admin:email&apos;] = email;
     }
   }
 
   /**
-  @desc Get administator's password.
+  @desc Get administator&apos;s password.
   @private
   @return {string} Admin password.
   */
   getPassword() {
-    return localStorage['admin:password'];
+    return localStorage[&apos;admin:password&apos;];
   }
   /**
-  @desc Set administrator's password.
+  @desc Set administrator&apos;s password.
   @private
   @param {string} password - The new password.
   @return {void} Void.
   */
   setPassword(password) {
     if (password === null) {
-      delete localStorage['admin:password'];
+      delete localStorage[&apos;admin:password&apos;];
     } else {
-      localStorage['admin:password'] = password;
+      localStorage[&apos;admin:password&apos;] = password;
     }
   }
 
@@ -415,7 +459,7 @@ class Moderator {
   @public
   */
   addToWhitelist(title, url) {
-    if (this.loggedIn && this.whitelist) {
+    if (this.loggedIn &amp;&amp; this.whitelist) {
       this.whitelist.addURL(title, url);
       return true;
     } else {
@@ -429,7 +473,7 @@ class Moderator {
   @public
   */
   removeFromWhitelist(url) {
-    if (this.loggedIn && this.whitelist) {
+    if (this.loggedIn &amp;&amp; this.whitelist) {
       this.whitelist.removeURL(url);
       return true;
     } else {
@@ -446,4 +490,20 @@ Start the background script
 
 @ignore
 */
-let moderator = window.moderator = new Moderator();
+let moderator = window.moderator = new Moderator();</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.5)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

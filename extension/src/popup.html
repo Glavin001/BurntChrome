@@ -1,91 +1,122 @@
 <html lang="en">
 
-  <meta charset="utf-8"/>
-  <head>
-    <title>Chrome Bootstrap</title>
+<meta charset="utf-8" />
 
-    <script type="text/javascript" src="../dist/deps-content.js"></script>
-    <script type="text/javascript" src="../dist/popup.js"></script>
+<head>
+  <title>Chrome Bootstrap</title>
 
-    <link href="../dist/deps-content.css" rel="stylesheet" type="text/css">
-    <link href="../src/popup.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="../dist/deps-content.js"></script>
+  <script type="text/javascript" src="../dist/popup.js"></script>
 
-  </head>
-  <body class="chrome-bootstrap">
+  <link href="../dist/deps-content.css" rel="stylesheet" type="text/css">
+  <link href="../src/popup.css" rel="stylesheet" type="text/css">
 
-    <script id="frame-template" type="text/x-handlebars-template">
+</head>
 
-      <div class="frame">
+<body class="chrome-bootstrap">
 
-        <header>
-          <h1>Burnt Chrome</h1>
-        </header>
+  <script id="frame-template" type="text/x-handlebars-template">
 
-        <div class="content">
+    <div class="frame">
 
-          {{#if isLoggedIn}}
-            <!-- Logged In -->
+      <header>
+        <h1>Burnt Chrome</h1>
+      </header>
 
-            <h2>Whitelist</h2>
-            <p>List of websites that are distinctly allowed.</p>
+      <div class="content">
+        {{#unless isLoggedIn}}
 
-            <div>
-              <div class="form-group">
-                <input type="text" placeholder="Title or short description">
-                <input type="password" placeholder="URL">
-                <button>Add to Whitelist</button>
-              </div>
+          <!-- Show login page -->
+          <div class="login">
+
+            <div class="form-group">
+              {{#if isLocked}}
+                Locked with email: {{email}}
+              {{else}}
+                <input type="text" name="email" placeholder="Email" value="{{email}}">
+              {{/if}}
+            </div>
+            <div class="form-group">
+              <input type="password" name="password" placeholder="Password">
             </div>
 
-            <ul class="highlightable editable">
-              {{#each whitelist as |website key|}}
-                <li>
-                  <a href="{{website.url}}" target="_blank">
-                    <dl>
-                      <dt>{{website.title}}</dt>
-                      <dd>{{website.url}}</dd>
-                    </dl>
-                  </a>
-                  <a class="action">Edit</a>
-                  <a href="#" class="delete">Delete</a>
-                </li>
-              {{/each}}
-            </ul>
-
-            {{else}}
-            <!-- Not Logged In -->
-
-            <div class="login">
-              <div class="form-group">
-                <input type="text" placeholder="Email or Username">
-              </div>
-              <div class="form-group">
-                <input type="password" placeholder="Password">
-              </div>
-              <div class="form-group">
-                <label>
-                  <input type="checkbox">
-                  <span>Save password for next time</span>
-                </label>
-              </div>
-              <div class="form-group">
-                <button id="sign-in">Sign in</button>
-              </div>
-              <div class="form-group">
-                <button>Create a new account</button>
-              </div>
-              <div class="form-group">
-                <a href="#">Forgot password?</a>
-              </div>
+            <!--
+            <div class="form-group">
+              <label>
+                <input type="checkbox">
+                <span>Save password for next time</span>
+              </label>
             </div>
+            -->
 
-          {{/if}}
+            <div class="form-group">
+              <button id="lock">
+                Login
+                {{#if isUnlocked}}
+                  &amp; Lock
+                {{/if}}
+              </button>
+            </div>
+            {{#if isLocked}}
+              <div class="form-group">
+                <button id="unlock">Unlock</button>
+              </div>
+            {{/if}}
+            <!--
+                <div class="form-group">
+                  <button>Create a new account</button>
+                </div>
+                <div class="form-group">
+                  <a href="#">Forgot password?</a>
+                </div>
+              -->
 
-        </div>
+          </div>
+
+        {{else}}
+
+          <h2>
+              Whitelist
+              <!-- Locked -->
+              for
+              <em>{{email}}</em>
+              <!-- <button id="unlock">Unlock</button> -->
+          </h2>
+          <button id="logout">Logout</button>
+          <p>
+            List of websites that are distinctly allowed.
+          </p>
+
+          <div>
+            <div class="form-group">
+              <input type="text" name="entry-title" placeholder="Title or short description">
+              <input type="text" name="entry-url" placeholder="URL">
+              <button id="add-to-whitelist">Add to Whitelist</button>
+            </div>
+          </div>
+
+          <ul class="highlightable editable">
+            {{#each whitelist as |website key|}}
+              <li>
+                <a href="{{website.url}}" target="_blank">
+                  <dl>
+                    <dt>{{website.title}}</dt>
+                    <dd>{{website.url}}</dd>
+                  </dl>
+                </a>
+                <!-- <a class="action">Edit</a> -->
+                <a href="#" class="delete">Delete</a>
+              </li>
+            {{/each}}
+          </ul>
+
+        {{/unless}}
+
       </div>
+    </div>
 
-    </script>
+  </script>
 
-  </body>
+</body>
 
 </html>

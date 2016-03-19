@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - popup.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>popup.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">72.20</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">191</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">32.69</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">1.60</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">&#039;use strict&#039;;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i &lt; props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (&quot;value&quot; in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(&quot;Cannot call a class as a function&quot;); } }
+
+/**
+@desc Burnt Chrome namespace
+*/
+
+var Burnt = function () {
+  /**
+  @desc Initialize the instance.
+  */
+
+  function Burnt() {
+    _classCallCheck(this, Burnt);
+
+    // Setup defaults
+    /**
+    Background page.
+    */
+    this.background = chrome.extension.getBackgroundPage();
+    /**
+    Template element ID
+    */
+    this.templateId = &#039;frame&#039;;
+
+    //
+    this.setupTemplates();
+
+    // Render initial page
+    this.refresh();
+  }
+
+  /**
+  @desc Setup handlebars views to render compiled templates to.
+  */
+
+
+  _createClass(Burnt, [{
+    key: &#039;setupTemplates&#039;,
+    value: function setupTemplates() {
+      var handlebarsSelector = &#039;script[type=&quot;text/x-handlebars-template&quot;]&#039;;
+      $(handlebarsSelector).each(function (index, $el) {
+        // console.log($el, $el.id);
+        var templateId = $el.id;
+        if (!templateId) {
+          return console.warn(&quot;Unknown id for element: &quot;, $el);
+        }
+        var containerId = templateId.split(&#039;-template&#039;)[0];
+        $($el).after($(&#039;&lt;div id=&quot;&#039; + containerId + &#039;&quot;&gt;&lt;/div&gt;&#039;));
+      });
+    }
+  }, {
+    key: &#039;getContext&#039;,
+    value: function getContext() {
+      return {
+        isLoggedIn: this.background.moderator.loggedIn,
+        isLocked: this.background.moderator.isLocked(),
+        isUnlocked: this.background.moderator.isUnlocked(),
+        whitelist: this.background.moderator.getWhitelistJSON(),
+        email: this.background.moderator.getEmail()
+      };
+    }
+
+    /**
+    @desc Render the template
+    */
+
+  }, {
+    key: &#039;render&#039;,
+    value: function render(id, context) {
+      console.log(&#039;render&#039;, context);
+      var el = document.getElementById(id + &#039;-template&#039;);
+      var source = el.innerHTML;
+      var template = Handlebars.compile(source);
+      var html = template(context);
+      document.getElementById(id).innerHTML = html;
+      // console.log(&#039;html&#039;, html);
+      // Bind events
+      this.bind();
+    }
+    /**
+    @desc Bind the events
+    */
+
+  }, {
+    key: &#039;bind&#039;,
+    value: function bind() {
+      var _this = this;
+
+      // console.log(&#039;Bind element events&#039;);
+      $(&#039;#lock&#039;).click(function () {
+        return _this.lock();
+      });
+      $(&#039;#logout&#039;).click(function () {
+        return _this.logout();
+      });
+      $(&#039;#unlock&#039;).click(function () {
+        return _this.unlock();
+      });
+      $(&#039;#add-to-whitelist&#039;).click(function () {
+        return _this.addToWhitelist();
+      });
+    }
+    /**
+    @desc Refresh the template
+    */
+
+  }, {
+    key: &#039;refresh&#039;,
+    value: function refresh() {
+      this.render(this.templateId, this.getContext());
+    }
+    /**
+    @desc Get a property on the context
+    */
+
+  }, {
+    key: &#039;get&#039;,
+    value: function get(key) {
+      return _.get(this.getContext(), key);
+    }
+    /**
+    @desc Lock
+    */
+
+  }, {
+    key: &#039;lock&#039;,
+    value: function lock() {
+      console.log(&#039;Lock!&#039;);
+      // chrome.runtime.sendMessage({type: &quot;login&quot;}, (response) =&gt; {
+      //   console.log(&#039;response&#039;, response);
+      // });
+      var context = this.getContext();
+      var email = $(&#039;input[name=&quot;email&quot;]&#039;).val() || context.email;
+      var password = $(&#039;input[name=&quot;password&quot;]&#039;).val();
+      console.log(email, password);
+      var successful = this.background.moderator.lock(email, password);
+      console.log(&#039;successful&#039;, successful);
+      this.refresh();
+    }
+  }, {
+    key: &#039;logout&#039;,
+    value: function logout() {
+      console.log(&#039;logout!&#039;);
+      var successful = this.background.moderator.logout();
+      console.log(&#039;successful&#039;, successful);
+      this.refresh();
+    }
+  }, {
+    key: &#039;unlock&#039;,
+    value: function unlock() {
+      console.log(&#039;Unlock!&#039;);
+      // chrome.runtime.sendMessage({type: &quot;login&quot;}, (response) =&gt; {
+      //   console.log(&#039;response&#039;, response);
+      // });
+      var context = this.getContext();
+      var email = $(&#039;input[name=&quot;email&quot;]&#039;).val() || context.email;
+      var password = $(&#039;input[name=&quot;password&quot;]&#039;).val(); // || prompt(&#039;Please confirm that you want to unlock Chrome by entering your password&#039;);
+      console.log(email, password);
+      if (email &amp;&amp; password) {
+        var successful = this.background.moderator.unlock(email, password);
+        console.log(&#039;successful&#039;, successful);
+        this.refresh();
+      }
+    }
+  }, {
+    key: &#039;addToWhitelist&#039;,
+    value: function addToWhitelist() {
+      console.log(&#039;addToWhitelist&#039;);
+      var title = $(&#039;input[name=&quot;entry-title&quot;]&#039;).val();
+      var url = $(&#039;input[name=&quot;entry-url&quot;]&#039;).val();
+      var successful = this.background.moderator.addToWhitelist(title, url);
+      if (successful) this.refresh();
+    }
+  }]);
+
+  return Burnt;
+}();
+
+;
+
+/**
+Ready up!
+*/
+$(document).ready(function () {
+  // console.log(&#039;Ready&#039;);
+  var burnt = window.burnt = new Burnt();
+});
+//# sourceMappingURL=data:application/json;base64,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LFVBQUksYUFBYSxLQUFLLFVBQUwsQ0FBZ0IsU0FBaEIsQ0FBMEIsY0FBMUIsQ0FBeUMsS0FBekMsRUFBZ0QsR0FBaEQsQ0FBYixDQUpXO0FBS2YsVUFBSSxVQUFKLEVBQWdCLEtBQUssT0FBTCxHQUFoQjs7OztTQWpJRTs7O0FBb0lMOzs7OztBQUtELEVBQUUsUUFBRixFQUFZLEtBQVosQ0FBa0IsWUFBTTs7QUFFdEIsTUFBSSxRQUFRLE9BQU8sS0FBUCxHQUFlLElBQUksS0FBSixFQUFmLENBRlU7Q0FBTixDQUFsQiIsImZpbGUiOiJwb3B1cC5qcyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuQGRlc2MgQnVybnQgQ2hyb21lIG5hbWVzcGFjZVxuKi9cbmNsYXNzIEJ1cm50IHtcbiAgLyoqXG4gIEBkZXNjIEluaXRpYWxpemUgdGhlIGluc3RhbmNlLlxuICAqL1xuICBjb25zdHJ1Y3RvcigpIHtcbiAgICAvLyBTZXR1cCBkZWZhdWx0c1xuICAgIC8qKlxuICAgIEJhY2tncm91bmQgcGFnZS5cbiAgICAqL1xuICAgIHRoaXMuYmFja2dyb3VuZCA9IGNocm9tZS5leHRlbnNpb24uZ2V0QmFja2dyb3VuZFBhZ2UoKTtcbiAgICAvKipcbiAgICBUZW1wbGF0ZSBlbGVtZW50IElEXG4gICAgKi9cbiAgICB0aGlzLnRlbXBsYXRlSWQgPSAnZnJhbWUnO1xuXG4gICAgLy9cbiAgICB0aGlzLnNldHVwVGVtcGxhdGVzKCk7XG5cbiAgICAvLyBSZW5kZXIgaW5pdGlhbCBwYWdlXG4gICAgdGhpcy5yZWZyZXNoKCk7XG4gIH1cblxuICAvKipcbiAgQGRlc2MgU2V0dXAgaGFuZGxlYmFycyB2aWV3cyB0byByZW5kZXIgY29tcGlsZWQgdGVtcGxhdGVzIHRvLlxuICAqL1xuICBzZXR1cFRlbXBsYXRlcygpIHtcbiAgICBsZXQgaGFuZGxlYmFyc1NlbGVjdG9yID0gJ3NjcmlwdFt0eXBlPVwidGV4dC94LWhhbmRsZWJhcnMtdGVtcGxhdGVcIl0nO1xuICAgICQoaGFuZGxlYmFyc1NlbGVjdG9yKS5lYWNoKChpbmRleCwgJGVsKSA9PiB7XG4gICAgICAvLyBjb25zb2xlLmxvZygkZWwsICRlbC5pZCk7XG4gICAgICB2YXIgdGVtcGxhdGVJZCA9ICRlbC5pZDtcbiAgICAgIGlmICghdGVtcGxhdGVJZCkge1xuICAgICAgICByZXR1cm4gY29uc29sZS53YXJuKFwiVW5rbm93biBpZCBmb3IgZWxlbWVudDogXCIsICRlbCk7XG4gICAgICB9XG4gICAgICBsZXQgY29udGFpbmVySWQgPSB0ZW1wbGF0ZUlkLnNwbGl0KCctdGVtcGxhdGUnKVswXTtcbiAgICAgICQoJGVsKS5hZnRlcigkKGA8ZGl2IGlkPVwiJHtjb250YWluZXJJZH1cIj48L2Rpdj5gKSk7XG4gICAgfSk7XG4gIH1cblxuICBnZXRDb250ZXh0KCkge1xuICAgIHJldHVybiB7XG4gICAgICBpc0xvZ2dlZEluOiB0aGlzLmJhY2tncm91bmQubW9kZXJhdG9yLmxvZ2dlZEluLFxuICAgICAgaXNMb2NrZWQ6IHRoaXMuYmFja2dyb3VuZC5tb2RlcmF0b3IuaXNMb2NrZWQoKSxcbiAgICAgIGlzVW5sb2NrZWQ6IHRoaXMuYmFja2dyb3VuZC5tb2RlcmF0b3IuaXNVbmxvY2tlZCgpLFxuICAgICAgd2hpdGVsaXN0OiB0aGlzLmJhY2tncm91bmQubW9kZXJhdG9yLmdldFdoaXRlbGlzdEpTT04oKSxcbiAgICAgIGVtYWlsOiB0aGlzLmJhY2tncm91bmQubW9kZXJhdG9yLmdldEVtYWlsKClcbiAgICB9O1xuICB9XG5cbiAgLyoqXG4gIEBkZXNjIFJlbmRlciB0aGUgdGVtcGxhdGVcbiAgKi9cbiAgcmVuZGVyKGlkLCBjb250ZXh0KSB7XG4gICAgICBjb25zb2xlLmxvZygncmVuZGVyJywgY29udGV4dCk7XG4gICAgICBsZXQgZWwgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZChgJHtpZH0tdGVtcGxhdGVgKTtcbiAgICAgIGxldCBzb3VyY2UgPSBlbC5pbm5lckhUTUw7XG4gICAgICBsZXQgdGVtcGxhdGUgPSBIYW5kbGViYXJzLmNvbXBpbGUoc291cmNlKTtcbiAgICAgIGxldCBodG1sID0gdGVtcGxhdGUoY29udGV4dCk7XG4gICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZChpZCkuaW5uZXJIVE1MID0gaHRtbDtcbiAgICAgIC8vIGNvbnNvbGUubG9nKCdodG1sJywgaHRtbCk7XG4gICAgICAvLyBCaW5kIGV2ZW50c1xuICAgICAgdGhpcy5iaW5kKCk7XG4gICAgfVxuICAgIC8qKlxuICAgIEBkZXNjIEJpbmQgdGhlIGV2ZW50c1xuICAgICovXG4gIGJpbmQoKSB7XG4gICAgICAvLyBjb25zb2xlLmxvZygnQmluZCBlbGVtZW50IGV2ZW50cycpO1xuICAgICAgJCgnI2xvY2snKS5jbGljaygoKSA9PiB0aGlzLmxvY2soKSk7XG4gICAgICAkKCcjbG9nb3V0JykuY2xpY2soKCkgPT4gdGhpcy5sb2dvdXQoKSk7XG4gICAgICAkKCcjdW5sb2NrJykuY2xpY2soKCkgPT4gdGhpcy51bmxvY2soKSk7XG4gICAgICAkKCcjYWRkLXRvLXdoaXRlbGlzdCcpLmNsaWNrKCgpID0+IHRoaXMuYWRkVG9XaGl0ZWxpc3QoKSk7XG4gICAgfVxuICAgIC8qKlxuICAgIEBkZXNjIFJlZnJlc2ggdGhlIHRlbXBsYXRlXG4gICAgKi9cbiAgcmVmcmVzaCgpIHtcbiAgICAgIHRoaXMucmVuZGVyKHRoaXMudGVtcGxhdGVJZCwgdGhpcy5nZXRDb250ZXh0KCkpO1xuICAgIH1cbiAgICAvKipcbiAgICBAZGVzYyBHZXQgYSBwcm9wZXJ0eSBvbiB0aGUgY29udGV4dFxuICAgICovXG4gIGdldChrZXkpIHtcbiAgICAgIHJldHVybiBfLmdldCh0aGlzLmdldENvbnRleHQoKSwga2V5KTtcbiAgICB9XG4gICAgLyoqXG4gICAgQGRlc2MgTG9ja1xuICAgICovXG4gIGxvY2soKSB7XG4gICAgY29uc29sZS5sb2coJ0xvY2shJyk7XG4gICAgLy8gY2hyb21lLnJ1bnRpbWUuc2VuZE1lc3NhZ2Uoe3R5cGU6IFwibG9naW5cIn0sIChyZXNwb25zZSkgPT4ge1xuICAgIC8vICAgY29uc29sZS5sb2coJ3Jlc3BvbnNlJywgcmVzcG9uc2UpO1xuICAgIC8vIH0pO1xuICAgIGxldCBjb250ZXh0ID0gdGhpcy5nZXRDb250ZXh0KCk7XG4gICAgbGV0IGVtYWlsID0gJCgnaW5wdXRbbmFtZT1cImVtYWlsXCJdJykudmFsKCkgfHwgY29udGV4dC5lbWFpbDtcbiAgICBsZXQgcGFzc3dvcmQgPSAkKCdpbnB1dFtuYW1lPVwicGFzc3dvcmRcIl0nKS52YWwoKTtcbiAgICBjb25zb2xlLmxvZyhlbWFpbCwgcGFzc3dvcmQpO1xuICAgIGxldCBzdWNjZXNzZnVsID0gdGhpcy5iYWNrZ3JvdW5kLm1vZGVyYXRvci5sb2NrKGVtYWlsLCBwYXNzd29yZCk7XG4gICAgY29uc29sZS5sb2coJ3N1Y2Nlc3NmdWwnLCBzdWNjZXNzZnVsKTtcbiAgICB0aGlzLnJlZnJlc2goKTtcbiAgfVxuXG4gIGxvZ291dCgpIHtcbiAgICBjb25zb2xlLmxvZygnbG9nb3V0IScpO1xuICAgIGxldCBzdWNjZXNzZnVsID0gdGhpcy5iYWNrZ3JvdW5kLm1vZGVyYXRvci5sb2dvdXQoKTtcbiAgICBjb25zb2xlLmxvZygnc3VjY2Vzc2Z1bCcsIHN1Y2Nlc3NmdWwpO1xuICAgIHRoaXMucmVmcmVzaCgpO1xuICB9XG5cbiAgdW5sb2NrKCkge1xuICAgIGNvbnNvbGUubG9nKCdVbmxvY2shJyk7XG4gICAgLy8gY2hyb21lLnJ1bnRpbWUuc2VuZE1lc3NhZ2Uoe3R5cGU6IFwibG9naW5cIn0sIChyZXNwb25zZSkgPT4ge1xuICAgIC8vICAgY29uc29sZS5sb2coJ3Jlc3BvbnNlJywgcmVzcG9uc2UpO1xuICAgIC8vIH0pO1xuICAgIGxldCBjb250ZXh0ID0gdGhpcy5nZXRDb250ZXh0KCk7XG4gICAgbGV0IGVtYWlsID0gJCgnaW5wdXRbbmFtZT1cImVtYWlsXCJdJykudmFsKCkgfHwgY29udGV4dC5lbWFpbDtcbiAgICBsZXQgcGFzc3dvcmQgPSAkKCdpbnB1dFtuYW1lPVwicGFzc3dvcmRcIl0nKS52YWwoKTsgLy8gfHwgcHJvbXB0KCdQbGVhc2UgY29uZmlybSB0aGF0IHlvdSB3YW50IHRvIHVubG9jayBDaHJvbWUgYnkgZW50ZXJpbmcgeW91ciBwYXNzd29yZCcpO1xuICAgIGNvbnNvbGUubG9nKGVtYWlsLCBwYXNzd29yZCk7XG4gICAgaWYgKGVtYWlsICYmIHBhc3N3b3JkKSB7XG4gICAgICBsZXQgc3VjY2Vzc2Z1bCA9IHRoaXMuYmFja2dyb3VuZC5tb2RlcmF0b3IudW5sb2NrKGVtYWlsLCBwYXNzd29yZCk7XG4gICAgICBjb25zb2xlLmxvZygnc3VjY2Vzc2Z1bCcsIHN1Y2Nlc3NmdWwpO1xuICAgICAgdGhpcy5yZWZyZXNoKCk7XG4gICAgfVxuICB9XG5cbiAgYWRkVG9XaGl0ZWxpc3QoKSB7XG4gICAgY29uc29sZS5sb2coJ2FkZFRvV2hpdGVsaXN0Jyk7XG4gICAgbGV0IHRpdGxlID0gJCgnaW5wdXRbbmFtZT1cImVudHJ5LXRpdGxlXCJdJykudmFsKCk7XG4gICAgbGV0IHVybCA9ICQoJ2lucHV0W25hbWU9XCJlbnRyeS11cmxcIl0nKS52YWwoKTtcbiAgICBsZXQgc3VjY2Vzc2Z1bCA9IHRoaXMuYmFja2dyb3VuZC5tb2RlcmF0b3IuYWRkVG9XaGl0ZWxpc3QodGl0bGUsIHVybCk7XG4gICAgaWYgKHN1Y2Nlc3NmdWwpIHRoaXMucmVmcmVzaCgpO1xuICB9XG5cbn07XG5cbi8qKlxuUmVhZHkgdXAhXG4qL1xuJChkb2N1bWVudCkucmVhZHkoKCkgPT4ge1xuICAvLyBjb25zb2xlLmxvZygnUmVhZHknKTtcbiAgbGV0IGJ1cm50ID0gd2luZG93LmJ1cm50ID0gbmV3IEJ1cm50KCk7XG5cbn0pOyJdfQ==</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

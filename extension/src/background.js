@@ -71,9 +71,7 @@ class Whitelist {
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     // Remove entry
-    _.remove(whitelist, (entry) => {
-      return Whitelist.testURLs(url, entry.url);
-    });
+    _.remove(whitelist, (entry)=> { return url.match(entry.url) });
 
     // Save new whitelist
     this.set(whitelist);

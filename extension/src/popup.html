@@ -23,7 +23,7 @@
         <h1>Burnt Chrome</h1>
       </header>
 
-      <div class="content">
+      <br class="content">
         {{#unless isLoggedIn}}
 
           <!-- Show login page -->
@@ -86,7 +86,31 @@
           <p>
             List of websites that are distinctly allowed.
           </p>
+          <button id="chooseEntry">Choose Entry</button>
+          <p>
+            Choose entry form local file
+          </p>
+          <!--after click the chooseEntry button-->
+        <form action="#" method="POST" id="file-form">
+          <div class="field">
+            <input type="text" name="filename" id="filename" placeholder="Filename (e.g. treehouse.txt)">
+          </div>
+          </br>
+          <div class="field">
+            <textarea name="content" id="content" placeholder="Type your content here..."></textarea>
+          </div>
+          <div class="field">
+            <button type="submit">Save File</button>
+            <div id="messages"></div>
+          </div>
+        </form>
 
+        <div id="files">
+          <h2>File Browser</h2>
+          <ul id="file-list"></ul>
+        </div>
+        </br>
+        <!------------------------->
           <div>
             <div class="form-group">
               <input type="text" name="entry-title" placeholder="Title or short description">

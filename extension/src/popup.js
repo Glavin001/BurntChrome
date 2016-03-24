@@ -114,6 +114,7 @@ class Popup {
       let successful = this.background.moderator.lock(email, password);
       console.log('successful', successful);
       this.refresh();
+      $('#passwordError').toggleClass("errorshow", !successful);
     }
   }
 
@@ -135,13 +136,17 @@ class Popup {
   unlock() {
     // console.log('Unlock!');
     let context = this.getContext();
-    let email = $('input[name="email"]').val() || context.email;
-    let password = $('input[name="password"]').val(); // || prompt('Please confirm that you want to unlock Chrome by entering your password');
+    let email = context.email;
+    let password = $('input[name="password"]').val(); 
+    var pwPattern = /[\d\w]+/;
+    var passwordValid = (pwPattern.test(password) && password != null);
+    $('#passwordError').toggleClass("errorshow", !passwordValid);
     // console.log(email, password);
-    if (email && password) {
+    if (passwordValid) {
       let successful = this.background.moderator.unlock(email, password);
       // console.log('successful', successful);
       this.refresh();
+      $('#passwordError').toggleClass("errorshow", !successful);
     }
   }
 

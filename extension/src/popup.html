@@ -34,12 +34,12 @@
                 Locked with email: {{email}}
               {{else}}
                 <input type="text" name="email" placeholder="Email" value="{{email}}">
-                <span id="emailError" class="errorhide">A valid username is required.</span>	
+                <span id="emailError" class="errorhide">Invalid email!</span>	
               {{/if}}
             </div>
             <div class="form-group">
               <input type="password" name="password" placeholder="Password">
-              <span id="passwordError" class="errorhide">A valid password is required.</span>
+              <span id="passwordError" class="errorhide">Invalid password!</span>
             </div>
 
             <div class="form-group">
@@ -64,7 +64,7 @@
               <!-- Locked -->
               for
               <em>{{email}}</em>
-              <button id="unlock">Unlock</button>
+              <!-- <button id="unlock">Unlock</button> -->
               <button id="logout">Logout</button>
           </h2>
           <p>
@@ -82,7 +82,7 @@
           <ul class="highlightable editable">
             {{#each whitelist as |website key|}}
               <li>
-                <a href={{website.url}} target="_blank">
+                <a href=#>
                   <dl>
                     <dt>{{website.title}}</dt>
                     <dd>{{website.url}}</dd>

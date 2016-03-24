@@ -101,21 +101,14 @@ class Popup {
     let context = this.getContext();
     let email = $('input[name="email"]').val() || context.email;
     let password = $('input[name="password"]').val();
+
     var passwordPattern = /[\d\w]+/;
-    var emailValid = (pattern.test(email) && email != null);
-    var passwordValid = (pattern.test(password) && password != null);
-    if (emailValid) { 
-      $('#emailError').removeClass("error_show").addClass("error");
-    }
-    else {
-      $('#emailError').removeClass("error").addClass("error_show");
-    }
-    if (passwordValid) {
-      $('#passwordError').removeClass("error_show").addClass("error");
-    }
-    else {
-      $('#passwordError').removeClass("error").addClass("error_show");
-    }
+    var emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    var emailValid = (emailPattern.test(email) && email != null);
+    var passwordValid = (passwordPattern.test(password) && password != null);
+    $('#emailError').toggleClass("errorshow", !emailValid);
+    $('#passwordError').toggleClass("errorshow", !passwordValid);
+
     if (emailValid && passwordValid) { 
       console.log(email, password);
       let successful = this.background.moderator.lock(email, password);

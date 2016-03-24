@@ -20,13 +20,14 @@ header {
 
 }
 
-.error{
+.errorhide{
 	display: none;
 	margin-left: 10px;
 }		
 
-.error_show{
-	color: red;
+.errorshow{
+	display: inline;
+    color: red;
 	margin-left: 10px;
     position: absolute;
 }

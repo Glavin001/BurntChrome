@@ -80,9 +80,9 @@
               <!-- Locked -->
               for
               <em>{{email}}</em>
-              <!-- <button id="unlock">Unlock</button> -->
+              <button id="unlock">Unlock</button>
+              <button id="logout">Logout</button>
           </h2>
-          <button id="logout">Logout</button>
           <p>
             List of websites that are distinctly allowed.
           </p>
@@ -98,14 +98,13 @@
           <ul class="highlightable editable">
             {{#each whitelist as |website key|}}
               <li>
-                <a href="{{website.url}}" target="_blank">
+                <a href={{website.url}} target="_blank">
                   <dl>
                     <dt>{{website.title}}</dt>
                     <dd>{{website.url}}</dd>
                   </dl>
                 </a>
-                <!-- <a class="action">Edit</a> -->
-                <a href="#" class="delete">Delete</a>
+                <div id={{website.url}} class="delete">Delete</div>
               </li>
             {{/each}}
           </ul>

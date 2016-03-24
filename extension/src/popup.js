@@ -81,6 +81,7 @@ class Popup {
     $('#logout').click(() => this.logout());
     $('#unlock').click(() => this.unlock());
     $('#add-to-whitelist').click(() => this.addToWhitelist());
+    $('.delete').click(() => this.removeFromWhitelist(event.target.id));
   }
 
   /**
@@ -146,6 +147,10 @@ class Popup {
     if (successful) this.refresh();
   }
 
+  removeFromWhitelist(url) {
+    let successful = this.background.moderator.removeFromWhitelist(url);
+    if (successful) this.refresh();
+  }
 };
 
 /**

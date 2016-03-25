@@ -137,8 +137,8 @@ class Popup {
     // console.log('Unlock!');
     let context = this.getContext();
     let email = context.email;
-
     let password = $('input[name="password"]').val(); 
+    
     let pwPattern = /[\w]+/;
     let passwordValid = (pwPattern.test(password) && password !== null);
     $('#passwordError').toggleClass("errorshow", !passwordValid);

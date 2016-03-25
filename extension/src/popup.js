@@ -102,10 +102,10 @@ class Popup {
     let email = $('input[name="email"]').val() || context.email;
     let password = $('input[name="password"]').val();
 
-    var passwordPattern = /[\d\w]+/;
-    var emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-    var emailValid = (emailPattern.test(email) && email != null);
-    var passwordValid = (passwordPattern.test(password) && password != null);
+    let pwPattern = /[\w]/;
+    let emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    let emailValid = (emailPattern.test(email) && email != null);
+    let passwordValid = (pwPattern.test(password) && password != null);
     $('#emailError').toggleClass("errorshow", !emailValid);
     $('#passwordError').toggleClass("errorshow", !passwordValid);
 
@@ -137,14 +137,14 @@ class Popup {
     // console.log('Unlock!');
     let context = this.getContext();
     let email = context.email;
+
     let password = $('input[name="password"]').val(); 
-    var pwPattern = /[\d\w]+/;
-    var passwordValid = (pwPattern.test(password) && password != null);
+    let pwPattern = /[\w]+/;
+    let passwordValid = (pwPattern.test(password) && password !== null);
     $('#passwordError').toggleClass("errorshow", !passwordValid);
     // console.log(email, password);
     if (passwordValid) {
       let successful = this.background.moderator.unlock(email, password);
-      // console.log('successful', successful);
       this.refresh();
       $('#passwordError').toggleClass("errorshow", !successful);
     }
@@ -158,8 +158,12 @@ class Popup {
     // console.log('addToWhitelist');
     let title = $('input[name="entry-title"]').val();
     let url = $('input[name="entry-url"]').val();
-    let successful = this.background.moderator.addToWhitelist(title, url);
-    if (successful) this.refresh();
+    let validEntry = (title != "" && url != "");
+    $('#entryError').toggleClass("errorshow", !validEntry);
+    if (validEntry) {
+      let successful = this.background.moderator.addToWhitelist(title, url);
+      if (successful) this.refresh();
+    }
   }
 
   removeFromWhitelist(url) {

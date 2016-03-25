@@ -20,14 +20,15 @@ header {
 
 }
 
-.errorhide{
-	display: none;
-	margin-left: 10px;
+.errorhide {
+  display: none;
+  margin-left: 10px;
 }		
 
-.errorshow{
-	display: inline;
-    color: red;
-	margin-left: 10px;
-    position: absolute;
+.errorshow {
+  display: inline;
+  color: red;
+  font-weight: bold;
+  margin-left: 10px;
+  position: absolute;
 }

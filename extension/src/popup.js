@@ -138,11 +138,7 @@ class Popup {
     let context = this.getContext();
     let email = context.email;
     let password = $('input[name="password"]').val(); 
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 922eedf289e7586e0d90c199677ea2ebcdbd3a74
     let pwPattern = /[\w]+/;
     let passwordValid = (pwPattern.test(password) && password !== null);
     $('#passwordError').toggleClass("errorshow", !passwordValid);

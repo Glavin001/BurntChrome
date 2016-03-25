@@ -369,7 +369,7 @@ class Moderator {
   */
   getPassword() {
     var password = localStorage['admin:password'];
-    var decrypted = CryptoJS.AES.decrypt(password, "Banana Bread");
+    var decrypted = CryptoJS.AES.decrypt(password, "0RIOdFYHv0");
     password = decrypted.toString(CryptoJS.enc.Utf8) 
     return password;
   }
@@ -383,7 +383,7 @@ class Moderator {
     if (password === null) {
       delete localStorage['admin:password'];
     } else {
-      var encrypted = CryptoJS.AES.encrypt(password, "Banana Bread");
+      var encrypted = CryptoJS.AES.encrypt(password, "0RIOdFYHv0");
       localStorage['admin:password'] = encrypted;
       //localStorage['admin:password'] = password;
     }

@@ -307,6 +307,7 @@ class Moderator {
       // Logged in now
       this.setEmail(null);
       this.setPassword(null);
+      this.whitelist = null;
       return this.logout();
     } else {
       // Could not login to unlock
@@ -336,7 +337,6 @@ class Moderator {
   */
   logout() {
     this.loggedIn = false;
-    this.whitelist = null;
     return true;
   }
 

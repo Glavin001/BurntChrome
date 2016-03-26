@@ -102,7 +102,7 @@ class Popup {
     let email = $('input[name="email"]').val() || context.email;
     let password = $('input[name="password"]').val();
 
-    let pwPattern = /[\w]/;
+    let pwPattern = /[\w]+/;
     let emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     let emailValid = (emailPattern.test(email) && email != null);
     let passwordValid = (pwPattern.test(password) && password != null);

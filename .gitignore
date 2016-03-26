@@ -4,3 +4,4 @@ extension/dist/*
 !extension/dist/README.md
 *.pem
 *.crx
+*.swp

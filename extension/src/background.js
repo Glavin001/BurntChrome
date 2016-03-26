@@ -72,7 +72,6 @@ class Whitelist {
     // Find entry with matching URL in whitelist
     // Remove entry
     _.remove(whitelist, (entry) => { return url.match(entry.url) });
-
     // Save new whitelist
     this.set(whitelist);
     return whitelist;
@@ -369,7 +368,10 @@ class Moderator {
   @return {string} Admin password.
   */
   getPassword() {
-    return localStorage['admin:password'];
+    var password = localStorage['admin:password'];
+    var decrypted = CryptoJS.AES.decrypt(password, "0RIOdFYHv0");
+    password = decrypted.toString(CryptoJS.enc.Utf8) 
+    return password;
   }
   /**
   @desc Set administrator's password.
@@ -381,7 +383,9 @@ class Moderator {
     if (password === null) {
       delete localStorage['admin:password'];
     } else {
-      localStorage['admin:password'] = password;
+      var encrypted = CryptoJS.AES.encrypt(password, "0RIOdFYHv0");
+      localStorage['admin:password'] = encrypted;
+      //localStorage['admin:password'] = password;
     }
   }
 

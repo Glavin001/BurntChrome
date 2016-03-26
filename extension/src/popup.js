@@ -101,10 +101,21 @@ class Popup {
     let context = this.getContext();
     let email = $('input[name="email"]').val() || context.email;
     let password = $('input[name="password"]').val();
-    // console.log(email, password);
-    let successful = this.background.moderator.lock(email, password);
-    console.log('successful', successful);
-    this.refresh();
+
+    let pwPattern = /[\w]/;
+    let emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    let emailValid = (emailPattern.test(email) && email != null);
+    let passwordValid = (pwPattern.test(password) && password != null);
+    $('#emailError').toggleClass("errorshow", !emailValid);
+    $('#passwordError').toggleClass("errorshow", !passwordValid);
+
+    if (emailValid && passwordValid) { 
+      console.log(email, password);
+      let successful = this.background.moderator.lock(email, password);
+      console.log('successful', successful);
+      this.refresh();
+      $('#passwordError').toggleClass("errorshow", !successful);
+    }
   }
 
   /**
@@ -125,13 +136,17 @@ class Popup {
   unlock() {
     // console.log('Unlock!');
     let context = this.getContext();
-    let email = $('input[name="email"]').val() || context.email;
-    let password = $('input[name="password"]').val(); // || prompt('Please confirm that you want to unlock Chrome by entering your password');
+    let email = context.email;
+    let password = $('input[name="password"]').val(); 
+
+    let pwPattern = /[\w]+/;
+    let passwordValid = (pwPattern.test(password) && password !== null);
+    $('#passwordError').toggleClass("errorshow", !passwordValid);
     // console.log(email, password);
-    if (email && password) {
+    if (passwordValid) {
       let successful = this.background.moderator.unlock(email, password);
-      // console.log('successful', successful);
       this.refresh();
+      $('#passwordError').toggleClass("errorshow", !successful);
     }
   }
 
@@ -143,8 +158,12 @@ class Popup {
     // console.log('addToWhitelist');
     let title = $('input[name="entry-title"]').val();
     let url = $('input[name="entry-url"]').val();
-    let successful = this.background.moderator.addToWhitelist(title, url);
-    if (successful) this.refresh();
+    let validEntry = (title != "" && url != "");
+    $('#entryError').toggleClass("errorshow", !validEntry);
+    if (validEntry) {
+      let successful = this.background.moderator.addToWhitelist(title, url);
+      if (successful) this.refresh();
+    }
   }
 
   removeFromWhitelist(url) {

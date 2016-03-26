@@ -3,7 +3,7 @@
 <meta charset="utf-8" />
 
 <head>
-  <title>Chrome Bootstrap</title>
+  <title>Burnt Chrome</title>
 
   <script type="text/javascript" src="../dist/deps-content.js"></script>
   <script type="text/javascript" src="../dist/popup.js"></script>
@@ -34,20 +34,13 @@
                 Locked with email: {{email}}
               {{else}}
                 <input type="text" name="email" placeholder="Email" value="{{email}}">
+                <span id="emailError" class="errorhide">Invalid email!</span>	
               {{/if}}
             </div>
             <div class="form-group">
               <input type="password" name="password" placeholder="Password">
+              <span id="passwordError" class="errorhide">Invalid password!</span>
             </div>
-
-            <!--
-            <div class="form-group">
-              <label>
-                <input type="checkbox">
-                <span>Save password for next time</span>
-              </label>
-            </div>
-            -->
 
             <div class="form-group">
               <button id="lock">
@@ -62,15 +55,6 @@
                 <button id="unlock">Unlock</button>
               </div>
             {{/if}}
-            <!--
-                <div class="form-group">
-                  <button>Create a new account</button>
-                </div>
-                <div class="form-group">
-                  <a href="#">Forgot password?</a>
-                </div>
-              -->
-
           </div>
 
         {{else}}
@@ -80,7 +64,7 @@
               <!-- Locked -->
               for
               <em>{{email}}</em>
-              <button id="unlock">Unlock</button>
+              <!-- <button id="unlock">Unlock</button> -->
               <button id="logout">Logout</button>
           </h2>
           <p>
@@ -92,13 +76,14 @@
               <input type="text" name="entry-title" placeholder="Title or short description">
               <input type="text" name="entry-url" placeholder="URL">
               <button id="add-to-whitelist">Add to Whitelist</button>
+              <span id="entryError" class="errorhide">Please Enter A Title & URL!</span>
             </div>
           </div>
 
           <ul class="highlightable editable">
             {{#each whitelist as |website key|}}
               <li>
-                <a href={{website.url}} target="_blank">
+                <a href=#>
                   <dl>
                     <dt>{{website.title}}</dt>
                     <dd>{{website.url}}</dd>

@@ -71,7 +71,7 @@ class Whitelist {
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     // Remove entry
-    _.remove(whitelist, (entry) => { return url.match(entry.url) });
+    _.remove(whitelist, (entry) => { return url === entry.url });
     // Save new whitelist
     this.set(whitelist);
     return whitelist;
@@ -127,11 +127,16 @@ class Whitelist {
   @return {boolean} If URL `a` matches URL `b`
   @private
   @example
-  testURLs('https://google.com','google.com'); // True
-  testURLs('https://google.com','google.ca'); // False
+  testURLs('https://google.com','*://google.com/**'); // True
+  testURLs('https://google.com','*://google.ca/**'); // False
   */
   static testURLs(a, b) {
-    return (a.indexOf(b) !== -1) || (new RegExp(a)).test(b);
+    // Ensure that a URL ends with "/" such that "/**" matches
+    // Check to make sure there is a path
+    if (a.split('?').length === 1 && a[a.length-1] !== '/') {
+      a += '/';
+    }
+    return minimatch(a, b);
   }
 
   /**

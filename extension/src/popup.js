@@ -82,6 +82,9 @@ class Popup {
     $('#unlock').click(() => this.unlock());
     $('#add-to-whitelist').click(() => this.addToWhitelist());
     $('.delete').click(() => this.removeFromWhitelist(event.target.id));
+    $('#loginIntro').click(() => this.loginIntro());
+    $('#listIntro').click(() => this.listIntro());
+    $('#lockedIntro').click(() => introJs().start());
   }
 
   /**
@@ -170,8 +173,71 @@ class Popup {
     let successful = this.background.moderator.removeFromWhitelist(url);
     if (successful) this.refresh();
   }
-};
 
+  loginIntro() {
+    let intro = introJs();
+    intro.setOptions({
+    steps: [
+      { 
+        intro: 'Welcome to Burnt Chrome!<br>If this is your first time \
+        using Burnt Chrome, use these steps to get started!'                 
+      },
+      { 
+        element: document.querySelector('input[name="email"]'),
+        intro: 'First lets create your account. Please enter a valid \
+        email address.',
+        position: 'right'
+      },
+      {
+        element: document.querySelector('input[name="password"]'),
+        intro: 'Next, choose the password you would like to use.',
+        position: 'right'
+      },
+      {
+        element: document.querySelector('#lock'),
+        intro: 'Click \"login and lock\" to login and setup your whitelist!',
+        position: 'left'
+      }
+           ]
+    });
+    intro.start();
+  }
+
+  listIntro() {
+    let intro = introJs();
+    intro.setOptions({
+    steps: [
+      { 
+        intro: 'Welcome to your whitelist!<br>Only websites on your list will be available \
+          while your browser is locked with Burnt Chrome. Lets get started by adding some entries.'                 
+      },
+      { 
+        element: document.querySelector('input[name="entry-title"]'),
+        intro: 'First give your entry a title or short description.',
+        position: 'right'
+      },
+      {
+        element: document.querySelector('input[name="entry-url"]'),
+        intro: 'Next, enter the URL you wish to permit.',
+        position: 'right'
+      },
+      {
+        element: document.querySelector('#add-to-whitelist'),
+        intro: 'Click here to add your entry to the whitelist.',
+        position: 'right'
+      },
+      {
+        element: document.querySelector('#logout'),
+        intro: 'When finished logout. Browsing will remain locked \
+          to your whitelist until you choose to unlock it.',
+        position: 'right'
+      }
+           ]
+    });
+    intro.start();
+  }
+  
+};
 /**
 Ready up!
 

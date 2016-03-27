@@ -29,7 +29,7 @@
           <!-- Show login page -->
           <div class="login">
 
-            <div class="form-group">
+            <div class="form-group" data-step="1" data-intro="Browsing is currently limited to the whitelist created by this email.">
               {{#if isLocked}}
                 Locked with email: {{email}}
               {{else}}
@@ -38,12 +38,12 @@
               {{/if}}
             </div>
             <div class="form-group">
-              <input type="password" name="password" placeholder="Password">
+              <input type="password" name="password" placeholder="Password"> 
               <span id="passwordError" class="errorhide">Invalid password!</span>
             </div>
 
             <div class="form-group">
-              <button id="lock">
+              <button id="lock" data-id="2" data-intro="You may login to edit your whitelist." data-position="right">
                 Login
                 {{#if isUnlocked}}
                   &amp; Lock
@@ -52,9 +52,18 @@
             </div>
             {{#if isLocked}}
               <div class="form-group">
-                <button id="unlock">Unlock</button>
+                <button id="unlock" data-id="3" data-intro="Or unlock to restore normal browsing." data-position="right">Unlock</button>
               </div>
             {{/if}}
+
+            <div class="help">
+              {{#if isLocked}}
+                <button id="lockedIntro">Help</button>
+              {{else}}
+              <button id="loginIntro">Help</button>
+              {{/if}}
+            </div>
+
           </div>
 
         {{else}}
@@ -93,9 +102,10 @@
               </li>
             {{/each}}
           </ul>
-
+        <div class="help">
+          <button id="listIntro">Help</button>
+        </div>
         {{/unless}}
-
       </div>
     </div>
 

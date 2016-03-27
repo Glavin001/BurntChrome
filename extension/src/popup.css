@@ -1,5 +1,4 @@
 body {
-
 }
 
 .frame {
@@ -17,7 +16,6 @@ header {
 }
 
 .login {
-
 }
 
 .errorhide {
@@ -31,4 +29,11 @@ header {
   font-weight: bold;
   margin-left: 10px;
   position: absolute;
+}
+
+.help {
+  text-align: right;
+  position: fixed;
+  bottom: 0;
+  right: 0;
 }

@@ -90,6 +90,14 @@ class Popup {
     $('#loginIntro').click(() => this.loginIntro());
     $('#listIntro').click(() => this.listIntro());
     $('#lockedIntro').click(() => introJs().start());
+    $('#export-whitelist').click(() => {
+      let whitelistJSON = JSON.stringify(this.background.moderator.getWhitelistJSON());
+      let email = this.background.moderator.getEmail();
+      let fileName = `Whitelist for ${email}.json`;
+      this.downloadData(fileName, whitelistJSON, "application/json");
+    });
+
+    // Clickng a whitelist entry fill in entry fields above
     $('.whitelist-entry').click((event) => {
       event.preventDefault();
       // console.log('whitelist-entry click', event, this);
@@ -269,6 +277,35 @@ class Popup {
       }]
     });
     intro.start();
+  }
+
+  downloadData(name, data, type) {
+      // Browser support
+      window.URL = window.URL || window.webkitURL;
+      // Arg defaults
+      type = type || "text/plain";
+      name = name || "download";
+      data = data || "";
+      // Create Blob
+      let blob;
+      if (data instanceof Blob) {
+          blob = data;
+      } else {
+          blob = new Blob([data], {type: type});
+      }
+      let url = window.URL.createObjectURL(blob)
+      // Create link
+      let link = document.createElement("a")
+      link.download = name
+      link.href = url
+      // Download!
+      // See http://stackoverflow.com/a/25047811/2578205 for more details
+      let event = document.createEvent("MouseEvents")
+      event.initMouseEvent(
+              "click", true, false, window, 0, 0, 0, 0, 0
+              , false, false, false, false, 0, null
+      )
+      link.dispatchEvent(event)
   }
 
 };

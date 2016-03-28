@@ -261,6 +261,7 @@ class Popup {
     if (passwordValid) {
       let successful = this.background.moderator.unlock(email, password);
       this.refresh();
+      introJs().exit();
       $('#passwordError').toggleClass("errorshow", !successful);
     }
   }

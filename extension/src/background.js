@@ -8,6 +8,11 @@
 @typedef {Array<whitelist_entry>} whitelist A whitelist array
 */
 
+if (!!require) {
+  var _ = require('../../bower_components/lodash/dist/lodash');
+  var minimatch = require('../../bower_components/minimatch/minimatch');
+}
+
 /**
 @desc Whitelist component
 */
@@ -497,4 +502,16 @@ Start the background script
 
 @ignore
 */
-let moderator = window.moderator = new Moderator();
+if (typeof window !== 'undefined') {
+  let moderator = window.moderator = new Moderator();
+}
+
+/*
+Exporting for Node.js
+*/
+if (typeof module !== 'undefined') {
+  module.exports = {
+    Whitelist: Whitelist,
+    Moderator: Moderator
+  };
+}

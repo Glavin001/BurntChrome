@@ -4,7 +4,7 @@
   "description": "Software Engineering class project",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register",
+    "test": "mocha --compilers js:babel-core/register --reporter spec",
     "docs": "./node_modules/.bin/esdoc -c esdoc.json",
     "report": "plato -d report -x deps-* extension/dist/*.js",
     "postinstall": "./node_modules/.bin/npm-run-all bower:install",
@@ -21,7 +21,7 @@
     "watch": "./node_modules/.bin/babel extension/src --watch --out-dir extension/dist --source-maps inline",
     "start": "./node_modules/.bin/npm-run-all compile watch",
     "pack": "./node_modules/.bin/crx pack ./extension -o burnt_chrome.crx -p ./key.pem --zip-output burnt_chrome.crx.zip",
-    "zip": "zip -r burnt_chrome.zip extension",
+    "zip": "zip -r burnt_chrome.zip extension"
   },
   "repository": {
     "type": "git",

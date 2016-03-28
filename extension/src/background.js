@@ -153,7 +153,7 @@ class Whitelist {
   static testURLs(a, b) {
     // Ensure that a URL ends with "/" such that "/**" matches
     // Check to make sure there is a path
-    if (a.split('?').length === 1 && a[a.length - 1] !== '/') {
+    if (_.endsWith(b, '/**') && a.split('?').length === 1 && a[a.length - 1] !== '/') {
       a += '/';
     }
     return minimatch(a, b);

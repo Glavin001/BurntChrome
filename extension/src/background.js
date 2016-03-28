@@ -374,10 +374,7 @@ class Moderator {
   @private
   @return {string} Admin password.
   */
-  getPassword() {
-    //var password = localStorage['admin:password'];
-    //var decrypted = CryptoJS.AES.decrypt(password, "0RIOdFYHv0");
-    //password = decrypted.toString(CryptoJS.enc.Utf8) 
+  getPassword() { 
     return localStorage['admin:password'];
   }
   /**
@@ -392,9 +389,6 @@ class Moderator {
     } else {
       var hash = CryptoJS.SHA256(password);
       localStorage['admin:password'] = hash.toString(CryptoJS.enc.Base64);
-      //var encrypted = CryptoJS.AES.encrypt(password, "0RIOdFYHv0");
-      //localStorage['admin:password'] = encrypted;
-      //localStorage['admin:password'] = password;
     }
   }
 
@@ -448,7 +442,6 @@ class Moderator {
       return false;
     }
   }
-
 
 }
 

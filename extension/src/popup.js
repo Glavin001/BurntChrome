@@ -105,10 +105,9 @@ class Popup {
     let email = $('input[name="email"]').val() || context.email;
     let password = $('input[name="password"]').val();
 
-    let pwPattern = /[\w]+/;
     let emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-    let emailValid = (emailPattern.test(email) && email != null);
-    let passwordValid = (pwPattern.test(password) && password != null);
+    let emailValid = (emailPattern.test(email) && email !== null);
+    let passwordValid = (password !== "" && password !== null);
     $('#emailError').toggleClass("errorshow", !emailValid);
     $('#passwordError').toggleClass("errorshow", !passwordValid);
 
@@ -117,6 +116,7 @@ class Popup {
       let successful = this.background.moderator.lock(email, password);
       console.log('successful', successful);
       this.refresh();
+      introJs().exit();
       $('#passwordError').toggleClass("errorshow", !successful);
     }
   }
@@ -130,6 +130,7 @@ class Popup {
     let successful = this.background.moderator.logout();
     // console.log('successful', successful);
     this.refresh();
+    introJs().exit();
   }
 
   /**
@@ -142,8 +143,7 @@ class Popup {
     let email = context.email;
     let password = $('input[name="password"]').val(); 
 
-    let pwPattern = /[\w]+/;
-    let passwordValid = (pwPattern.test(password) && password !== null);
+    let passwordValid = (password !== "" && password !== null);
     $('#passwordError').toggleClass("errorshow", !passwordValid);
     // console.log(email, password);
     if (passwordValid) {
@@ -161,7 +161,7 @@ class Popup {
     // console.log('addToWhitelist');
     let title = $('input[name="entry-title"]').val();
     let url = $('input[name="entry-url"]').val();
-    let validEntry = (title != "" && url != "");
+    let validEntry = (title !== "" && url !== "");
     $('#entryError').toggleClass("errorshow", !validEntry);
     if (validEntry) {
       let successful = this.background.moderator.addToWhitelist(title, url);

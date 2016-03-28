@@ -106,7 +106,7 @@ class Popup {
     // On refresh, we sync the last state of the input field
     // back into the input field.
     const attr = "name"
-    // We store state in formData property
+      // We store state in formData property
     const formData = this.formData;
     // Iterate over all Input fields that should be syncing their value
     $(`input[${attr}]`).each((idx, el) => {
@@ -121,11 +121,11 @@ class Popup {
       // Handle changing input value
       // and storing state
       let changeHandler = (event) => {
-        let text = $(event.currentTarget).val();
-        // console.log(key, text);
-        _.set(formData, key, text);
-      }
-      // Bind events to listen for changes to input field
+          let text = $(event.currentTarget).val();
+          // console.log(key, text);
+          _.set(formData, key, text);
+        }
+        // Bind events to listen for changes to input field
       $el.change(changeHandler);
       $el.keyup(changeHandler);
     });
@@ -156,7 +156,7 @@ class Popup {
     $('#emailError').toggleClass("errorshow", !emailValid);
     $('#passwordError').toggleClass("errorshow", !passwordValid);
 
-    if (emailValid && passwordValid) { 
+    if (emailValid && passwordValid) {
       console.log(email, password);
       let successful = this.background.moderator.lock(email, password);
       console.log('successful', successful);
@@ -186,7 +186,7 @@ class Popup {
     // console.log('Unlock!');
     let context = this.getContext();
     let email = context.email;
-    let password = $('input[name="password"]').val(); 
+    let password = $('input[name="password"]').val();
 
     let passwordValid = (password !== "" && password !== null);
     $('#passwordError').toggleClass("errorshow", !passwordValid);
@@ -222,28 +222,23 @@ class Popup {
   loginIntro() {
     let intro = introJs();
     intro.setOptions({
-    steps: [
-      { 
+      steps: [{
         intro: 'Welcome to Burnt Chrome!<br>If this is your first time \
-        using Burnt Chrome, use these steps to get started!'                 
-      },
-      { 
+        using Burnt Chrome, use these steps to get started!'
+      }, {
         element: document.querySelector('input[name="email"]'),
         intro: 'First lets create your account. Please enter a valid \
         email address.',
         position: 'right'
-      },
-      {
+      }, {
         element: document.querySelector('input[name="password"]'),
         intro: 'Next, choose the password you would like to use.',
         position: 'right'
-      },
-      {
+      }, {
         element: document.querySelector('#lock'),
         intro: 'Click \"login and lock\" to login and setup your whitelist!',
         position: 'left'
-      }
-           ]
+      }]
     });
     intro.start();
   }
@@ -251,37 +246,31 @@ class Popup {
   listIntro() {
     let intro = introJs();
     intro.setOptions({
-    steps: [
-      { 
+      steps: [{
         intro: 'Welcome to your whitelist!<br>Only websites on your list will be available \
-          while your browser is locked with Burnt Chrome. Lets get started by adding some entries.'                 
-      },
-      { 
+          while your browser is locked with Burnt Chrome. Lets get started by adding some entries.'
+      }, {
         element: document.querySelector('input[name="entry-title"]'),
         intro: 'First give your entry a title or short description.',
         position: 'right'
-      },
-      {
+      }, {
         element: document.querySelector('input[name="entry-url"]'),
         intro: 'Next, enter the URL you wish to permit.',
         position: 'right'
-      },
-      {
+      }, {
         element: document.querySelector('#add-to-whitelist'),
         intro: 'Click here to add your entry to the whitelist.',
         position: 'right'
-      },
-      {
+      }, {
         element: document.querySelector('#logout'),
         intro: 'When finished logout. Browsing will remain locked \
           to your whitelist until you choose to unlock it.',
         position: 'right'
-      }
-           ]
+      }]
     });
     intro.start();
   }
-  
+
 };
 /**
 Ready up!

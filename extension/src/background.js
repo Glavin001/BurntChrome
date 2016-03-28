@@ -39,7 +39,9 @@ class Whitelist {
     let whitelist = this.get();
 
     // Check that URL is not already in whitelist
-    if (_.findIndex(whitelist, (entry) => { return entry.url === url; }) !== -1) {
+    if (_.findIndex(whitelist, (entry) => {
+        return entry.url === url;
+      }) !== -1) {
       // Must already be in whitelist
       // Throw an error!
       throw new Error(`URL '${url}' is already in whitelist`);
@@ -71,7 +73,9 @@ class Whitelist {
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     // Remove entry
-    _.remove(whitelist, (entry) => { return url === entry.url });
+    _.remove(whitelist, (entry) => {
+      return url === entry.url
+    });
     // Save new whitelist
     this.set(whitelist);
     return whitelist;
@@ -138,7 +142,7 @@ class Whitelist {
   static testURLs(a, b) {
     // Ensure that a URL ends with "/" such that "/**" matches
     // Check to make sure there is a path
-    if (a.split('?').length === 1 && a[a.length-1] !== '/') {
+    if (a.split('?').length === 1 && a[a.length - 1] !== '/') {
       a += '/';
     }
     return minimatch(a, b);
@@ -358,14 +362,14 @@ class Moderator {
   @return {string} Admin email.
   */
   getEmail() {
-    return localStorage['admin:email'];
-  }
-  /**
-  @desc Set administrator's email.
-  @private
-  @param {string} email - The new email.
-  @return {void} Void.
-  */
+      return localStorage['admin:email'];
+    }
+    /**
+    @desc Set administrator's email.
+    @private
+    @param {string} email - The new email.
+    @return {void} Void.
+    */
   setEmail(email) {
     if (email === null) {
       delete localStorage['admin:email'];
@@ -380,14 +384,14 @@ class Moderator {
   @return {string} Admin password.
   */
   getPassword() {
-    return localStorage['admin:password'];
-  }
-  /**
-  @desc Set administrator's password.
-  @private
-  @param {string} password - The new password.
-  @return {void} Void.
-  */
+      return localStorage['admin:password'];
+    }
+    /**
+    @desc Set administrator's password.
+    @private
+    @param {string} password - The new password.
+    @return {void} Void.
+    */
   setPassword(password) {
     if (password === null) {
       delete localStorage['admin:password'];

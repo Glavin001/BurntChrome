@@ -1,6 +1,3 @@
-body {
-}
-
 .frame {
   margin-left: 21px;
 }
@@ -10,19 +7,13 @@ header {
 .content .login {
   text-align: center;
 }
-
 .form-group {
   margin: 20px;
 }
-
-.login {
-}
-
 .errorhide {
   display: none;
   margin-left: 10px;
-}		
-
+}
 .errorshow {
   display: inline;
   color: red;
@@ -30,14 +21,12 @@ header {
   margin-left: 10px;
   position: absolute;
 }
-
 .help {
   text-align: right;
   position: fixed;
   bottom: 0;
   right: 0;
 }
-
 a {
   color: #333 !important;
 }

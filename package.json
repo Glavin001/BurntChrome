@@ -21,7 +21,9 @@
     "watch": "./node_modules/.bin/babel extension/src --watch --out-dir extension/dist --source-maps inline",
     "start": "./node_modules/.bin/npm-run-all compile watch",
     "pack": "./node_modules/.bin/crx pack -o burnt_chrome.crx ./extension",
-    "zip": "zip -r burnt_chrome.zip extension"
+    "zip": "zip -r burnt_chrome.zip extension",
+    "zip:pack": "zip burnt_chrome.crx.zip burnt_chrome.crx",
+    "dist": "./node_modules/.bin/npm-run-all pack zip:pack"
   },
   "repository": {
     "type": "git",

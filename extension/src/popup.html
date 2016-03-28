@@ -90,11 +90,16 @@
                   <span id="entryError" class="errorshow">{{errorMessage}}</span>
                 {{/if}}
                 <br>
-                <button id="export-whitelist">Export Whitelist</button>
-                <input type="file" id="import-whitelist-file">
-                <br>
-                <input type="text" id="import-whitelist-url" placeholder="Import whitelist from URL">
-                <button id="import-whitelist">Import Whitelist</button>
+                <details id="options">
+                  <summary>Advanced Options</summary>
+                  <br>
+                  <input type="text" id="import-whitelist-url" placeholder="Import whitelist from URL">
+                  <button id="import-whitelist">Import Whitelist</button> 
+                  <button id="export-whitelist">Export Whitelist File</button>
+                  <br>
+                  <span>Import Whitelist File:  </span>
+                  <input type="file" id="import-whitelist-file">
+                </details>
               </div>
             </div>
 

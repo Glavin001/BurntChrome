@@ -263,6 +263,7 @@ class Popup {
     if (context.isLoggedIn) {
       let successful = this.background.moderator.unlock(email, null);
       this.refresh();
+      introJs().exit();
       return;
     }
     let password = $('input[name="password"]').val();
@@ -273,6 +274,7 @@ class Popup {
     if (passwordValid) {
       let successful = this.background.moderator.unlock(email, password);
       this.refresh();
+      introJs().exit();
       $('#passwordError').toggleClass("errorshow", !successful);
     }
   }
@@ -367,31 +369,34 @@ class Popup {
         element: document.querySelector('#add-to-whitelist'),
         intro: 'Click here to add your entry to the whitelist.',
         position: 'right'
-      },
-      {
+      }, {
+        element: document.querySelector('#options'),
+        intro: 'Click here for more options.',
+        position: 'bottom'
+      }, {
         element: document.querySelector('#export-whitelist'),
         intro: 'Click here to export your current whitelist to a file.',
         position: 'right'
-      },
-      {
+      }, {
         element: document.querySelector('#import-whitelist-file'),
         intro: 'Click here to import a whitelist from a file.',
         position: 'right'
-      },
-      {
+      }, {
         element: document.querySelector('#import-whitelist-url'),
         intro: 'Enter a URL to read and import a remote whitelist from.',
         position: 'right'
-      },
-      {
+      }, {
         element: document.querySelector('#import-whitelist'),
         intro: 'Click here to start importing a remote whitelist from the URL you previously entered.',
         position: 'right'
-      },
-      {
+      }, {
         element: document.querySelector('#logout'),
         intro: 'When finished logout. Browsing will remain locked \
           to your whitelist until you choose to unlock it.',
+        position: 'right'
+      }, {
+        element: document.querySelector('#unlock'),
+        intro: 'Click here to logout and unlock your browser.',
         position: 'right'
       }]
     });

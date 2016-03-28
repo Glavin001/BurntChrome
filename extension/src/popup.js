@@ -172,11 +172,11 @@ class Popup {
     // So every change to input, we store the state
     // On refresh, we sync the last state of the input field
     // back into the input field.
-    const attr = "name"
+    const attr = "name";
       // We store state in formData property
     const formData = this.formData;
     // Iterate over all Input fields that should be syncing their value
-    $(`input[${attr}]`).each((idx, el) => {
+    $(`input[type="text"][${attr}]`).each((idx, el) => {
       let $el = $(el);
       // Get the key to sync with in the formData
       let key = $el.attr(attr);

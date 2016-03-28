@@ -20,8 +20,8 @@
     "compile": "./node_modules/.bin/npm-run-all compile:deps compile:src",
     "watch": "./node_modules/.bin/babel extension/src --watch --out-dir extension/dist --source-maps inline",
     "start": "./node_modules/.bin/npm-run-all compile watch",
-    "pack": "./node_modules/.bin/crx pack -o burnt_chrome.crx ./extension",
-    "zip": "zip -r burnt_chrome.zip extension"
+    "pack": "./node_modules/.bin/crx pack ./extension -o burnt_chrome.crx -p ./key.pem --zip-output burnt_chrome.crx.zip",
+    "zip": "zip -r burnt_chrome.zip extension",
   },
   "repository": {
     "type": "git",

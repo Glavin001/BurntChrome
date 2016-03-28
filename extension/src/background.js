@@ -35,6 +35,17 @@ class Whitelist {
   @public
   */
   addURL(title, url) {
+    // Trim whitespace from input
+    title = title.trim();
+    url = url.trim();
+    // Validation entry input
+    if (title === "") {
+      throw new Error("Please enter a Title!");
+    }
+    if (url === "") {
+      throw new Error("Please enter a URL!");
+    }
+
     // Get whitelist
     let whitelist = this.get();
 
@@ -44,7 +55,7 @@ class Whitelist {
       }) !== -1) {
       // Must already be in whitelist
       // Throw an error!
-      throw new Error(`URL '${url}' is already in whitelist`);
+      throw new Error(`URL pattern '${url}' is already in whitelist`);
     }
     // Not already in whitelist
 

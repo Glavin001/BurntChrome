@@ -22,6 +22,11 @@ class Popup {
     */
     this.formData = {}
 
+    /**
+    Last error message
+    */
+    this.lastErrorMessage = "";
+
     //
     this.setupTemplates();
 
@@ -56,7 +61,8 @@ class Popup {
       isLocked: this.background.moderator.isLocked(),
       isUnlocked: this.background.moderator.isUnlocked(),
       whitelist: this.background.moderator.getWhitelistJSON(),
-      email: this.background.moderator.getEmail()
+      email: this.background.moderator.getEmail(),
+      errorMessage: this.lastErrorMessage
     };
   }
 
@@ -227,11 +233,11 @@ class Popup {
     // console.log('addToWhitelist');
     let title = $('input[name="entry-title"]').val();
     let url = $('input[name="entry-url"]').val();
-    let validEntry = (title !== "" && url !== "");
-    $('#entryError').toggleClass("errorshow", !validEntry);
-    if (validEntry) {
+    try {
       let successful = this.background.moderator.addToWhitelist(title, url);
       if (successful) this.refresh();
+    } catch (error) {
+      this.showError(error);
     }
   }
 
@@ -240,9 +246,23 @@ class Popup {
     if (successful) this.refresh();
   }
 
+  showError(error) {
+    let message = error.message;
+    this.lastErrorMessage = message
+    this.refresh();
+    // $('#entryError').text(message).toggleClass("errorshow", !error);
+  }
+
   importWhitelist(whitelist) {
-    _.each(whitelist, ({title, url}) => {
-      this.background.moderator.addToWhitelist(title, url);
+    _.each(whitelist, ({
+      title,
+      url
+    }) => {
+      try {
+        this.background.moderator.addToWhitelist(title, url);
+      } catch (error) {
+        this.showError(error);
+      }
     });
     this.refresh();
   }
@@ -300,32 +320,33 @@ class Popup {
   }
 
   downloadData(name, data, type) {
-      // Browser support
-      window.URL = window.URL || window.webkitURL;
-      // Arg defaults
-      type = type || "text/plain";
-      name = name || "download";
-      data = data || "";
-      // Create Blob
-      let blob;
-      if (data instanceof Blob) {
-          blob = data;
-      } else {
-          blob = new Blob([data], {type: type});
-      }
-      let url = window.URL.createObjectURL(blob)
+    // Browser support
+    window.URL = window.URL || window.webkitURL;
+    // Arg defaults
+    type = type || "text/plain";
+    name = name || "download";
+    data = data || "";
+    // Create Blob
+    let blob;
+    if (data instanceof Blob) {
+      blob = data;
+    } else {
+      blob = new Blob([data], {
+        type: type
+      });
+    }
+    let url = window.URL.createObjectURL(blob)
       // Create link
-      let link = document.createElement("a")
-      link.download = name
-      link.href = url
+    let link = document.createElement("a")
+    link.download = name
+    link.href = url
       // Download!
       // See http://stackoverflow.com/a/25047811/2578205 for more details
-      let event = document.createEvent("MouseEvents")
-      event.initMouseEvent(
-              "click", true, false, window, 0, 0, 0, 0, 0
-              , false, false, false, false, 0, null
-      )
-      link.dispatchEvent(event)
+    let event = document.createEvent("MouseEvents")
+    event.initMouseEvent(
+      "click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null
+    )
+    link.dispatchEvent(event)
   }
 
 };

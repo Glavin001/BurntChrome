@@ -86,9 +86,12 @@
                 <input type="text" name="entry-title" placeholder="Title or short description">
                 <input type="text" name="entry-url" placeholder="URL">
                 <button id="add-to-whitelist">Add to Whitelist</button>
+                {{#if errorMessage}}
+                  <span id="entryError" class="errorshow">{{errorMessage}}</span>
+                {{/if}}
+                <br>
                 <button id="export-whitelist">Export Whitelist</button>
                 <input type="file" id="import-whitelist">
-                <span id="entryError" class="errorhide">Please Enter A Title & URL!</span>
               </div>
             </div>
 

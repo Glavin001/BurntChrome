@@ -148,7 +148,7 @@ class Popup {
       }
     });
 
-    // Clickng a whitelist entry fill in entry fields above
+    // Clicking a whitelist entry fill in entry fields above
     $('.whitelist-entry').click((event) => {
       event.preventDefault();
       // console.log('whitelist-entry click', event, this);
@@ -158,6 +158,14 @@ class Popup {
       $('input[name="entry-title"]').val(title).change();
       $('input[name="entry-url"]').val(url).change();
     });
+
+    // When Enter is pressed while focus is inside of password field
+    // Login automatically
+    $('input[name="password"]').keyup((event) => {
+      if (event.keyCode === 13) {
+        this.lock();
+      }
+    })
 
     // Make sure that input elements do not
     // have their value cleared when template is refreshed.

@@ -165,7 +165,14 @@ class Popup {
       if (event.keyCode === 13) {
         this.lock();
       }
-    })
+    });
+    // When Enter is pressed while focus is inside of password field
+    // Login automatically
+    $('input[name="entry-url"]').keyup((event) => {
+      if (event.keyCode === 13) {
+        this.addToWhitelist();
+      }
+    });
 
     // Make sure that input elements do not
     // have their value cleared when template is refreshed.
@@ -280,7 +287,13 @@ class Popup {
     let url = $('input[name="entry-url"]').val();
     try {
       let successful = this.background.moderator.addToWhitelist(title, url);
-      if (successful) this.refresh();
+      if (successful) {
+        // Clear fields
+        $('input[name="entry-title"]').val('').change();
+        $('input[name="entry-url"]').val('').change();
+        // Refresh UI
+        this.refresh();
+      }
     } catch (error) {
       this.showError(error);
     }

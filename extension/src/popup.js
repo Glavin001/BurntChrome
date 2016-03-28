@@ -85,6 +85,15 @@ class Popup {
     $('#loginIntro').click(() => this.loginIntro());
     $('#listIntro').click(() => this.listIntro());
     $('#lockedIntro').click(() => introJs().start());
+    $('.whitelist-entry').click((event) => {
+      event.preventDefault();
+      console.log('whitelist-entry click', event, this);
+      let $el = $(event.currentTarget);
+      let title = $el.data('title');
+      let url = $el.data('url');
+      $('input[name="entry-title"]').val(title);
+      $('input[name="entry-url"]').val(url);
+    });
   }
 
   /**

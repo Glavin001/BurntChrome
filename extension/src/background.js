@@ -142,21 +142,29 @@ class Whitelist {
 
   /**
   @desc Test URLs.
-  @param {string} a - URL to test against. Can be a RegExp.
-  @param {string} b - URL to test with.
-  @return {boolean} If URL `a` matches URL `b`
+  @param {string} url - URL to test against.
+  @param {string} pattern - URL pattern with glob support to test with.
+  @return {boolean} If URL matches pattern
   @private
   @example
   testURLs('https://google.com','*://google.com/**'); // True
   testURLs('https://google.com','*://google.ca/**'); // False
   */
-  static testURLs(a, b) {
+  static testURLs(url, pattern) {
     // Ensure that a URL ends with "/" such that "/**" matches
     // Check to make sure there is a path
-    if (_.endsWith(b, '/**') && a.split('?').length === 1 && a[a.length - 1] !== '/') {
-      a += '/';
+    if (_.endsWith(pattern, '/**') && url.split('?').length === 1 && url[url.length - 1] !== '/') {
+      url += '/';
     }
-    return minimatch(a, b);
+    // Handle cases where scheme is not provided in pattern
+    const defaultScheme = "*";
+    const schemeSep = "://";
+    let urlParts = url.split(schemeSep);
+    let patternParts = pattern.split(schemeSep);
+    if (patternParts.length === 1) {
+      patternParts = ["*", patternParts[0]];
+    }
+    return minimatch(urlParts[0], patternParts[0]) && minimatch(urlParts[1], patternParts[1]);
   }
 
   /**
@@ -346,7 +354,7 @@ class Moderator {
   @public
   */
   unlock(email, password) {
-    if (this.login(email, password)) {
+    if (this.loggedIn || this.login(email, password)) {
       // Logged in now
       this.setEmail(null);
       this.setPassword(null);

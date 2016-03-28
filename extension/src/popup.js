@@ -165,18 +165,25 @@ class Popup {
       if (event.keyCode === 13) {
         this.lock();
       }
-    })
+    });
+    // When Enter is pressed while focus is inside of password field
+    // Login automatically
+    $('input[name="entry-url"]').keyup((event) => {
+      if (event.keyCode === 13) {
+        this.addToWhitelist();
+      }
+    });
 
     // Make sure that input elements do not
     // have their value cleared when template is refreshed.
     // So every change to input, we store the state
     // On refresh, we sync the last state of the input field
     // back into the input field.
-    const attr = "name"
+    const attr = "name";
       // We store state in formData property
     const formData = this.formData;
     // Iterate over all Input fields that should be syncing their value
-    $(`input[${attr}]`).each((idx, el) => {
+    $(`input[type="text"][${attr}]`).each((idx, el) => {
       let $el = $(el);
       // Get the key to sync with in the formData
       let key = $el.attr(attr);
@@ -224,9 +231,9 @@ class Popup {
     $('#passwordError').toggleClass("errorshow", !passwordValid);
 
     if (emailValid && passwordValid) {
-      console.log(email, password);
+      // console.log(email, password);
       let successful = this.background.moderator.lock(email, password);
-      console.log('successful', successful);
+      // console.log('successful', successful);
       this.refresh();
       introJs().exit();
       $('#passwordError').toggleClass("errorshow", !successful);
@@ -253,6 +260,11 @@ class Popup {
     // console.log('Unlock!');
     let context = this.getContext();
     let email = context.email;
+    if (context.isLoggedIn) {
+      let successful = this.background.moderator.unlock(email, null);
+      this.refresh();
+      return;
+    }
     let password = $('input[name="password"]').val();
 
     let passwordValid = (password !== "" && password !== null);
@@ -276,7 +288,13 @@ class Popup {
     let url = $('input[name="entry-url"]').val();
     try {
       let successful = this.background.moderator.addToWhitelist(title, url);
-      if (successful) this.refresh();
+      if (successful) {
+        // Clear fields
+        $('input[name="entry-title"]').val('').change();
+        $('input[name="entry-url"]').val('').change();
+        // Refresh UI
+        this.refresh();
+      }
     } catch (error) {
       this.showError(error);
     }
@@ -350,7 +368,28 @@ class Popup {
         element: document.querySelector('#add-to-whitelist'),
         intro: 'Click here to add your entry to the whitelist.',
         position: 'right'
-      }, {
+      },
+      {
+        element: document.querySelector('#export-whitelist'),
+        intro: 'Click here to export your current whitelist to a file.',
+        position: 'right'
+      },
+      {
+        element: document.querySelector('#import-whitelist-file'),
+        intro: 'Click here to import a whitelist from a file.',
+        position: 'right'
+      },
+      {
+        element: document.querySelector('#import-whitelist-url'),
+        intro: 'Enter a URL to read and import a remote whitelist from.',
+        position: 'right'
+      },
+      {
+        element: document.querySelector('#import-whitelist'),
+        intro: 'Click here to start importing a remote whitelist from the URL you previously entered.',
+        position: 'right'
+      },
+      {
         element: document.querySelector('#logout'),
         intro: 'When finished logout. Browsing will remain locked \
           to your whitelist until you choose to unlock it.',

@@ -228,6 +228,10 @@ class Moderator {
     */
     this.loggedIn = false;
     /**
+    @desc Moderator is in disabled state
+    */
+    this.isDisabled = false;
+    /**
     @desc The Whitelist instance
     @private
     */
@@ -252,7 +256,8 @@ class Moderator {
     chrome.webRequest.onBeforeRequest.addListener((info) => {
       var url = info.url;
       let whitelist = this.getWhitelist();
-      if (!whitelist) {
+      // console.log('webRequest', this, this.isDisabled, whitelist);
+      if (this.isDisabled || !whitelist) {
         return {
           cancel: false
         };
@@ -283,6 +288,19 @@ class Moderator {
     //     }
     //   });
 
+  }
+
+  /**
+  @desc Disable moderator
+  */
+  disable() {
+    this.isDisabled = true;
+  }
+  /**
+  @desc Enable moderator
+  */
+  enable() {
+    this.isDisabled = false;
   }
 
   /**

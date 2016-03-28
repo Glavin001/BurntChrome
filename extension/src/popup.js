@@ -102,7 +102,7 @@ class Popup {
       let fileName = `Whitelist for ${email}.json`;
       this.downloadData(fileName, whitelistJSON, "application/json");
     });
-    $('#import-whitelist').change((event) => {
+    $('#import-whitelist-file').change((event) => {
       let $el = $(event.currentTarget);
       // Source: http://stackoverflow.com/a/13747921/2578205
       let file = $el.prop('files')[0];
@@ -114,6 +114,38 @@ class Popup {
         this.importWhitelist(json);
       };
       reader.readAsText(file);
+    });
+    $('#import-whitelist').click((event) => {
+      let url = $('#import-whitelist-url').val();
+      if (!url) {
+        // Invalid URL
+        return this.showError(new Error('Enter a URL to import whitelist from.'));
+      } else {
+        // Temporarily disable
+        this.background.moderator.disable();
+
+        let callback = (error) => {
+          if (error) {
+            this.showError(error);
+          }
+          // Re-enable
+          this.background.moderator.enable();
+        };
+
+        // Source: https://developers.google.com/web/updates/2015/03/introduction-to-fetch?hl=en
+        fetch(url)
+        .then((response) => {
+          if (response.status !== 200) {
+            callback(new Error(`An error occurred reading ${url}`));
+          } else {
+            response.json().then((data) => {
+              this.importWhitelist(data);
+              callback();
+            }).catch(callback);
+          }
+        })
+        .catch(callback);
+      }
     });
 
     // Clickng a whitelist entry fill in entry fields above

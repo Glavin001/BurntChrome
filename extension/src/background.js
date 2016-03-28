@@ -321,7 +321,9 @@ class Moderator {
   @public
   */
   login(email, password) {
-    if (email === this.getEmail() && password === this.getPassword()) {
+    var enteredHash = CryptoJS.SHA256(password);
+    var passwordHash = enteredHash.toString(CryptoJS.enc.Base64)
+    if (email === this.getEmail() && passwordHash === this.getPassword()) {
       this.loggedIn = true;
       this.whitelist = new Whitelist(this.getEmail());
       return true;
@@ -367,11 +369,8 @@ class Moderator {
   @private
   @return {string} Admin password.
   */
-  getPassword() {
-    var password = localStorage['admin:password'];
-    var decrypted = CryptoJS.AES.decrypt(password, "0RIOdFYHv0");
-    password = decrypted.toString(CryptoJS.enc.Utf8) 
-    return password;
+  getPassword() { 
+    return localStorage['admin:password'];
   }
   /**
   @desc Set administrator's password.
@@ -383,9 +382,8 @@ class Moderator {
     if (password === null) {
       delete localStorage['admin:password'];
     } else {
-      var encrypted = CryptoJS.AES.encrypt(password, "0RIOdFYHv0");
-      localStorage['admin:password'] = encrypted;
-      //localStorage['admin:password'] = password;
+      var hash = CryptoJS.SHA256(password);
+      localStorage['admin:password'] = hash.toString(CryptoJS.enc.Base64);
     }
   }
 
@@ -439,7 +437,6 @@ class Moderator {
       return false;
     }
   }
-
 
 }
 

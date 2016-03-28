@@ -96,6 +96,19 @@ class Popup {
       let fileName = `Whitelist for ${email}.json`;
       this.downloadData(fileName, whitelistJSON, "application/json");
     });
+    $('#import-whitelist').change((event) => {
+      let $el = $(event.currentTarget);
+      // Source: http://stackoverflow.com/a/13747921/2578205
+      let file = $el.prop('files')[0];
+      let reader = new FileReader();
+      reader.onload = () => {
+        let data = reader.result;
+        let json = JSON.parse(data);
+        // Add each entry to current whitelist
+        this.importWhitelist(json);
+      };
+      reader.readAsText(file);
+    });
 
     // Clickng a whitelist entry fill in entry fields above
     $('.whitelist-entry').click((event) => {
@@ -225,6 +238,13 @@ class Popup {
   removeFromWhitelist(url) {
     let successful = this.background.moderator.removeFromWhitelist(url);
     if (successful) this.refresh();
+  }
+
+  importWhitelist(whitelist) {
+    _.each(whitelist, ({title, url}) => {
+      this.background.moderator.addToWhitelist(title, url);
+    });
+    this.refresh();
   }
 
   loginIntro() {

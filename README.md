@@ -28,6 +28,7 @@
 1. Install [Node.js & `npm`](https://nodejs.org/)
 2. Install the dependencies using `npm`:
  ```bash
+npm install -g bower
 npm install
 ```
 

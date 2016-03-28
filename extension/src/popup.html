@@ -1,116 +1,125 @@
 <html lang="en">
 
-<meta charset="utf-8" />
+  <meta charset="utf-8"/>
 
-<head>
-  <title>Burnt Chrome</title>
+  <head>
+    <title>Burnt Chrome</title>
 
-  <script type="text/javascript" src="../dist/deps-content.js"></script>
-  <script type="text/javascript" src="../dist/popup.js"></script>
+    <script type="text/javascript" src="../dist/deps-content.js"></script>
+    <script type="text/javascript" src="../dist/popup.js"></script>
 
-  <link href="../dist/deps-content.css" rel="stylesheet" type="text/css">
-  <link href="../src/popup.css" rel="stylesheet" type="text/css">
+    <link href="../dist/deps-content.css" rel="stylesheet" type="text/css">
+    <link href="../src/popup.css" rel="stylesheet" type="text/css">
 
-</head>
+  </head>
 
-<body class="chrome-bootstrap">
+  <body class="chrome-bootstrap">
 
-  <script id="frame-template" type="text/x-handlebars-template">
+    <script id="frame-template" type="text/x-handlebars-template">
 
-    <div class="frame">
+      <div class="frame">
 
-      <header>
-        <h1>Burnt Chrome</h1>
-      </header>
+        <header>
+          <h1>Burnt Chrome</h1>
+        </header>
 
-      <div class="content">
-        {{#unless isLoggedIn}}
+        <div class="content">
+          {{#unless isLoggedIn}}
 
-          <!-- Show login page -->
-          <div class="login">
+            <!-- Show login page -->
+            <div class="login">
 
-            <div class="form-group" data-step="1" data-intro="Browsing is currently limited to the whitelist created by this email.">
-              {{#if isLocked}}
-                Locked with email: {{email}}
-              {{else}}
-                <input type="text" name="email" placeholder="Email" value="{{email}}">
-                <span id="emailError" class="errorhide">Invalid email!</span>	
-              {{/if}}
-            </div>
-            <div class="form-group">
-              <input type="password" name="password" placeholder="Password"> 
-              <span id="passwordError" class="errorhide">Invalid password!</span>
-            </div>
-
-            <div class="form-group">
-              <button id="lock" data-id="2" data-intro="You may login to edit your whitelist." data-position="right">
-                Login
-                {{#if isUnlocked}}
-                  &amp; Lock
+              <div class="form-group" data-step="1" data-intro="Browsing is currently limited to the whitelist created by this email.">
+                {{#if isLocked}}
+                  Locked with email:
+                  {{email}}
+                {{else}}
+                  <input type="text" name="email" placeholder="Email" value="{{email}}">
+                  <span id="emailError" class="errorhide">Invalid email!</span>
                 {{/if}}
-              </button>
-            </div>
-            {{#if isLocked}}
-              <div class="form-group">
-                <button id="unlock" data-id="3" data-intro="Or unlock to restore normal browsing." data-position="right">Unlock</button>
               </div>
-            {{/if}}
+              <div class="form-group">
+                <input type="password" name="password" placeholder="Password">
+                <span id="passwordError" class="errorhide">Invalid password!</span>
+              </div>
 
-            <div class="help">
+              <div class="form-group">
+                <button id="lock" data-id="2" data-intro="You may login to edit your whitelist." data-position="right">
+                  Login
+                  {{#if isUnlocked}}
+                    &amp; Lock
+                  {{/if}}
+                </button>
+              </div>
               {{#if isLocked}}
-                <button id="lockedIntro">Help</button>
-              {{else}}
-                <button id="loginIntro">Help</button>
+                <div class="form-group">
+                  <button id="unlock" data-id="3" data-intro="Or unlock to restore normal browsing." data-position="right">Unlock</button>
+                </div>
               {{/if}}
+
+              <div class="help">
+                {{#if isLocked}}
+                  <button id="lockedIntro">Help</button>
+                {{else}}
+                  <button id="loginIntro">Help</button>
+                {{/if}}
+              </div>
+
             </div>
 
-          </div>
+          {{else}}
 
-        {{else}}
-
-          <h2>
+            <h2>
               Whitelist
               <!-- Locked -->
               for
               <em>{{email}}</em>
-              <!-- <button id="unlock">Unlock</button> -->
               <button id="logout">Logout</button>
-          </h2>
-          <p>
-            List of websites that are distinctly allowed.
-          </p>
+              <button id="unlock">Unlock</button>
+            </h2>
+            <p>
+              List of websites that are distinctly allowed.
+            </p>
 
-          <div>
-            <div class="form-group">
-              <input type="text" name="entry-title" placeholder="Title or short description">
-              <input type="text" name="entry-url" placeholder="URL">
-              <button id="add-to-whitelist">Add to Whitelist</button>
-              <span id="entryError" class="errorhide">Please Enter A Title & URL!</span>
+            <div>
+              <div class="form-group">
+                <input type="text" name="entry-title" placeholder="Title or short description">
+                <input type="text" name="entry-url" placeholder="URL">
+                <button id="add-to-whitelist">Add to Whitelist</button>
+                {{#if errorMessage}}
+                  <span id="entryError" class="errorshow">{{errorMessage}}</span>
+                {{/if}}
+                <br>
+                <button id="export-whitelist">Export Whitelist</button>
+                <input type="file" id="import-whitelist-file">
+                <br>
+                <input type="text" id="import-whitelist-url" placeholder="Import whitelist from URL">
+                <button id="import-whitelist">Import Whitelist</button>
+              </div>
             </div>
-          </div>
 
-          <ul class="highlightable editable">
-            {{#each whitelist as |website key|}}
-              <li>
-                <a href="#">
-                  <dl>
-                    <dt>{{website.title}}</dt>
-                    <dd>{{website.url}}</dd>
-                  </dl>
-                </a>
-                <div id={{website.url}} class="delete">Delete</div>
-              </li>
-            {{/each}}
-          </ul>
-        <div class="help">
-          <button id="listIntro">Help</button>
+            <ul class="highlightable editable">
+              {{#each whitelist as |website key|}}
+                <li>
+                  <a href="#" class="whitelist-entry" data-title={{website.title}} data-url={{website.url}}>
+                    <dl>
+                      <dt>{{website.title}}</dt>
+                      <dd>{{website.url}}</dd>
+                    </dl>
+                  </a>
+                  <div id={{website.url}} class="delete">Delete</div>
+                </li>
+              {{/each}}
+            </ul>
+            <div class="help">
+              <button id="listIntro">Help</button>
+            </div>
+          {{/unless}}
         </div>
-        {{/unless}}
       </div>
-    </div>
 
-  </script>
+    </script>
 
-</body>
+  </body>
 
 </html>

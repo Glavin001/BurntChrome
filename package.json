@@ -4,15 +4,15 @@
   "description": "Software Engineering class project",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register",
+    "test": "mocha --compilers js:babel-core/register --reporter spec",
     "docs": "./node_modules/.bin/esdoc -c esdoc.json",
     "report": "plato -d report -x deps-* extension/dist/*.js",
-    "postinstall": "./node_modules/.bin/npm-run-all bower:install compile",
-    "bower:install": "./node_modules/.bin/bower install",
+    "postinstall": "./node_modules/.bin/npm-run-all bower:install",
+    "bower:install": "bower install",
     "compile:deps:css:content": "./node_modules/.bin/cleancss --source-map-inline-sources -o extension/dist/deps-content.css ./bower_components/chrome-bootstrap/chrome-bootstrap.css ./bower_components/intro.js/introjs.css",
     "compile:deps:css": "./node_modules/.bin/npm-run-all compile:deps:css:*",
-    "compile:deps:js:content": "./node_modules/.bin/uglifyjs ./bower_components/jquery/dist/jquery.js ./bower_components/lodash/dist/lodash.js ./node_modules/devtools-detect/index.js ./bower_components/handlebars/handlebars.min.js ./bower_components/intro.js/intro.js --compress --output extension/dist/deps-content.js",
-    "compile:deps:js:background": "./node_modules/.bin/uglifyjs ./bower_components/lodash/dist/lodash.js ./bower_components/crypto-js/crypto-js.js --compress --output extension/dist/deps-background.js",
+    "compile:deps:js:content": "./node_modules/.bin/uglifyjs ./bower_components/jquery/dist/jquery.js ./bower_components/lodash/dist/lodash.js ./bower_components/handlebars/handlebars.min.js ./bower_components/intro.js/intro.js --compress --output extension/dist/deps-content.js",
+    "compile:deps:js:background": "./node_modules/.bin/uglifyjs ./bower_components/lodash/dist/lodash.js ./bower_components/crypto-js/crypto-js.js ./bower_components/minimatch/minimatch.js --compress --output extension/dist/deps-background.js",
     "compile:deps:js": "./node_modules/.bin/npm-run-all compile:deps:js:*",
     "compile:deps": "./node_modules/.bin/npm-run-all compile:deps:*",
     "compile:src:js": "./node_modules/.bin/babel extension/src --out-dir extension/dist --source-maps inline",
@@ -20,7 +20,7 @@
     "compile": "./node_modules/.bin/npm-run-all compile:deps compile:src",
     "watch": "./node_modules/.bin/babel extension/src --watch --out-dir extension/dist --source-maps inline",
     "start": "./node_modules/.bin/npm-run-all compile watch",
-    "pack": "./node_modules/.bin/crx pack -o burnt_chrome.crx ./extension",
+    "pack": "./node_modules/.bin/crx pack ./extension -o burnt_chrome.crx -p ./key.pem --zip-output burnt_chrome.crx.zip",
     "zip": "zip -r burnt_chrome.zip extension"
   },
   "repository": {
@@ -34,7 +34,6 @@
   },
   "homepage": "https://github.com/Glavin001/BurntChrome#readme",
   "dependencies": {
-    "devtools-detect": "^2.1.1",
     "intro.js": "^2.0.0"
   },
   "devDependencies": {
@@ -42,7 +41,6 @@
     "babel-core": "^6.5.2",
     "babel-preset-es2015": "^6.5.0",
     "babelify": "^7.2.0",
-    "bower": "^1.7.7",
     "browserify": "^13.0.0",
     "clean-css": "^3.4.9",
     "crx": "^3.0.3",

@@ -8,6 +8,11 @@
 @typedef {Array<whitelist_entry>} whitelist A whitelist array
 */
 
+if (!!require) {
+  var _ = require('../../bower_components/lodash/dist/lodash');
+  var minimatch = require('../../bower_components/minimatch/minimatch');
+}
+
 /**
 @desc Whitelist component
 */
@@ -35,14 +40,27 @@ class Whitelist {
   @public
   */
   addURL(title, url) {
+    // Trim whitespace from input
+    title = title.trim();
+    url = url.trim();
+    // Validation entry input
+    if (title === "") {
+      throw new Error("Please enter a Title!");
+    }
+    if (url === "") {
+      throw new Error("Please enter a URL!");
+    }
+
     // Get whitelist
     let whitelist = this.get();
 
     // Check that URL is not already in whitelist
-    if (_.findIndex(whitelist, (entry) => { return entry.url === url; }) !== -1) {
+    if (_.findIndex(whitelist, (entry) => {
+        return entry.url === url;
+      }) !== -1) {
       // Must already be in whitelist
       // Throw an error!
-      throw new Error(`URL '${url}' is already in whitelist`);
+      throw new Error(`URL pattern '${url}' is already in whitelist`);
     }
     // Not already in whitelist
 
@@ -71,7 +89,9 @@ class Whitelist {
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     // Remove entry
-    _.remove(whitelist, (entry) => { return url.match(entry.url) });
+    _.remove(whitelist, (entry) => {
+      return url === entry.url
+    });
     // Save new whitelist
     this.set(whitelist);
     return whitelist;
@@ -92,7 +112,12 @@ class Whitelist {
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     let idx = _.findIndex(whitelist, (entry) => {
-      return Whitelist.testURLs(url, entry.url);
+      try {
+        return Whitelist.testURLs(url, entry.url);
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
     });
     // Allow if not idx isnt -1
     console.log('isAllowed', url, idx !== -1);
@@ -122,16 +147,29 @@ class Whitelist {
 
   /**
   @desc Test URLs.
-  @param {string} a - URL to test against. Can be a RegExp.
-  @param {string} b - URL to test with.
-  @return {boolean} If URL `a` matches URL `b`
+  @param {string} url - URL to test against.
+  @param {string} pattern - URL pattern with glob support to test with.
+  @return {boolean} If URL matches pattern
   @private
   @example
-  testURLs('https://google.com','google.com'); // True
-  testURLs('https://google.com','google.ca'); // False
+  testURLs('https://google.com','*://google.com/**'); // True
+  testURLs('https://google.com','*://google.ca/**'); // False
   */
-  static testURLs(a, b) {
-    return (a.indexOf(b) !== -1) || (new RegExp(a)).test(b);
+  static testURLs(url, pattern) {
+    // Ensure that a URL ends with "/" such that "/**" matches
+    // Check to make sure there is a path
+    if (_.endsWith(pattern, '/**') && url.split('?').length === 1 && url[url.length - 1] !== '/') {
+      url += '/';
+    }
+    // Handle cases where scheme is not provided in pattern
+    const defaultScheme = "*";
+    const schemeSep = "://";
+    let urlParts = url.split(schemeSep);
+    let patternParts = pattern.split(schemeSep);
+    if (patternParts.length === 1) {
+      patternParts = ["*", patternParts[0]];
+    }
+    return minimatch(urlParts[0], patternParts[0]) && minimatch(urlParts[1], patternParts[1]);
   }
 
   /**
@@ -203,6 +241,10 @@ class Moderator {
     */
     this.loggedIn = false;
     /**
+    @desc Moderator is in disabled state
+    */
+    this.isDisabled = false;
+    /**
     @desc The Whitelist instance
     @private
     */
@@ -227,7 +269,8 @@ class Moderator {
     chrome.webRequest.onBeforeRequest.addListener((info) => {
       var url = info.url;
       let whitelist = this.getWhitelist();
-      if (!whitelist) {
+      // console.log('webRequest', this, this.isDisabled, whitelist);
+      if (this.isDisabled || !whitelist) {
         return {
           cancel: false
         };
@@ -258,6 +301,19 @@ class Moderator {
     //     }
     //   });
 
+  }
+
+  /**
+  @desc Disable moderator
+  */
+  disable() {
+    this.isDisabled = true;
+  }
+  /**
+  @desc Enable moderator
+  */
+  enable() {
+    this.isDisabled = false;
   }
 
   /**
@@ -303,7 +359,7 @@ class Moderator {
   @public
   */
   unlock(email, password) {
-    if (this.login(email, password)) {
+    if (this.loggedIn || this.login(email, password)) {
       // Logged in now
       this.setEmail(null);
       this.setPassword(null);
@@ -348,14 +404,14 @@ class Moderator {
   @return {string} Admin email.
   */
   getEmail() {
-    return localStorage['admin:email'];
-  }
-  /**
-  @desc Set administrator's email.
-  @private
-  @param {string} email - The new email.
-  @return {void} Void.
-  */
+      return localStorage['admin:email'];
+    }
+    /**
+    @desc Set administrator's email.
+    @private
+    @param {string} email - The new email.
+    @return {void} Void.
+    */
   setEmail(email) {
     if (email === null) {
       delete localStorage['admin:email'];
@@ -369,15 +425,15 @@ class Moderator {
   @private
   @return {string} Admin password.
   */
-  getPassword() { 
-    return localStorage['admin:password'];
-  }
-  /**
-  @desc Set administrator's password.
-  @private
-  @param {string} password - The new password.
-  @return {void} Void.
-  */
+  getPassword() {
+      return localStorage['admin:password'];
+    }
+    /**
+    @desc Set administrator's password.
+    @private
+    @param {string} password - The new password.
+    @return {void} Void.
+    */
   setPassword(password) {
     if (password === null) {
       delete localStorage['admin:password'];
@@ -446,4 +502,16 @@ Start the background script
 
 @ignore
 */
-let moderator = window.moderator = new Moderator();
+if (typeof window !== 'undefined') {
+  let moderator = window.moderator = new Moderator();
+}
+
+/*
+Exporting for Node.js
+*/
+if (typeof module !== 'undefined') {
+  module.exports = {
+    Whitelist: Whitelist,
+    Moderator: Moderator
+  };
+}

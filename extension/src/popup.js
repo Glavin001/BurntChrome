@@ -224,9 +224,9 @@ class Popup {
     $('#passwordError').toggleClass("errorshow", !passwordValid);
 
     if (emailValid && passwordValid) {
-      console.log(email, password);
+      // console.log(email, password);
       let successful = this.background.moderator.lock(email, password);
-      console.log('successful', successful);
+      // console.log('successful', successful);
       this.refresh();
       introJs().exit();
       $('#passwordError').toggleClass("errorshow", !successful);
@@ -253,6 +253,11 @@ class Popup {
     // console.log('Unlock!');
     let context = this.getContext();
     let email = context.email;
+    if (context.isLoggedIn) {
+      let successful = this.background.moderator.unlock(email, null);
+      this.refresh();
+      return;
+    }
     let password = $('input[name="password"]').val();
 
     let passwordValid = (password !== "" && password !== null);

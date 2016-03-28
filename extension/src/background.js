@@ -346,7 +346,7 @@ class Moderator {
   @public
   */
   unlock(email, password) {
-    if (this.login(email, password)) {
+    if (this.loggedIn || this.login(email, password)) {
       // Logged in now
       this.setEmail(null);
       this.setPassword(null);

@@ -17,6 +17,11 @@ class Popup {
     */
     this.templateId = 'frame';
 
+    /**
+    Static form data
+    */
+    this.formData = {}
+
     //
     this.setupTemplates();
 
@@ -87,13 +92,44 @@ class Popup {
     $('#lockedIntro').click(() => introJs().start());
     $('.whitelist-entry').click((event) => {
       event.preventDefault();
-      console.log('whitelist-entry click', event, this);
+      // console.log('whitelist-entry click', event, this);
       let $el = $(event.currentTarget);
       let title = $el.data('title');
       let url = $el.data('url');
-      $('input[name="entry-title"]').val(title);
-      $('input[name="entry-url"]').val(url);
+      $('input[name="entry-title"]').val(title).change();
+      $('input[name="entry-url"]').val(url).change();
     });
+
+    // Make sure that input elements do not
+    // have their value cleared when template is refreshed.
+    // So every change to input, we store the state
+    // On refresh, we sync the last state of the input field
+    // back into the input field.
+    const attr = "name"
+    // We store state in formData property
+    const formData = this.formData;
+    // Iterate over all Input fields that should be syncing their value
+    $(`input[${attr}]`).each((idx, el) => {
+      let $el = $(el);
+      // Get the key to sync with in the formData
+      let key = $el.attr(attr);
+      // Get current value of input
+      let val = _.get(formData, key);
+      $el.val(val);
+      // console.log($el, attr, key, val);
+
+      // Handle changing input value
+      // and storing state
+      let changeHandler = (event) => {
+        let text = $(event.currentTarget).val();
+        // console.log(key, text);
+        _.set(formData, key, text);
+      }
+      // Bind events to listen for changes to input field
+      $el.change(changeHandler);
+      $el.keyup(changeHandler);
+    });
+
   }
 
   /**

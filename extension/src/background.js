@@ -92,7 +92,12 @@ class Whitelist {
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     let idx = _.findIndex(whitelist, (entry) => {
-      return Whitelist.testURLs(url, entry.url);
+      try {
+        return Whitelist.testURLs(url, entry.url);
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
     });
     // Allow if not idx isnt -1
     console.log('isAllowed', url, idx !== -1);
@@ -374,7 +379,7 @@ class Moderator {
   @private
   @return {string} Admin password.
   */
-  getPassword() { 
+  getPassword() {
     return localStorage['admin:password'];
   }
   /**

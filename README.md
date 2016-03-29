@@ -9,6 +9,8 @@
 - [Risk Analysis](https://drive.google.com/open?id=1lOxLEEGWvbhaKKaLM5Oys0vn94d1937PmQm6UNcSkq8)
 - [Requirements Specifications](https://drive.google.com/open?id=1k3z0ABU4Lxw3b5KyHMEdxxgWWG_033Yj4MgzTJdZ0QQ)
 
+Documentation: http://blog.glavin.org/BurntChrome/docs/index.html
+
 ### Authors / Team Black
 
 | [Evan Larose](https://github.com/LizardLeliel) | [Glavin Wiechert](https://github.com/Glavin001) | [Nathan Hernden](https://github.com/nhernden) | [Ziyun (Toby) Zhong](https://github.com/zhongziyun1993) |

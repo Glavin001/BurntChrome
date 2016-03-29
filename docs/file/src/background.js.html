@@ -19,7 +19,7 @@
   <a href="identifiers.html">Reference</a>
   <a href="source.html">Source</a>
   
-  <a data-ice="repoURL" href="git+https://github.com/Glavin001/BurntChrome.git">Repository</a>
+  <a data-ice="repoURL" href="https://github.com/Glavin001/BurntChrome" class="repo-url-github">Repository</a>
   <div class="search-box">
   <span>
     <img src="./image/search.png">
@@ -37,6 +37,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Popup.html">Popup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist_entry">whitelist_entry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -51,6 +52,10 @@
 /**
 @typedef {Array&lt;whitelist_entry&gt;} whitelist A whitelist array
 */
+if (typeof module !== &apos;undefined&apos; &amp;&amp; typeof require !== &quot;undefined&quot;) {
+  var _ = require(&apos;../../bower_components/lodash/dist/lodash&apos;);
+  var minimatch = require(&apos;../../bower_components/minimatch/minimatch&apos;);
+}
 
 /**
 @desc Whitelist component
@@ -79,14 +84,27 @@ class Whitelist {
   @public
   */
   addURL(title, url) {
+    // Trim whitespace from input
+    title = title.trim();
+    url = url.trim();
+    // Validation entry input
+    if (title === &quot;&quot;) {
+      throw new Error(&quot;Please enter a Title!&quot;);
+    }
+    if (url === &quot;&quot;) {
+      throw new Error(&quot;Please enter a URL!&quot;);
+    }
+
     // Get whitelist
     let whitelist = this.get();
 
     // Check that URL is not already in whitelist
-    if (_.findIndex(whitelist, (entry) =&gt; { return entry.url === url; }) !== -1) {
+    if (_.findIndex(whitelist, (entry) =&gt; {
+        return entry.url === url;
+      }) !== -1) {
       // Must already be in whitelist
       // Throw an error!
-      throw new Error(`URL &apos;${url}&apos; is already in whitelist`);
+      throw new Error(`URL pattern &apos;${url}&apos; is already in whitelist`);
     }
     // Not already in whitelist
 
@@ -115,8 +133,8 @@ class Whitelist {
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     // Remove entry
-    whitelist = _.remove(whitelist, (entry) =&gt; {
-      return Whitelist.testURLs(url, entry.url);
+    _.remove(whitelist, (entry) =&gt; {
+      return url === entry.url
     });
     // Save new whitelist
     this.set(whitelist);
@@ -138,7 +156,12 @@ class Whitelist {
     let whitelist = this.get();
     // Find entry with matching URL in whitelist
     let idx = _.findIndex(whitelist, (entry) =&gt; {
-      return Whitelist.testURLs(url, entry.url);
+      try {
+        return Whitelist.testURLs(url, entry.url);
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
     });
     // Allow if not idx isnt -1
     console.log(&apos;isAllowed&apos;, url, idx !== -1);
@@ -168,16 +191,29 @@ class Whitelist {
 
   /**
   @desc Test URLs.
-  @param {string} a - URL to test against. Can be a RegExp.
-  @param {string} b - URL to test with.
-  @return {boolean} If URL `a` matches URL `b`
+  @param {string} url - URL to test against.
+  @param {string} pattern - URL pattern with glob support to test with.
+  @return {boolean} If URL matches pattern
   @private
   @example
-  testURLs(&apos;https://google.com&apos;,&apos;google.com&apos;); // True
-  testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False
+  testURLs(&apos;https://google.com&apos;,&apos;*://google.com/**&apos;); // True
+  testURLs(&apos;https://google.com&apos;,&apos;*://google.ca/**&apos;); // False
   */
-  static testURLs(a, b) {
-    return (a.indexOf(b) !== -1) || (new RegExp(a)).test(b);
+  static testURLs(url, pattern) {
+    // Ensure that a URL ends with &quot;/&quot; such that &quot;/**&quot; matches
+    // Check to make sure there is a path
+    if (_.endsWith(pattern, &apos;/**&apos;) &amp;&amp; url.split(&apos;?&apos;).length === 1 &amp;&amp; url[url.length - 1] !== &apos;/&apos;) {
+      url += &apos;/&apos;;
+    }
+    // Handle cases where scheme is not provided in pattern
+    const defaultScheme = &quot;*&quot;;
+    const schemeSep = &quot;://&quot;;
+    let urlParts = url.split(schemeSep);
+    let patternParts = pattern.split(schemeSep);
+    if (patternParts.length === 1) {
+      patternParts = [&quot;*&quot;, patternParts[0]];
+    }
+    return minimatch(urlParts[0], patternParts[0]) &amp;&amp; minimatch(urlParts[1], patternParts[1]);
   }
 
   /**
@@ -249,6 +285,10 @@ class Moderator {
     */
     this.loggedIn = false;
     /**
+    @desc Moderator is in disabled state
+    */
+    this.isDisabled = false;
+    /**
     @desc The Whitelist instance
     @private
     */
@@ -273,7 +313,8 @@ class Moderator {
     chrome.webRequest.onBeforeRequest.addListener((info) =&gt; {
       var url = info.url;
       let whitelist = this.getWhitelist();
-      if (!whitelist) {
+      // console.log(&apos;webRequest&apos;, this, this.isDisabled, whitelist);
+      if (this.isDisabled || !whitelist) {
         return {
           cancel: false
         };
@@ -304,6 +345,19 @@ class Moderator {
     //     }
     //   });
 
+  }
+
+  /**
+  @desc Disable moderator
+  */
+  disable() {
+    this.isDisabled = true;
+  }
+  /**
+  @desc Enable moderator
+  */
+  enable() {
+    this.isDisabled = false;
   }
 
   /**
@@ -349,10 +403,11 @@ class Moderator {
   @public
   */
   unlock(email, password) {
-    if (this.login(email, password)) {
+    if (this.loggedIn || this.login(email, password)) {
       // Logged in now
       this.setEmail(null);
       this.setPassword(null);
+      this.whitelist = null;
       return this.logout();
     } else {
       // Could not login to unlock
@@ -366,7 +421,9 @@ class Moderator {
   @public
   */
   login(email, password) {
-    if (email === this.getEmail() &amp;&amp; password === this.getPassword()) {
+    var enteredHash = CryptoJS.SHA256(password);
+    var passwordHash = enteredHash.toString(CryptoJS.enc.Base64)
+    if (email === this.getEmail() &amp;&amp; passwordHash === this.getPassword()) {
       this.loggedIn = true;
       this.whitelist = new Whitelist(this.getEmail());
       return true;
@@ -382,7 +439,6 @@ class Moderator {
   */
   logout() {
     this.loggedIn = false;
-    this.whitelist = null;
     return true;
   }
 
@@ -392,14 +448,14 @@ class Moderator {
   @return {string} Admin email.
   */
   getEmail() {
-    return localStorage[&apos;admin:email&apos;];
-  }
-  /**
-  @desc Set administrator&apos;s email.
-  @private
-  @param {string} email - The new email.
-  @return {void} Void.
-  */
+      return localStorage[&apos;admin:email&apos;];
+    }
+    /**
+    @desc Set administrator&apos;s email.
+    @private
+    @param {string} email - The new email.
+    @return {void} Void.
+    */
   setEmail(email) {
     if (email === null) {
       delete localStorage[&apos;admin:email&apos;];
@@ -414,19 +470,20 @@ class Moderator {
   @return {string} Admin password.
   */
   getPassword() {
-    return localStorage[&apos;admin:password&apos;];
-  }
-  /**
-  @desc Set administrator&apos;s password.
-  @private
-  @param {string} password - The new password.
-  @return {void} Void.
-  */
+      return localStorage[&apos;admin:password&apos;];
+    }
+    /**
+    @desc Set administrator&apos;s password.
+    @private
+    @param {string} password - The new password.
+    @return {void} Void.
+    */
   setPassword(password) {
     if (password === null) {
       delete localStorage[&apos;admin:password&apos;];
     } else {
-      localStorage[&apos;admin:password&apos;] = password;
+      var hash = CryptoJS.SHA256(password);
+      localStorage[&apos;admin:password&apos;] = hash.toString(CryptoJS.enc.Base64);
     }
   }
 
@@ -481,7 +538,6 @@ class Moderator {
     }
   }
 
-
 }
 
 /**
@@ -490,12 +546,25 @@ Start the background script
 
 @ignore
 */
-let moderator = window.moderator = new Moderator();</code></pre>
+if (typeof window !== &apos;undefined&apos;) {
+  let moderator = new Moderator();
+  window.moderator = moderator;
+}
+
+/*
+Exporting for Node.js
+*/
+if (typeof module !== &apos;undefined&apos;) {
+  module.exports = {
+    Whitelist: Whitelist,
+    Moderator: Moderator
+  };
+}</code></pre>
 
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.5)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.6)</span></a>
 </footer>
 
 <script src="script/search_index.js"></script>

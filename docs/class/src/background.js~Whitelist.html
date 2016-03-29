@@ -19,7 +19,7 @@
   <a href="identifiers.html">Reference</a>
   <a href="source.html">Source</a>
   
-  <a data-ice="repoURL" href="git+https://github.com/Glavin001/BurntChrome.git">Repository</a>
+  <a data-ice="repoURL" href="https://github.com/Glavin001/BurntChrome" class="repo-url-github">Repository</a>
   <div class="search-box">
   <span>
     <img src="./image/search.png">
@@ -37,6 +37,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Popup.html">Popup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist_entry">whitelist_entry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -48,7 +49,7 @@
   
   
   
-  <span data-ice="source">| <span><a href="file/src/background.js.html#lineNumber14">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/background.js.html#lineNumber18">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -174,7 +175,7 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/background.js~Whitelist.html#static-method-testURLs">testURLs</a></span></span><span data-ice="signature">(a: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, b: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
+           <span data-ice="name"><span><a href="class/src/background.js~Whitelist.html#static-method-testURLs">testURLs</a></span></span><span data-ice="signature">(url: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, pattern: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
         </p>
       </div>
       <div>
@@ -418,7 +419,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber155">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber190">source</a></span></span>
     </span>
   </h3>
 
@@ -487,7 +488,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber144">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber179">source</a></span></span>
     </span>
   </h3>
 
@@ -555,7 +556,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber180">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber215">source</a></span></span>
     </span>
   </h3>
 
@@ -628,11 +629,11 @@
     
     
     
-    <span data-ice="name">testURLs</span><span data-ice="signature">(a: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, b: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
+    <span data-ice="name">testURLs</span><span data-ice="signature">(url: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, pattern: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber135">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber157">source</a></span></span>
     </span>
   </h3>
 
@@ -653,17 +654,17 @@
     <tbody>
     
     <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">a</td>
+      <td data-ice="name" data-depth="0">url</td>
       <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>URL to test against. Can be a RegExp.</p>
+      <td data-ice="description"><p>URL to test against.</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">b</td>
+      <td data-ice="name" data-depth="0">pattern</td>
       <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>URL to test with.</p>
+      <td data-ice="description"><p>URL pattern with glob support to test with.</p>
 </td>
     </tr>
 </tbody>
@@ -676,7 +677,7 @@
     <table>
       <tr>
         <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>If URL <code>a</code> matches URL <code>b</code></p>
+        <td class="return-desc" data-ice="returnDescription"><p>If URL matches pattern</p>
 </td>
       </tr>
     </table>
@@ -695,8 +696,8 @@
     
   <div class="example-doc" data-ice="exampleDoc">
       
-      <pre class="prettyprint source-code"><code data-ice="exampleCode">testURLs(&apos;https://google.com&apos;,&apos;google.com&apos;); // True
-testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False</code></pre>
+      <pre class="prettyprint source-code"><code data-ice="exampleCode">testURLs(&apos;https://google.com&apos;,&apos;*://google.com/**&apos;); // True
+testURLs(&apos;https://google.com&apos;,&apos;*://google.ca/**&apos;); // False</code></pre>
     </div>
 </div>
 
@@ -719,7 +720,7 @@ testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False</code><
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber20">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber24">source</a></span></span>
     </span>
   </h3>
 
@@ -779,7 +780,7 @@ testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False</code><
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber25">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber29">source</a></span></span>
     </span>
   </h3>
 
@@ -823,7 +824,7 @@ testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False</code><
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber37">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber41">source</a></span></span>
     </span>
   </h3>
 
@@ -911,7 +912,7 @@ testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False</code><
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber88">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber105">source</a></span></span>
     </span>
   </h3>
 
@@ -980,7 +981,7 @@ testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False</code><
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber69">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber86">source</a></span></span>
     </span>
   </h3>
 
@@ -1051,7 +1052,7 @@ testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False</code><
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber110">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber132">source</a></span></span>
     </span>
   </h3>
 
@@ -1103,7 +1104,7 @@ testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False</code><
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber121">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/background.js.html#lineNumber143">source</a></span></span>
     </span>
   </h3>
 
@@ -1165,7 +1166,7 @@ testURLs(&apos;https://google.com&apos;,&apos;google.ca&apos;); // False</code><
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.5)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.6)</span></a>
 </footer>
 
 <script src="script/search_index.js"></script>

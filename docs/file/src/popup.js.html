@@ -19,7 +19,7 @@
   <a href="identifiers.html">Reference</a>
   <a href="source.html">Source</a>
   
-  <a data-ice="repoURL" href="git+https://github.com/Glavin001/BurntChrome.git">Repository</a>
+  <a data-ice="repoURL" href="https://github.com/Glavin001/BurntChrome" class="repo-url-github">Repository</a>
   <div class="search-box">
   <span>
     <img src="./image/search.png">
@@ -37,12 +37,17 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/popup.js~Popup.html">Popup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist_entry">whitelist_entry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-whitelist">whitelist</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/popup.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+@typedef {Array&lt;whitelist_entry&gt;} whitelist A whitelist array
+*/
+
+/**
 @desc Popup view for Burnt Chrome
 */
 class Popup {
@@ -60,6 +65,16 @@ class Popup {
     Template element ID
     */
     this.templateId = &apos;frame&apos;;
+
+    /**
+    Static form data
+    */
+    this.formData = {}
+
+    /**
+    Last error message
+    */
+    this.lastErrorMessage = &quot;&quot;;
 
     //
     this.setupTemplates();
@@ -95,7 +110,8 @@ class Popup {
       isLocked: this.background.moderator.isLocked(),
       isUnlocked: this.background.moderator.isUnlocked(),
       whitelist: this.background.moderator.getWhitelistJSON(),
-      email: this.background.moderator.getEmail()
+      email: this.background.moderator.getEmail(),
+      errorMessage: this.lastErrorMessage
     };
   }
 
@@ -125,6 +141,118 @@ class Popup {
     $(&apos;#logout&apos;).click(() =&gt; this.logout());
     $(&apos;#unlock&apos;).click(() =&gt; this.unlock());
     $(&apos;#add-to-whitelist&apos;).click(() =&gt; this.addToWhitelist());
+    $(&apos;.delete&apos;).click(() =&gt; this.removeFromWhitelist(event.target.id));
+    $(&apos;#loginIntro&apos;).click(() =&gt; this.loginIntro());
+    $(&apos;#listIntro&apos;).click(() =&gt; this.listIntro());
+    $(&apos;#lockedIntro&apos;).click(() =&gt; introJs().start());
+    $(&apos;#export-whitelist&apos;).click(() =&gt; {
+      let whitelistJSON = JSON.stringify(this.background.moderator.getWhitelistJSON());
+      let email = this.background.moderator.getEmail();
+      let fileName = `Whitelist for ${email}.json`;
+      this.downloadData(fileName, whitelistJSON, &quot;application/json&quot;);
+    });
+    $(&apos;#import-whitelist-file&apos;).change((event) =&gt; {
+      let $el = $(event.currentTarget);
+      // Source: http://stackoverflow.com/a/13747921/2578205
+      let file = $el.prop(&apos;files&apos;)[0];
+      let reader = new FileReader();
+      reader.onload = () =&gt; {
+        let data = reader.result;
+        let json = JSON.parse(data);
+        // Add each entry to current whitelist
+        this.importWhitelist(json);
+      };
+      reader.readAsText(file);
+    });
+    $(&apos;#import-whitelist&apos;).click((event) =&gt; {
+      let url = $(&apos;#import-whitelist-url&apos;).val();
+      if (!url) {
+        // Invalid URL
+        return this.showError(new Error(&apos;Enter a URL to import whitelist from.&apos;));
+      } else {
+        // Temporarily disable
+        this.background.moderator.disable();
+
+        let callback = (error) =&gt; {
+          if (error) {
+            this.showError(error);
+          }
+          // Re-enable
+          this.background.moderator.enable();
+        };
+
+        // Source: https://developers.google.com/web/updates/2015/03/introduction-to-fetch?hl=en
+        fetch(url)
+        .then((response) =&gt; {
+          if (response.status !== 200) {
+            callback(new Error(`An error occurred reading ${url}`));
+          } else {
+            response.json().then((data) =&gt; {
+              this.importWhitelist(data);
+              callback();
+            }).catch(callback);
+          }
+        })
+        .catch(callback);
+      }
+    });
+
+    // Clicking a whitelist entry fill in entry fields above
+    $(&apos;.whitelist-entry&apos;).click((event) =&gt; {
+      event.preventDefault();
+      // console.log(&apos;whitelist-entry click&apos;, event, this);
+      let $el = $(event.currentTarget);
+      let title = $el.data(&apos;title&apos;);
+      let url = $el.data(&apos;url&apos;);
+      $(&apos;input[name=&quot;entry-title&quot;]&apos;).val(title).change();
+      $(&apos;input[name=&quot;entry-url&quot;]&apos;).val(url).change();
+    });
+
+    // When Enter is pressed while focus is inside of password field
+    // Login automatically
+    $(&apos;input[name=&quot;password&quot;]&apos;).keyup((event) =&gt; {
+      if (event.keyCode === 13) {
+        this.lock();
+      }
+    });
+    // When Enter is pressed while focus is inside of password field
+    // Login automatically
+    $(&apos;input[name=&quot;entry-url&quot;]&apos;).keyup((event) =&gt; {
+      if (event.keyCode === 13) {
+        this.addToWhitelist();
+      }
+    });
+
+    // Make sure that input elements do not
+    // have their value cleared when template is refreshed.
+    // So every change to input, we store the state
+    // On refresh, we sync the last state of the input field
+    // back into the input field.
+    const attr = &quot;name&quot;;
+      // We store state in formData property
+    const formData = this.formData;
+    // Iterate over all Input fields that should be syncing their value
+    $(`input[type=&quot;text&quot;][${attr}]`).each((idx, el) =&gt; {
+      let $el = $(el);
+      // Get the key to sync with in the formData
+      let key = $el.attr(attr);
+      // Get current value of input
+      let val = _.get(formData, key);
+      $el.val(val);
+      // console.log($el, attr, key, val);
+
+      // Handle changing input value
+      // and storing state
+      let changeHandler = (event) =&gt; {
+          let text = $(event.currentTarget).val();
+          // console.log(key, text);
+          _.set(formData, key, text);
+        }
+        // Bind events to listen for changes to input field
+      $el.change(changeHandler);
+      $el.keyup(changeHandler);
+    });
+
   }
 
   /**
@@ -144,10 +272,21 @@ class Popup {
     let context = this.getContext();
     let email = $(&apos;input[name=&quot;email&quot;]&apos;).val() || context.email;
     let password = $(&apos;input[name=&quot;password&quot;]&apos;).val();
-    // console.log(email, password);
-    let successful = this.background.moderator.lock(email, password);
-    console.log(&apos;successful&apos;, successful);
-    this.refresh();
+
+    let emailPattern = /^[a-zA-Z0-9.!#$%&amp;&apos;*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    let emailValid = (emailPattern.test(email) &amp;&amp; email !== null);
+    let passwordValid = (password !== &quot;&quot; &amp;&amp; password !== null);
+    $(&apos;#emailError&apos;).toggleClass(&quot;errorshow&quot;, !emailValid);
+    $(&apos;#passwordError&apos;).toggleClass(&quot;errorshow&quot;, !passwordValid);
+
+    if (emailValid &amp;&amp; passwordValid) {
+      // console.log(email, password);
+      let successful = this.background.moderator.lock(email, password);
+      // console.log(&apos;successful&apos;, successful);
+      this.refresh();
+      introJs().exit();
+      $(&apos;#passwordError&apos;).toggleClass(&quot;errorshow&quot;, !successful);
+    }
   }
 
   /**
@@ -159,6 +298,7 @@ class Popup {
     let successful = this.background.moderator.logout();
     // console.log(&apos;successful&apos;, successful);
     this.refresh();
+    introJs().exit();
   }
 
   /**
@@ -168,13 +308,23 @@ class Popup {
   unlock() {
     // console.log(&apos;Unlock!&apos;);
     let context = this.getContext();
-    let email = $(&apos;input[name=&quot;email&quot;]&apos;).val() || context.email;
-    let password = $(&apos;input[name=&quot;password&quot;]&apos;).val(); // || prompt(&apos;Please confirm that you want to unlock Chrome by entering your password&apos;);
-    // console.log(email, password);
-    if (email &amp;&amp; password) {
-      let successful = this.background.moderator.unlock(email, password);
-      // console.log(&apos;successful&apos;, successful);
+    let email = context.email;
+    if (context.isLoggedIn) {
+      let successful = this.background.moderator.unlock(email, null);
       this.refresh();
+      introJs().exit();
+      return;
+    }
+    let password = $(&apos;input[name=&quot;password&quot;]&apos;).val();
+
+    let passwordValid = (password !== &quot;&quot; &amp;&amp; password !== null);
+    $(&apos;#passwordError&apos;).toggleClass(&quot;errorshow&quot;, !passwordValid);
+    // console.log(email, password);
+    if (passwordValid) {
+      let successful = this.background.moderator.unlock(email, password);
+      this.refresh();
+      introJs().exit();
+      $(&apos;#passwordError&apos;).toggleClass(&quot;errorshow&quot;, !successful);
     }
   }
 
@@ -186,12 +336,180 @@ class Popup {
     // console.log(&apos;addToWhitelist&apos;);
     let title = $(&apos;input[name=&quot;entry-title&quot;]&apos;).val();
     let url = $(&apos;input[name=&quot;entry-url&quot;]&apos;).val();
-    let successful = this.background.moderator.addToWhitelist(title, url);
+    try {
+      let successful = this.background.moderator.addToWhitelist(title, url);
+      if (successful) {
+        // Clear fields
+        $(&apos;input[name=&quot;entry-title&quot;]&apos;).val(&apos;&apos;).change();
+        $(&apos;input[name=&quot;entry-url&quot;]&apos;).val(&apos;&apos;).change();
+        // Refresh UI
+        this.refresh();
+      }
+    } catch (error) {
+      this.showError(error);
+    }
+  }
+
+  /**
+  @desc Remove entry from whitelist
+  @public
+  @param {string} url - URL pattern in an existing whitelist entry
+  */
+  removeFromWhitelist(url) {
+    let successful = this.background.moderator.removeFromWhitelist(url);
     if (successful) this.refresh();
   }
 
-};
+  /**
+  @desc Show error in User Interface
+  @public
+  @param {Error} error - The error to show
+  */
+  showError(error) {
+    let message = error.message;
+    this.lastErrorMessage = message
+    this.refresh();
+    // $(&apos;#entryError&apos;).text(message).toggleClass(&quot;errorshow&quot;, !error);
+  }
 
+  /**
+  @desc Import entries from an existing whitelist
+  @public
+  @param {whitelist} whitelist - An existing whitelist to copy entries from
+  */
+  importWhitelist(whitelist) {
+    _.each(whitelist, ({
+      title,
+      url
+    }) =&gt; {
+      try {
+        this.background.moderator.addToWhitelist(title, url);
+      } catch (error) {
+        this.showError(error);
+      }
+    });
+    this.refresh();
+  }
+
+  /**
+  @desc Show IntroJS tutorial for login page
+  */
+  loginIntro() {
+    let intro = introJs();
+    intro.setOptions({
+      steps: [{
+        intro: &apos;Welcome to Burnt Chrome!&lt;br&gt;If this is your first time \
+        using Burnt Chrome, use these steps to get started!&apos;
+      }, {
+        element: document.querySelector(&apos;input[name=&quot;email&quot;]&apos;),
+        intro: &apos;First lets create your account. Please enter a valid \
+        email address.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;input[name=&quot;password&quot;]&apos;),
+        intro: &apos;Next, choose the password you would like to use.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;#lock&apos;),
+        intro: &apos;Click \&quot;login and lock\&quot; to login and setup your whitelist!&apos;,
+        position: &apos;left&apos;
+      }]
+    });
+    intro.start();
+  }
+
+  /**
+  @desc Show IntroJS tutorial for whitelist list page
+  */
+  listIntro() {
+    let intro = introJs();
+    intro.setOptions({
+      steps: [{
+        intro: &apos;Welcome to your whitelist!&lt;br&gt;Only websites on your list will be available \
+          while your browser is locked with Burnt Chrome. Lets get started by adding some entries.&apos;
+      }, {
+        element: document.querySelector(&apos;input[name=&quot;entry-title&quot;]&apos;),
+        intro: &apos;First give your entry a title or short description.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;input[name=&quot;entry-url&quot;]&apos;),
+        intro: &apos;Next, enter the URL you wish to permit.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;#add-to-whitelist&apos;),
+        intro: &apos;Click here to add your entry to the whitelist.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;#options&apos;),
+        intro: &apos;Click here for more options.&apos;,
+        position: &apos;bottom&apos;
+      }, {
+        element: document.querySelector(&apos;#export-whitelist&apos;),
+        intro: &apos;Click here to export your current whitelist to a file.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;#import-whitelist-file&apos;),
+        intro: &apos;Click here to import a whitelist from a file.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;#import-whitelist-url&apos;),
+        intro: &apos;Enter a URL to read and import a remote whitelist from.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;#import-whitelist&apos;),
+        intro: &apos;Click here to start importing a remote whitelist from the URL you previously entered.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;#logout&apos;),
+        intro: &apos;When finished logout. Browsing will remain locked \
+          to your whitelist until you choose to unlock it.&apos;,
+        position: &apos;right&apos;
+      }, {
+        element: document.querySelector(&apos;#unlock&apos;),
+        intro: &apos;Click here to logout and unlock your browser.&apos;,
+        position: &apos;right&apos;
+      }]
+    });
+    intro.start();
+  }
+
+  /**
+  @desc Download the given data to the users computer as a file
+  @param {string} name - Name of the file
+  @param {string} data - Contents of the file
+  @param {string} type - MIME type of the file
+  */
+  downloadData(name, data, type) {
+    // Browser support
+    window.URL = window.URL || window.webkitURL;
+    // Arg defaults
+    type = type || &quot;text/plain&quot;;
+    name = name || &quot;download&quot;;
+    data = data || &quot;&quot;;
+    // Create Blob
+    let blob;
+    if (data instanceof Blob) {
+      blob = data;
+    } else {
+      blob = new Blob([data], {
+        type: type
+      });
+    }
+    let url = window.URL.createObjectURL(blob)
+      // Create link
+    let link = document.createElement(&quot;a&quot;)
+    link.download = name
+    link.href = url
+      // Download!
+      // See http://stackoverflow.com/a/25047811/2578205 for more details
+    let event = document.createEvent(&quot;MouseEvents&quot;)
+    event.initMouseEvent(
+      &quot;click&quot;, true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null
+    )
+    link.dispatchEvent(event)
+  }
+
+};
 /**
 Ready up!
 
@@ -201,12 +519,13 @@ $(document).ready(() =&gt; {
   // console.log(&apos;Ready&apos;);
   let burnt = window.burnt = new Popup();
 
-});</code></pre>
+});
+</code></pre>
 
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.5)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.6)</span></a>
 </footer>
 
 <script src="script/search_index.js"></script>

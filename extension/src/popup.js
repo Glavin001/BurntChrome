@@ -1,4 +1,8 @@
 /**
+@typedef {Array<whitelist_entry>} whitelist A whitelist array
+*/
+
+/**
 @desc Popup view for Burnt Chrome
 */
 class Popup {
@@ -301,11 +305,21 @@ class Popup {
     }
   }
 
+  /**
+  @desc Remove entry from whitelist
+  @public
+  @param {string} url - URL pattern in an existing whitelist entry
+  */
   removeFromWhitelist(url) {
     let successful = this.background.moderator.removeFromWhitelist(url);
     if (successful) this.refresh();
   }
 
+  /**
+  @desc Show error in User Interface
+  @public
+  @param {Error} error - The error to show
+  */
   showError(error) {
     let message = error.message;
     this.lastErrorMessage = message
@@ -313,6 +327,11 @@ class Popup {
     // $('#entryError').text(message).toggleClass("errorshow", !error);
   }
 
+  /**
+  @desc Import entries from an existing whitelist
+  @public
+  @param {whitelist} whitelist - An existing whitelist to copy entries from
+  */
   importWhitelist(whitelist) {
     _.each(whitelist, ({
       title,
@@ -327,6 +346,9 @@ class Popup {
     this.refresh();
   }
 
+  /**
+  @desc Show IntroJS tutorial for login page
+  */
   loginIntro() {
     let intro = introJs();
     intro.setOptions({
@@ -351,6 +373,9 @@ class Popup {
     intro.start();
   }
 
+  /**
+  @desc Show IntroJS tutorial for whitelist list page
+  */
   listIntro() {
     let intro = introJs();
     intro.setOptions({
@@ -403,6 +428,12 @@ class Popup {
     intro.start();
   }
 
+  /**
+  @desc Download the given data to the users computer as a file
+  @param {string} name - Name of the file
+  @param {string} data - Contents of the file
+  @param {string} type - MIME type of the file
+  */
   downloadData(name, data, type) {
     // Browser support
     window.URL = window.URL || window.webkitURL;

@@ -366,6 +366,18 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/background.js~moderator#disable",
+    "class/src/background.js~Moderator.html#instance-method-disable",
+    "src/background.js~Moderator#disable",
+    "method"
+  ],
+  [
+    "src/background.js~moderator#enable",
+    "class/src/background.js~Moderator.html#instance-method-enable",
+    "src/background.js~Moderator#enable",
+    "method"
+  ],
+  [
     "src/background.js~moderator#getemail",
     "class/src/background.js~Moderator.html#instance-method-getEmail",
     "src/background.js~Moderator#getEmail",
@@ -388,6 +400,12 @@ window.esdocSearchIndex = [
     "class/src/background.js~Moderator.html#instance-method-getWhitelistJSON",
     "src/background.js~Moderator#getWhitelistJSON",
     "method"
+  ],
+  [
+    "src/background.js~moderator#isdisabled",
+    "class/src/background.js~Moderator.html#instance-member-isDisabled",
+    "src/background.js~Moderator#isDisabled",
+    "member"
   ],
   [
     "src/background.js~moderator#islocked",
@@ -570,15 +588,51 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/popup.js~popup#downloaddata",
+    "class/src/popup.js~Popup.html#instance-method-downloadData",
+    "src/popup.js~Popup#downloadData",
+    "method"
+  ],
+  [
+    "src/popup.js~popup#formdata",
+    "class/src/popup.js~Popup.html#instance-member-formData",
+    "src/popup.js~Popup#formData",
+    "member"
+  ],
+  [
     "src/popup.js~popup#getcontext",
     "class/src/popup.js~Popup.html#instance-method-getContext",
     "src/popup.js~Popup#getContext",
     "method"
   ],
   [
+    "src/popup.js~popup#importwhitelist",
+    "class/src/popup.js~Popup.html#instance-method-importWhitelist",
+    "src/popup.js~Popup#importWhitelist",
+    "method"
+  ],
+  [
+    "src/popup.js~popup#lasterrormessage",
+    "class/src/popup.js~Popup.html#instance-member-lastErrorMessage",
+    "src/popup.js~Popup#lastErrorMessage",
+    "member"
+  ],
+  [
+    "src/popup.js~popup#listintro",
+    "class/src/popup.js~Popup.html#instance-method-listIntro",
+    "src/popup.js~Popup#listIntro",
+    "method"
+  ],
+  [
     "src/popup.js~popup#lock",
     "class/src/popup.js~Popup.html#instance-method-lock",
     "src/popup.js~Popup#lock",
+    "method"
+  ],
+  [
+    "src/popup.js~popup#loginintro",
+    "class/src/popup.js~Popup.html#instance-method-loginIntro",
+    "src/popup.js~Popup#loginIntro",
     "method"
   ],
   [
@@ -594,6 +648,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/popup.js~popup#removefromwhitelist",
+    "class/src/popup.js~Popup.html#instance-method-removeFromWhitelist",
+    "src/popup.js~Popup#removeFromWhitelist",
+    "method"
+  ],
+  [
     "src/popup.js~popup#render",
     "class/src/popup.js~Popup.html#instance-method-render",
     "src/popup.js~Popup#render",
@@ -603,6 +663,12 @@ window.esdocSearchIndex = [
     "src/popup.js~popup#setuptemplates",
     "class/src/popup.js~Popup.html#instance-method-setupTemplates",
     "src/popup.js~Popup#setupTemplates",
+    "method"
+  ],
+  [
+    "src/popup.js~popup#showerror",
+    "class/src/popup.js~Popup.html#instance-method-showError",
+    "src/popup.js~Popup#showError",
     "method"
   ],
   [
@@ -616,5 +682,11 @@ window.esdocSearchIndex = [
     "class/src/popup.js~Popup.html#instance-method-unlock",
     "src/popup.js~Popup#unlock",
     "method"
+  ],
+  [
+    "src/popup.js~whitelist",
+    "typedef/index.html#static-typedef-whitelist",
+    "src/popup.js~whitelist",
+    "typedef"
   ]
 ]

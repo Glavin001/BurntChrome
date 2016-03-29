@@ -9,8 +9,8 @@
     "longname": "src/background.js",
     "access": null,
     "description": null,
-    "lineNumber": 14,
-    "content": "/**\n@typedef {Object} whitelist_entry A whitelist entry\n@property {string} title The title of the whitelist entry.\n@property {string} url The URL for the whitelist entry.\n*/\n\n/**\n@typedef {Array<whitelist_entry>} whitelist A whitelist array\n*/\n\n/**\n@desc Whitelist component\n*/\nclass Whitelist {\n\n  /**\n  @desc Initialize the instance.\n  @private\n  */\n  constructor(email) {\n    /**\n    @desc Whitelist's Email\n    @private\n    */\n    this.email = email;\n  }\n\n  /**\n  @desc Add URL to whitelist.\n\n  @param {string} title - Title for whitelist entry\n  @param {string} url - URL for whitelist entry\n  @return {boolean} Was successfully added to whitelist\n  @throws {Error} URL is already in whitelist.\n  @public\n  */\n  addURL(title, url) {\n    // Get whitelist\n    let whitelist = this.get();\n\n    // Check that URL is not already in whitelist\n    if (_.findIndex(whitelist, (entry) => { return entry.url === url; }) !== -1) {\n      // Must already be in whitelist\n      // Throw an error!\n      throw new Error(`URL '${url}' is already in whitelist`);\n    }\n    // Not already in whitelist\n\n    // Create new entry\n    title = title || url;\n    let entry = {\n      title,\n      url\n    };\n    // Add entry to whitelist\n    whitelist.push(entry);\n    // Save whitelist\n    this.set(whitelist);\n    // Return successful\n    return true;\n  }\n\n  /**\n  @desc Remove URL from whitelist\n  @param {string} url - The URL to remove from the whitelist\n  @return {whitelist} whitelist The updated whitelist\n  @public\n  */\n  removeURL(url) {\n    // Get whitelist\n    let whitelist = this.get();\n    // Find entry with matching URL in whitelist\n    // Remove entry\n    whitelist = _.remove(whitelist, (entry) => {\n      return Whitelist.testURLs(url, entry.url);\n    });\n    // Save new whitelist\n    this.set(whitelist);\n    return whitelist;\n  }\n\n  /**\n  @desc Check if URL is allowed\n  @param {string} url - The URL to check if whitelist allows.\n  @return {boolean} Whether the URL is allowed.\n  @public\n  */\n  isAllowed(url) {\n    // Check if Chrome extension\n    if (url.indexOf('chrome-extension://') !== -1) {\n      return true;\n    }\n    // Get whitelist\n    let whitelist = this.get();\n    // Find entry with matching URL in whitelist\n    let idx = _.findIndex(whitelist, (entry) => {\n      return Whitelist.testURLs(url, entry.url);\n    });\n    // Allow if not idx isnt -1\n    console.log('isAllowed', url, idx !== -1);\n    return idx !== -1;\n  }\n\n  /**\n  @desc Get the whitelist in localStorage.\n\n  @return {whitelist} The whitelist.\n  @private\n  */\n  get() {\n    return Whitelist.getWhitelistForEmail(this.email);\n  }\n\n  /**\n  @desc Set the whitelist in localStorage.\n\n  @param {whitelist} whitelist - The whitelist to save.\n  @return {boolean} Whether successfully saved.\n  @private\n  */\n  set(whitelist) {\n    return Whitelist.setWhitelistForEmail(this.email, whitelist);\n  }\n\n  /**\n  @desc Test URLs.\n  @param {string} a - URL to test against. Can be a RegExp.\n  @param {string} b - URL to test with.\n  @return {boolean} If URL `a` matches URL `b`\n  @private\n  @example\n  testURLs('https://google.com','google.com'); // True\n  testURLs('https://google.com','google.ca'); // False\n  */\n  static testURLs(a, b) {\n    return (a.indexOf(b) !== -1) || (new RegExp(a)).test(b);\n  }\n\n  /**\n  @desc Get the key to lookup in localStorage for the whitelist.\n  @return {string} localStorage key for the whitelist for the given email.\n  @private\n  */\n  static getWhitelistKeyForEmail(email) {\n    return 'whitelist:' + email;\n  }\n\n  /**\n  @desc Get the whitelist from localStorage\n  @private\n  @return {whitelist} The whitelist\n  @see https://developer.chrome.com/extensions/storage\n  @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API\n  */\n  static getWhitelistForEmail(email) {\n    let key = Whitelist.getWhitelistKeyForEmail(email);\n    let whitelist = localStorage[key];\n    if (typeof whitelist === 'string') {\n      return JSON.parse(whitelist);\n    }\n    /*\n      else if (typeof whitelist === 'object') {\n      return whitelist;\n    } */\n    else {\n      //console.warn('Unknown whitelist type: ', typeof whitelist, whitelist);\n      return [];\n    }\n  }\n\n  /**\n  @desc Set the whitelist in localStorage\n  @private\n  @param {string} email - The admin's email address.\n  @param {whitelist} whitelist - The whitelist to save.\n  @return {boolean} Whether successfully saved.\n  @see https://developer.chrome.com/extensions/storage\n  @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API\n  */\n  static setWhitelistForEmail(email, whitelist) {\n    let key = Whitelist.getWhitelistKeyForEmail(email);\n    if (typeof whitelist !== 'string') {\n      whitelist = JSON.stringify(whitelist);\n    }\n    localStorage[key] = whitelist;\n    // Return successful\n    return true;\n  }\n\n}\n\n/**\n@desc Moderator component\n*/\nclass Moderator {\n\n  /**\n  @desc Initialize the instance.\n  @private\n  */\n  constructor() {\n\n    /**\n    @desc Logged in state\n    */\n    this.loggedIn = false;\n    /**\n    @desc The Whitelist instance\n    @private\n    */\n    this.whitelist = null;\n\n    // Event listeners\n    this.setupListeners();\n\n\n  }\n\n  /**\n  @desc Setup all event listeners.\n\n  @see https://developer.chrome.com/extensions/webRequest\n  @listens {onBeforeRequest} Listens for before requests\n  @private\n  */\n  setupListeners() {\n\n    // Request listener\n    chrome.webRequest.onBeforeRequest.addListener((info) => {\n      var url = info.url;\n      let whitelist = this.getWhitelist();\n      if (!whitelist) {\n        return {\n          cancel: false\n        };\n      }\n      let shouldAllow = whitelist.isAllowed(url);\n      // console.log('URL: ', url, shouldAllow);\n      return {\n        cancel: !shouldAllow\n      };\n    }, {\n      urls: [\"<all_urls>\"]\n    }, [\"blocking\"]);\n\n    // Message Passing listener\n    // chrome.runtime.onMessage.addListener(\n    //   (request, sender, sendResponse) => {\n    //     console.log(sender.tab ?\n    //       \"from a content script:\" + sender.tab.url :\n    //       \"from the extension\");\n    //     if (request.type == \"login\") {\n    //       // Login!\n    //       this.session.login((error, userInfo) => {\n    //         console.log('userInfo', userInfo, error);\n    //         sendResponse(userInfo);\n    //       });\n    //     } else {\n    //       console.warn('Unknown message type', request);\n    //     }\n    //   });\n\n  }\n\n  /**\n  @desc Check if Chrome is locked.\n        Locked means that an admin has signed in with their email.\n  @return {boolean} Whether Chrome is locked.\n  @public\n  */\n  isLocked() {\n    return !this.isUnlocked();\n  }\n\n  /**\n  @desc Check if Chrome is unlocked.\n        Locked means that an admin has signed in with their email.\n  @return {boolean} Whether Chrome is unlocked.\n  @public\n  */\n  isUnlocked() {\n    return !this.getEmail();\n  }\n\n  /**\n  @desc Lock\n  @return {boolean} Whether successfully locked\n  @public\n  */\n  lock(email, password) {\n    // Check to make sure it is not already locked\n    if (this.isUnlocked()) {\n      // Not already locked\n      this.setEmail(email);\n      this.setPassword(password);\n      return this.login(email, password);\n    } else {\n      return this.login(email, password);\n    }\n  }\n\n  /**\n  @desc Unlock\n  @return {boolean} Whether successfully unlocked\n  @public\n  */\n  unlock(email, password) {\n    if (this.login(email, password)) {\n      // Logged in now\n      this.setEmail(null);\n      this.setPassword(null);\n      return this.logout();\n    } else {\n      // Could not login to unlock\n      return false;\n    }\n  }\n\n  /**\n  @desc Login\n  @return {boolean} Whether successfully logged in\n  @public\n  */\n  login(email, password) {\n    if (email === this.getEmail() && password === this.getPassword()) {\n      this.loggedIn = true;\n      this.whitelist = new Whitelist(this.getEmail());\n      return true;\n    } else {\n      return false;\n    }\n  }\n\n  /**\n  @desc logout\n  @return {boolean} Whether successfully logged out\n  @public\n  */\n  logout() {\n    this.loggedIn = false;\n    this.whitelist = null;\n    return true;\n  }\n\n  /**\n  @desc Get administator's email.\n  @private\n  @return {string} Admin email.\n  */\n  getEmail() {\n    return localStorage['admin:email'];\n  }\n  /**\n  @desc Set administrator's email.\n  @private\n  @param {string} email - The new email.\n  @return {void} Void.\n  */\n  setEmail(email) {\n    if (email === null) {\n      delete localStorage['admin:email'];\n    } else {\n      localStorage['admin:email'] = email;\n    }\n  }\n\n  /**\n  @desc Get administator's password.\n  @private\n  @return {string} Admin password.\n  */\n  getPassword() {\n    return localStorage['admin:password'];\n  }\n  /**\n  @desc Set administrator's password.\n  @private\n  @param {string} password - The new password.\n  @return {void} Void.\n  */\n  setPassword(password) {\n    if (password === null) {\n      delete localStorage['admin:password'];\n    } else {\n      localStorage['admin:password'] = password;\n    }\n  }\n\n  /**\n  @desc Get the current Whitelist instance.\n  @return {Object} The whitelist instance.\n  @private\n  */\n  getWhitelist() {\n    return this.whitelist;\n  }\n\n  /**\n  @desc Get the serialized JSON form of the Whitelist.\n  @return {whitelist} The whitelist JSON.\n  @public\n  */\n  getWhitelistJSON() {\n    let whitelist = this.getWhitelist();\n    if (whitelist) {\n      return whitelist.get();\n    } else {\n      return [];\n    }\n  }\n\n  /**\n  @desc Add to Whitelist\n  @return {boolean} Whether successfully added to whitelist.\n  @public\n  */\n  addToWhitelist(title, url) {\n    if (this.loggedIn && this.whitelist) {\n      this.whitelist.addURL(title, url);\n      return true;\n    } else {\n      return false;\n    }\n  }\n\n  /**\n  @desc Remove from Whitelist\n  @return {boolean} Whether successfully removed from whitelist.\n  @public\n  */\n  removeFromWhitelist(url) {\n    if (this.loggedIn && this.whitelist) {\n      this.whitelist.removeURL(url);\n      return true;\n    } else {\n      return false;\n    }\n  }\n\n\n}\n\n/**\n===== Main =====\nStart the background script\n\n@ignore\n*/\nlet moderator = window.moderator = new Moderator();"
+    "lineNumber": 10,
+    "content": "/**\n@typedef {Object} whitelist_entry A whitelist entry\n@property {string} title The title of the whitelist entry.\n@property {string} url The URL for the whitelist entry.\n*/\n\n/**\n@typedef {Array<whitelist_entry>} whitelist A whitelist array\n*/\nif (typeof module !== 'undefined' && typeof require !== \"undefined\") {\n  var _ = require('../../bower_components/lodash/dist/lodash');\n  var minimatch = require('../../bower_components/minimatch/minimatch');\n}\n\n/**\n@desc Whitelist component\n*/\nclass Whitelist {\n\n  /**\n  @desc Initialize the instance.\n  @private\n  */\n  constructor(email) {\n    /**\n    @desc Whitelist's Email\n    @private\n    */\n    this.email = email;\n  }\n\n  /**\n  @desc Add URL to whitelist.\n\n  @param {string} title - Title for whitelist entry\n  @param {string} url - URL for whitelist entry\n  @return {boolean} Was successfully added to whitelist\n  @throws {Error} URL is already in whitelist.\n  @public\n  */\n  addURL(title, url) {\n    // Trim whitespace from input\n    title = title.trim();\n    url = url.trim();\n    // Validation entry input\n    if (title === \"\") {\n      throw new Error(\"Please enter a Title!\");\n    }\n    if (url === \"\") {\n      throw new Error(\"Please enter a URL!\");\n    }\n\n    // Get whitelist\n    let whitelist = this.get();\n\n    // Check that URL is not already in whitelist\n    if (_.findIndex(whitelist, (entry) => {\n        return entry.url === url;\n      }) !== -1) {\n      // Must already be in whitelist\n      // Throw an error!\n      throw new Error(`URL pattern '${url}' is already in whitelist`);\n    }\n    // Not already in whitelist\n\n    // Create new entry\n    title = title || url;\n    let entry = {\n      title,\n      url\n    };\n    // Add entry to whitelist\n    whitelist.push(entry);\n    // Save whitelist\n    this.set(whitelist);\n    // Return successful\n    return true;\n  }\n\n  /**\n  @desc Remove URL from whitelist\n  @param {string} url - The URL to remove from the whitelist\n  @return {whitelist} whitelist The updated whitelist\n  @public\n  */\n  removeURL(url) {\n    // Get whitelist\n    let whitelist = this.get();\n    // Find entry with matching URL in whitelist\n    // Remove entry\n    _.remove(whitelist, (entry) => {\n      return url === entry.url\n    });\n    // Save new whitelist\n    this.set(whitelist);\n    return whitelist;\n  }\n\n  /**\n  @desc Check if URL is allowed\n  @param {string} url - The URL to check if whitelist allows.\n  @return {boolean} Whether the URL is allowed.\n  @public\n  */\n  isAllowed(url) {\n    // Check if Chrome extension\n    if (url.indexOf('chrome-extension://') !== -1) {\n      return true;\n    }\n    // Get whitelist\n    let whitelist = this.get();\n    // Find entry with matching URL in whitelist\n    let idx = _.findIndex(whitelist, (entry) => {\n      try {\n        return Whitelist.testURLs(url, entry.url);\n      } catch (error) {\n        console.error(error);\n        return false;\n      }\n    });\n    // Allow if not idx isnt -1\n    console.log('isAllowed', url, idx !== -1);\n    return idx !== -1;\n  }\n\n  /**\n  @desc Get the whitelist in localStorage.\n\n  @return {whitelist} The whitelist.\n  @private\n  */\n  get() {\n    return Whitelist.getWhitelistForEmail(this.email);\n  }\n\n  /**\n  @desc Set the whitelist in localStorage.\n\n  @param {whitelist} whitelist - The whitelist to save.\n  @return {boolean} Whether successfully saved.\n  @private\n  */\n  set(whitelist) {\n    return Whitelist.setWhitelistForEmail(this.email, whitelist);\n  }\n\n  /**\n  @desc Test URLs.\n  @param {string} url - URL to test against.\n  @param {string} pattern - URL pattern with glob support to test with.\n  @return {boolean} If URL matches pattern\n  @private\n  @example\n  testURLs('https://google.com','*://google.com/**'); // True\n  testURLs('https://google.com','*://google.ca/**'); // False\n  */\n  static testURLs(url, pattern) {\n    // Ensure that a URL ends with \"/\" such that \"/**\" matches\n    // Check to make sure there is a path\n    if (_.endsWith(pattern, '/**') && url.split('?').length === 1 && url[url.length - 1] !== '/') {\n      url += '/';\n    }\n    // Handle cases where scheme is not provided in pattern\n    const defaultScheme = \"*\";\n    const schemeSep = \"://\";\n    let urlParts = url.split(schemeSep);\n    let patternParts = pattern.split(schemeSep);\n    if (patternParts.length === 1) {\n      patternParts = [\"*\", patternParts[0]];\n    }\n    return minimatch(urlParts[0], patternParts[0]) && minimatch(urlParts[1], patternParts[1]);\n  }\n\n  /**\n  @desc Get the key to lookup in localStorage for the whitelist.\n  @return {string} localStorage key for the whitelist for the given email.\n  @private\n  */\n  static getWhitelistKeyForEmail(email) {\n    return 'whitelist:' + email;\n  }\n\n  /**\n  @desc Get the whitelist from localStorage\n  @private\n  @return {whitelist} The whitelist\n  @see https://developer.chrome.com/extensions/storage\n  @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API\n  */\n  static getWhitelistForEmail(email) {\n    let key = Whitelist.getWhitelistKeyForEmail(email);\n    let whitelist = localStorage[key];\n    if (typeof whitelist === 'string') {\n      return JSON.parse(whitelist);\n    }\n    /*\n      else if (typeof whitelist === 'object') {\n      return whitelist;\n    } */\n    else {\n      //console.warn('Unknown whitelist type: ', typeof whitelist, whitelist);\n      return [];\n    }\n  }\n\n  /**\n  @desc Set the whitelist in localStorage\n  @private\n  @param {string} email - The admin's email address.\n  @param {whitelist} whitelist - The whitelist to save.\n  @return {boolean} Whether successfully saved.\n  @see https://developer.chrome.com/extensions/storage\n  @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API\n  */\n  static setWhitelistForEmail(email, whitelist) {\n    let key = Whitelist.getWhitelistKeyForEmail(email);\n    if (typeof whitelist !== 'string') {\n      whitelist = JSON.stringify(whitelist);\n    }\n    localStorage[key] = whitelist;\n    // Return successful\n    return true;\n  }\n\n}\n\n/**\n@desc Moderator component\n*/\nclass Moderator {\n\n  /**\n  @desc Initialize the instance.\n  @private\n  */\n  constructor() {\n\n    /**\n    @desc Logged in state\n    */\n    this.loggedIn = false;\n    /**\n    @desc Moderator is in disabled state\n    */\n    this.isDisabled = false;\n    /**\n    @desc The Whitelist instance\n    @private\n    */\n    this.whitelist = null;\n\n    // Event listeners\n    this.setupListeners();\n\n\n  }\n\n  /**\n  @desc Setup all event listeners.\n\n  @see https://developer.chrome.com/extensions/webRequest\n  @listens {onBeforeRequest} Listens for before requests\n  @private\n  */\n  setupListeners() {\n\n    // Request listener\n    chrome.webRequest.onBeforeRequest.addListener((info) => {\n      var url = info.url;\n      let whitelist = this.getWhitelist();\n      // console.log('webRequest', this, this.isDisabled, whitelist);\n      if (this.isDisabled || !whitelist) {\n        return {\n          cancel: false\n        };\n      }\n      let shouldAllow = whitelist.isAllowed(url);\n      // console.log('URL: ', url, shouldAllow);\n      return {\n        cancel: !shouldAllow\n      };\n    }, {\n      urls: [\"<all_urls>\"]\n    }, [\"blocking\"]);\n\n    // Message Passing listener\n    // chrome.runtime.onMessage.addListener(\n    //   (request, sender, sendResponse) => {\n    //     console.log(sender.tab ?\n    //       \"from a content script:\" + sender.tab.url :\n    //       \"from the extension\");\n    //     if (request.type == \"login\") {\n    //       // Login!\n    //       this.session.login((error, userInfo) => {\n    //         console.log('userInfo', userInfo, error);\n    //         sendResponse(userInfo);\n    //       });\n    //     } else {\n    //       console.warn('Unknown message type', request);\n    //     }\n    //   });\n\n  }\n\n  /**\n  @desc Disable moderator\n  */\n  disable() {\n    this.isDisabled = true;\n  }\n  /**\n  @desc Enable moderator\n  */\n  enable() {\n    this.isDisabled = false;\n  }\n\n  /**\n  @desc Check if Chrome is locked.\n        Locked means that an admin has signed in with their email.\n  @return {boolean} Whether Chrome is locked.\n  @public\n  */\n  isLocked() {\n    return !this.isUnlocked();\n  }\n\n  /**\n  @desc Check if Chrome is unlocked.\n        Locked means that an admin has signed in with their email.\n  @return {boolean} Whether Chrome is unlocked.\n  @public\n  */\n  isUnlocked() {\n    return !this.getEmail();\n  }\n\n  /**\n  @desc Lock\n  @return {boolean} Whether successfully locked\n  @public\n  */\n  lock(email, password) {\n    // Check to make sure it is not already locked\n    if (this.isUnlocked()) {\n      // Not already locked\n      this.setEmail(email);\n      this.setPassword(password);\n      return this.login(email, password);\n    } else {\n      return this.login(email, password);\n    }\n  }\n\n  /**\n  @desc Unlock\n  @return {boolean} Whether successfully unlocked\n  @public\n  */\n  unlock(email, password) {\n    if (this.loggedIn || this.login(email, password)) {\n      // Logged in now\n      this.setEmail(null);\n      this.setPassword(null);\n      this.whitelist = null;\n      return this.logout();\n    } else {\n      // Could not login to unlock\n      return false;\n    }\n  }\n\n  /**\n  @desc Login\n  @return {boolean} Whether successfully logged in\n  @public\n  */\n  login(email, password) {\n    var enteredHash = CryptoJS.SHA256(password);\n    var passwordHash = enteredHash.toString(CryptoJS.enc.Base64)\n    if (email === this.getEmail() && passwordHash === this.getPassword()) {\n      this.loggedIn = true;\n      this.whitelist = new Whitelist(this.getEmail());\n      return true;\n    } else {\n      return false;\n    }\n  }\n\n  /**\n  @desc logout\n  @return {boolean} Whether successfully logged out\n  @public\n  */\n  logout() {\n    this.loggedIn = false;\n    return true;\n  }\n\n  /**\n  @desc Get administator's email.\n  @private\n  @return {string} Admin email.\n  */\n  getEmail() {\n      return localStorage['admin:email'];\n    }\n    /**\n    @desc Set administrator's email.\n    @private\n    @param {string} email - The new email.\n    @return {void} Void.\n    */\n  setEmail(email) {\n    if (email === null) {\n      delete localStorage['admin:email'];\n    } else {\n      localStorage['admin:email'] = email;\n    }\n  }\n\n  /**\n  @desc Get administator's password.\n  @private\n  @return {string} Admin password.\n  */\n  getPassword() {\n      return localStorage['admin:password'];\n    }\n    /**\n    @desc Set administrator's password.\n    @private\n    @param {string} password - The new password.\n    @return {void} Void.\n    */\n  setPassword(password) {\n    if (password === null) {\n      delete localStorage['admin:password'];\n    } else {\n      var hash = CryptoJS.SHA256(password);\n      localStorage['admin:password'] = hash.toString(CryptoJS.enc.Base64);\n    }\n  }\n\n  /**\n  @desc Get the current Whitelist instance.\n  @return {Object} The whitelist instance.\n  @private\n  */\n  getWhitelist() {\n    return this.whitelist;\n  }\n\n  /**\n  @desc Get the serialized JSON form of the Whitelist.\n  @return {whitelist} The whitelist JSON.\n  @public\n  */\n  getWhitelistJSON() {\n    let whitelist = this.getWhitelist();\n    if (whitelist) {\n      return whitelist.get();\n    } else {\n      return [];\n    }\n  }\n\n  /**\n  @desc Add to Whitelist\n  @return {boolean} Whether successfully added to whitelist.\n  @public\n  */\n  addToWhitelist(title, url) {\n    if (this.loggedIn && this.whitelist) {\n      this.whitelist.addURL(title, url);\n      return true;\n    } else {\n      return false;\n    }\n  }\n\n  /**\n  @desc Remove from Whitelist\n  @return {boolean} Whether successfully removed from whitelist.\n  @public\n  */\n  removeFromWhitelist(url) {\n    if (this.loggedIn && this.whitelist) {\n      this.whitelist.removeURL(url);\n      return true;\n    } else {\n      return false;\n    }\n  }\n\n}\n\n/**\n===== Main =====\nStart the background script\n\n@ignore\n*/\nif (typeof window !== 'undefined') {\n  let moderator = new Moderator();\n  window.moderator = moderator;\n}\n\n/*\nExporting for Node.js\n*/\nif (typeof module !== 'undefined') {\n  module.exports = {\n    Whitelist: Whitelist,\n    Moderator: Moderator\n  };\n}"
   },
   {
     "__docId__": 1,
@@ -62,6 +62,7 @@
     "longname": "src/background.js~whitelist",
     "access": null,
     "description": "",
+    "lineNumber": 10,
     "type": {
       "types": [
         "Array<whitelist_entry>"
@@ -83,7 +84,7 @@
     "importPath": "burntchrome/src/background.js",
     "importStyle": null,
     "description": "Whitelist component",
-    "lineNumber": 14,
+    "lineNumber": 18,
     "interface": false
   },
   {
@@ -96,7 +97,7 @@
     "longname": "src/background.js~Whitelist#constructor",
     "access": "private",
     "description": "Initialize the instance.",
-    "lineNumber": 20,
+    "lineNumber": 24,
     "params": [
       {
         "name": "email",
@@ -117,7 +118,7 @@
     "longname": "src/background.js~Whitelist#email",
     "access": "private",
     "description": "Whitelist's Email",
-    "lineNumber": 25,
+    "lineNumber": 29,
     "type": {
       "types": [
         "*"
@@ -134,7 +135,7 @@
     "longname": "src/background.js~Whitelist#addURL",
     "access": "public",
     "description": "Add URL to whitelist.",
-    "lineNumber": 37,
+    "lineNumber": 41,
     "params": [
       {
         "nullable": null,
@@ -185,7 +186,7 @@
     "longname": "src/background.js~Whitelist#removeURL",
     "access": "public",
     "description": "Remove URL from whitelist",
-    "lineNumber": 69,
+    "lineNumber": 86,
     "params": [
       {
         "nullable": null,
@@ -218,7 +219,7 @@
     "longname": "src/background.js~Whitelist#isAllowed",
     "access": "public",
     "description": "Check if URL is allowed",
-    "lineNumber": 88,
+    "lineNumber": 105,
     "params": [
       {
         "nullable": null,
@@ -251,7 +252,7 @@
     "longname": "src/background.js~Whitelist#get",
     "access": "private",
     "description": "Get the whitelist in localStorage.",
-    "lineNumber": 110,
+    "lineNumber": 132,
     "params": [],
     "return": {
       "nullable": null,
@@ -273,7 +274,7 @@
     "longname": "src/background.js~Whitelist#set",
     "access": "private",
     "description": "Set the whitelist in localStorage.",
-    "lineNumber": 121,
+    "lineNumber": 143,
     "params": [
       {
         "nullable": null,
@@ -307,9 +308,9 @@
     "access": "private",
     "description": "Test URLs.",
     "examples": [
-      "testURLs('https://google.com','google.com'); // True\ntestURLs('https://google.com','google.ca'); // False"
+      "testURLs('https://google.com','*://google.com/**'); // True\ntestURLs('https://google.com','*://google.ca/**'); // False"
     ],
-    "lineNumber": 135,
+    "lineNumber": 157,
     "params": [
       {
         "nullable": null,
@@ -318,8 +319,8 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "a",
-        "description": "URL to test against. Can be a RegExp."
+        "name": "url",
+        "description": "URL to test against."
       },
       {
         "nullable": null,
@@ -328,8 +329,8 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "b",
-        "description": "URL to test with."
+        "name": "pattern",
+        "description": "URL pattern with glob support to test with."
       }
     ],
     "return": {
@@ -338,7 +339,7 @@
         "boolean"
       ],
       "spread": false,
-      "description": "If URL `a` matches URL `b`"
+      "description": "If URL matches pattern"
     },
     "generator": false
   },
@@ -352,7 +353,7 @@
     "longname": "src/background.js~Whitelist.getWhitelistKeyForEmail",
     "access": "private",
     "description": "Get the key to lookup in localStorage for the whitelist.",
-    "lineNumber": 144,
+    "lineNumber": 179,
     "params": [
       {
         "name": "email",
@@ -385,7 +386,7 @@
       "https://developer.chrome.com/extensions/storage",
       "https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API"
     ],
-    "lineNumber": 155,
+    "lineNumber": 190,
     "params": [
       {
         "name": "email",
@@ -418,7 +419,7 @@
       "https://developer.chrome.com/extensions/storage",
       "https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API"
     ],
-    "lineNumber": 180,
+    "lineNumber": 215,
     "params": [
       {
         "nullable": null,
@@ -464,7 +465,7 @@
     "importPath": "burntchrome/src/background.js",
     "importStyle": null,
     "description": "Moderator component",
-    "lineNumber": 195,
+    "lineNumber": 230,
     "interface": false
   },
   {
@@ -477,7 +478,7 @@
     "longname": "src/background.js~Moderator#constructor",
     "access": "private",
     "description": "Initialize the instance.",
-    "lineNumber": 201,
+    "lineNumber": 236,
     "params": [],
     "generator": false
   },
@@ -491,7 +492,7 @@
     "longname": "src/background.js~Moderator#loggedIn",
     "access": null,
     "description": "Logged in state",
-    "lineNumber": 206,
+    "lineNumber": 241,
     "type": {
       "types": [
         "boolean"
@@ -503,12 +504,29 @@
     "kind": "member",
     "static": false,
     "variation": null,
+    "name": "isDisabled",
+    "memberof": "src/background.js~Moderator",
+    "longname": "src/background.js~Moderator#isDisabled",
+    "access": null,
+    "description": "Moderator is in disabled state",
+    "lineNumber": 245,
+    "type": {
+      "types": [
+        "boolean"
+      ]
+    }
+  },
+  {
+    "__docId__": 19,
+    "kind": "member",
+    "static": false,
+    "variation": null,
     "name": "whitelist",
     "memberof": "src/background.js~Moderator",
     "longname": "src/background.js~Moderator#whitelist",
     "access": "private",
     "description": "The Whitelist instance",
-    "lineNumber": 211,
+    "lineNumber": 250,
     "type": {
       "types": [
         "*"
@@ -516,7 +534,7 @@
     }
   },
   {
-    "__docId__": 19,
+    "__docId__": 20,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -528,7 +546,7 @@
     "see": [
       "https://developer.chrome.com/extensions/webRequest"
     ],
-    "lineNumber": 226,
+    "lineNumber": 265,
     "params": [],
     "listens": [
       {
@@ -541,7 +559,71 @@
     "generator": false
   },
   {
-    "__docId__": 20,
+    "__docId__": 21,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "disable",
+    "memberof": "src/background.js~Moderator",
+    "longname": "src/background.js~Moderator#disable",
+    "access": null,
+    "description": "Disable moderator",
+    "lineNumber": 308,
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 22,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "isDisabled",
+    "memberof": "src/background.js~Moderator",
+    "longname": "src/background.js~Moderator#isDisabled",
+    "access": null,
+    "description": null,
+    "lineNumber": 309,
+    "undocument": true,
+    "type": {
+      "types": [
+        "boolean"
+      ]
+    }
+  },
+  {
+    "__docId__": 23,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "enable",
+    "memberof": "src/background.js~Moderator",
+    "longname": "src/background.js~Moderator#enable",
+    "access": null,
+    "description": "Enable moderator",
+    "lineNumber": 314,
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 24,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "isDisabled",
+    "memberof": "src/background.js~Moderator",
+    "longname": "src/background.js~Moderator#isDisabled",
+    "access": null,
+    "description": null,
+    "lineNumber": 315,
+    "undocument": true,
+    "type": {
+      "types": [
+        "boolean"
+      ]
+    }
+  },
+  {
+    "__docId__": 25,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -550,7 +632,7 @@
     "longname": "src/background.js~Moderator#isLocked",
     "access": "public",
     "description": "Check if Chrome is locked.\nLocked means that an admin has signed in with their email.",
-    "lineNumber": 271,
+    "lineNumber": 324,
     "params": [],
     "return": {
       "nullable": null,
@@ -563,7 +645,7 @@
     "generator": false
   },
   {
-    "__docId__": 21,
+    "__docId__": 26,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -572,7 +654,7 @@
     "longname": "src/background.js~Moderator#isUnlocked",
     "access": "public",
     "description": "Check if Chrome is unlocked.\nLocked means that an admin has signed in with their email.",
-    "lineNumber": 281,
+    "lineNumber": 334,
     "params": [],
     "return": {
       "nullable": null,
@@ -585,7 +667,7 @@
     "generator": false
   },
   {
-    "__docId__": 22,
+    "__docId__": 27,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -594,7 +676,7 @@
     "longname": "src/background.js~Moderator#lock",
     "access": "public",
     "description": "Lock",
-    "lineNumber": 290,
+    "lineNumber": 343,
     "params": [
       {
         "name": "email",
@@ -620,7 +702,7 @@
     "generator": false
   },
   {
-    "__docId__": 23,
+    "__docId__": 28,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -629,7 +711,7 @@
     "longname": "src/background.js~Moderator#unlock",
     "access": "public",
     "description": "Unlock",
-    "lineNumber": 307,
+    "lineNumber": 360,
     "params": [
       {
         "name": "email",
@@ -655,7 +737,25 @@
     "generator": false
   },
   {
-    "__docId__": 24,
+    "__docId__": 29,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "whitelist",
+    "memberof": "src/background.js~Moderator",
+    "longname": "src/background.js~Moderator#whitelist",
+    "access": null,
+    "description": null,
+    "lineNumber": 365,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 30,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -664,7 +764,7 @@
     "longname": "src/background.js~Moderator#login",
     "access": "public",
     "description": "Login",
-    "lineNumber": 324,
+    "lineNumber": 378,
     "params": [
       {
         "name": "email",
@@ -690,7 +790,7 @@
     "generator": false
   },
   {
-    "__docId__": 25,
+    "__docId__": 31,
     "kind": "member",
     "static": false,
     "variation": null,
@@ -699,7 +799,7 @@
     "longname": "src/background.js~Moderator#loggedIn",
     "access": null,
     "description": null,
-    "lineNumber": 326,
+    "lineNumber": 382,
     "undocument": true,
     "type": {
       "types": [
@@ -708,7 +808,7 @@
     }
   },
   {
-    "__docId__": 26,
+    "__docId__": 32,
     "kind": "member",
     "static": false,
     "variation": null,
@@ -717,7 +817,7 @@
     "longname": "src/background.js~Moderator#whitelist",
     "access": null,
     "description": null,
-    "lineNumber": 327,
+    "lineNumber": 383,
     "undocument": true,
     "type": {
       "types": [
@@ -726,7 +826,7 @@
     }
   },
   {
-    "__docId__": 27,
+    "__docId__": 33,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -735,7 +835,7 @@
     "longname": "src/background.js~Moderator#logout",
     "access": "public",
     "description": "logout",
-    "lineNumber": 339,
+    "lineNumber": 395,
     "params": [],
     "return": {
       "nullable": null,
@@ -748,7 +848,7 @@
     "generator": false
   },
   {
-    "__docId__": 28,
+    "__docId__": 34,
     "kind": "member",
     "static": false,
     "variation": null,
@@ -757,7 +857,7 @@
     "longname": "src/background.js~Moderator#loggedIn",
     "access": null,
     "description": null,
-    "lineNumber": 340,
+    "lineNumber": 396,
     "undocument": true,
     "type": {
       "types": [
@@ -766,25 +866,7 @@
     }
   },
   {
-    "__docId__": 29,
-    "kind": "member",
-    "static": false,
-    "variation": null,
-    "name": "whitelist",
-    "memberof": "src/background.js~Moderator",
-    "longname": "src/background.js~Moderator#whitelist",
-    "access": null,
-    "description": null,
-    "lineNumber": 341,
-    "undocument": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 30,
+    "__docId__": 35,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -793,7 +875,7 @@
     "longname": "src/background.js~Moderator#getEmail",
     "access": "private",
     "description": "Get administator's email.",
-    "lineNumber": 350,
+    "lineNumber": 405,
     "params": [],
     "return": {
       "nullable": null,
@@ -806,7 +888,7 @@
     "generator": false
   },
   {
-    "__docId__": 31,
+    "__docId__": 36,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -815,7 +897,7 @@
     "longname": "src/background.js~Moderator#setEmail",
     "access": "private",
     "description": "Set administrator's email.",
-    "lineNumber": 359,
+    "lineNumber": 414,
     "params": [
       {
         "nullable": null,
@@ -839,7 +921,7 @@
     "generator": false
   },
   {
-    "__docId__": 32,
+    "__docId__": 37,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -848,7 +930,7 @@
     "longname": "src/background.js~Moderator#getPassword",
     "access": "private",
     "description": "Get administator's password.",
-    "lineNumber": 372,
+    "lineNumber": 427,
     "params": [],
     "return": {
       "nullable": null,
@@ -861,7 +943,7 @@
     "generator": false
   },
   {
-    "__docId__": 33,
+    "__docId__": 38,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -870,7 +952,7 @@
     "longname": "src/background.js~Moderator#setPassword",
     "access": "private",
     "description": "Set administrator's password.",
-    "lineNumber": 381,
+    "lineNumber": 436,
     "params": [
       {
         "nullable": null,
@@ -894,7 +976,7 @@
     "generator": false
   },
   {
-    "__docId__": 34,
+    "__docId__": 39,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -903,7 +985,7 @@
     "longname": "src/background.js~Moderator#getWhitelist",
     "access": "private",
     "description": "Get the current Whitelist instance.",
-    "lineNumber": 394,
+    "lineNumber": 450,
     "params": [],
     "return": {
       "nullable": null,
@@ -916,7 +998,7 @@
     "generator": false
   },
   {
-    "__docId__": 35,
+    "__docId__": 40,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -925,7 +1007,7 @@
     "longname": "src/background.js~Moderator#getWhitelistJSON",
     "access": "public",
     "description": "Get the serialized JSON form of the Whitelist.",
-    "lineNumber": 403,
+    "lineNumber": 459,
     "params": [],
     "return": {
       "nullable": null,
@@ -938,7 +1020,7 @@
     "generator": false
   },
   {
-    "__docId__": 36,
+    "__docId__": 41,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -947,7 +1029,7 @@
     "longname": "src/background.js~Moderator#addToWhitelist",
     "access": "public",
     "description": "Add to Whitelist",
-    "lineNumber": 417,
+    "lineNumber": 473,
     "params": [
       {
         "name": "title",
@@ -973,7 +1055,7 @@
     "generator": false
   },
   {
-    "__docId__": 37,
+    "__docId__": 42,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -982,7 +1064,7 @@
     "longname": "src/background.js~Moderator#removeFromWhitelist",
     "access": "public",
     "description": "Remove from Whitelist",
-    "lineNumber": 431,
+    "lineNumber": 487,
     "params": [
       {
         "name": "url",
@@ -1002,28 +1084,7 @@
     "generator": false
   },
   {
-    "__docId__": 38,
-    "kind": "variable",
-    "static": true,
-    "variation": null,
-    "name": "moderator",
-    "memberof": "src/background.js",
-    "longname": "src/background.js~moderator",
-    "access": null,
-    "export": false,
-    "importPath": "burntchrome/src/background.js",
-    "importStyle": null,
-    "description": "===== Main =====\nStart the background script",
-    "lineNumber": 449,
-    "ignore": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 39,
+    "__docId__": 43,
     "kind": "file",
     "static": true,
     "variation": null,
@@ -1032,11 +1093,29 @@
     "longname": "src/popup.js",
     "access": null,
     "description": null,
-    "lineNumber": 4,
-    "content": "/**\n@desc Popup view for Burnt Chrome\n*/\nclass Popup {\n  /**\n  @desc Initialize the instance.\n  @private\n  */\n  constructor() {\n    // Setup defaults\n    /**\n    Background page.\n    */\n    this.background = chrome.extension.getBackgroundPage();\n    /**\n    Template element ID\n    */\n    this.templateId = 'frame';\n\n    //\n    this.setupTemplates();\n\n    // Render initial page\n    this.refresh();\n  }\n\n  /**\n  @desc Setup handlebars views to render compiled templates to.\n  @private\n  */\n  setupTemplates() {\n    let handlebarsSelector = 'script[type=\"text/x-handlebars-template\"]';\n    $(handlebarsSelector).each((index, $el) => {\n      // console.log($el, $el.id);\n      var templateId = $el.id;\n      if (!templateId) {\n        return console.warn(\"Unknown id for element: \", $el);\n      }\n      let containerId = templateId.split('-template')[0];\n      $($el).after($(`<div id=\"${containerId}\"></div>`));\n    });\n  }\n\n  /**\n  @desc Generate the context to pass to the template to render.\n  @private\n  */\n  getContext() {\n    return {\n      isLoggedIn: this.background.moderator.loggedIn,\n      isLocked: this.background.moderator.isLocked(),\n      isUnlocked: this.background.moderator.isUnlocked(),\n      whitelist: this.background.moderator.getWhitelistJSON(),\n      email: this.background.moderator.getEmail()\n    };\n  }\n\n  /**\n  @desc Render the template with a context\n  @private\n  */\n  render(id, context) {\n    console.log('render', context);\n    let el = document.getElementById(`${id}-template`);\n    let source = el.innerHTML;\n    let template = Handlebars.compile(source);\n    let html = template(context);\n    document.getElementById(id).innerHTML = html;\n    // console.log('html', html);\n    // Bind events\n    this.bind();\n  }\n\n  /**\n  @desc Bind the events\n  @private\n  */\n  bind() {\n    // console.log('Bind element events');\n    $('#lock').click(() => this.lock());\n    $('#logout').click(() => this.logout());\n    $('#unlock').click(() => this.unlock());\n    $('#add-to-whitelist').click(() => this.addToWhitelist());\n  }\n\n  /**\n  @desc Refresh the template\n  @private\n  */\n  refresh() {\n    this.render(this.templateId, this.getContext());\n  }\n\n  /**\n  @desc Lock\n  @public\n  */\n  lock() {\n    // console.log('Lock!');\n    let context = this.getContext();\n    let email = $('input[name=\"email\"]').val() || context.email;\n    let password = $('input[name=\"password\"]').val();\n    // console.log(email, password);\n    let successful = this.background.moderator.lock(email, password);\n    console.log('successful', successful);\n    this.refresh();\n  }\n\n  /**\n  @desc Logout\n  @public\n  */\n  logout() {\n    // console.log('logout!');\n    let successful = this.background.moderator.logout();\n    // console.log('successful', successful);\n    this.refresh();\n  }\n\n  /**\n  @desc Unlock\n  @public\n  */\n  unlock() {\n    // console.log('Unlock!');\n    let context = this.getContext();\n    let email = $('input[name=\"email\"]').val() || context.email;\n    let password = $('input[name=\"password\"]').val(); // || prompt('Please confirm that you want to unlock Chrome by entering your password');\n    // console.log(email, password);\n    if (email && password) {\n      let successful = this.background.moderator.unlock(email, password);\n      // console.log('successful', successful);\n      this.refresh();\n    }\n  }\n\n  /**\n  @desc Add to Whitelist\n  @public\n  */\n  addToWhitelist() {\n    // console.log('addToWhitelist');\n    let title = $('input[name=\"entry-title\"]').val();\n    let url = $('input[name=\"entry-url\"]').val();\n    let successful = this.background.moderator.addToWhitelist(title, url);\n    if (successful) this.refresh();\n  }\n\n};\n\n/**\nReady up!\n\n@ignore\n*/\n$(document).ready(() => {\n  // console.log('Ready');\n  let burnt = window.burnt = new Popup();\n\n});"
+    "lineNumber": 8,
+    "content": "/**\n@typedef {Array<whitelist_entry>} whitelist A whitelist array\n*/\n\n/**\n@desc Popup view for Burnt Chrome\n*/\nclass Popup {\n  /**\n  @desc Initialize the instance.\n  @private\n  */\n  constructor() {\n    // Setup defaults\n    /**\n    Background page.\n    */\n    this.background = chrome.extension.getBackgroundPage();\n    /**\n    Template element ID\n    */\n    this.templateId = 'frame';\n\n    /**\n    Static form data\n    */\n    this.formData = {}\n\n    /**\n    Last error message\n    */\n    this.lastErrorMessage = \"\";\n\n    //\n    this.setupTemplates();\n\n    // Render initial page\n    this.refresh();\n  }\n\n  /**\n  @desc Setup handlebars views to render compiled templates to.\n  @private\n  */\n  setupTemplates() {\n    let handlebarsSelector = 'script[type=\"text/x-handlebars-template\"]';\n    $(handlebarsSelector).each((index, $el) => {\n      // console.log($el, $el.id);\n      var templateId = $el.id;\n      if (!templateId) {\n        return console.warn(\"Unknown id for element: \", $el);\n      }\n      let containerId = templateId.split('-template')[0];\n      $($el).after($(`<div id=\"${containerId}\"></div>`));\n    });\n  }\n\n  /**\n  @desc Generate the context to pass to the template to render.\n  @private\n  */\n  getContext() {\n    return {\n      isLoggedIn: this.background.moderator.loggedIn,\n      isLocked: this.background.moderator.isLocked(),\n      isUnlocked: this.background.moderator.isUnlocked(),\n      whitelist: this.background.moderator.getWhitelistJSON(),\n      email: this.background.moderator.getEmail(),\n      errorMessage: this.lastErrorMessage\n    };\n  }\n\n  /**\n  @desc Render the template with a context\n  @private\n  */\n  render(id, context) {\n    console.log('render', context);\n    let el = document.getElementById(`${id}-template`);\n    let source = el.innerHTML;\n    let template = Handlebars.compile(source);\n    let html = template(context);\n    document.getElementById(id).innerHTML = html;\n    // console.log('html', html);\n    // Bind events\n    this.bind();\n  }\n\n  /**\n  @desc Bind the events\n  @private\n  */\n  bind() {\n    // console.log('Bind element events');\n    $('#lock').click(() => this.lock());\n    $('#logout').click(() => this.logout());\n    $('#unlock').click(() => this.unlock());\n    $('#add-to-whitelist').click(() => this.addToWhitelist());\n    $('.delete').click(() => this.removeFromWhitelist(event.target.id));\n    $('#loginIntro').click(() => this.loginIntro());\n    $('#listIntro').click(() => this.listIntro());\n    $('#lockedIntro').click(() => introJs().start());\n    $('#export-whitelist').click(() => {\n      let whitelistJSON = JSON.stringify(this.background.moderator.getWhitelistJSON());\n      let email = this.background.moderator.getEmail();\n      let fileName = `Whitelist for ${email}.json`;\n      this.downloadData(fileName, whitelistJSON, \"application/json\");\n    });\n    $('#import-whitelist-file').change((event) => {\n      let $el = $(event.currentTarget);\n      // Source: http://stackoverflow.com/a/13747921/2578205\n      let file = $el.prop('files')[0];\n      let reader = new FileReader();\n      reader.onload = () => {\n        let data = reader.result;\n        let json = JSON.parse(data);\n        // Add each entry to current whitelist\n        this.importWhitelist(json);\n      };\n      reader.readAsText(file);\n    });\n    $('#import-whitelist').click((event) => {\n      let url = $('#import-whitelist-url').val();\n      if (!url) {\n        // Invalid URL\n        return this.showError(new Error('Enter a URL to import whitelist from.'));\n      } else {\n        // Temporarily disable\n        this.background.moderator.disable();\n\n        let callback = (error) => {\n          if (error) {\n            this.showError(error);\n          }\n          // Re-enable\n          this.background.moderator.enable();\n        };\n\n        // Source: https://developers.google.com/web/updates/2015/03/introduction-to-fetch?hl=en\n        fetch(url)\n        .then((response) => {\n          if (response.status !== 200) {\n            callback(new Error(`An error occurred reading ${url}`));\n          } else {\n            response.json().then((data) => {\n              this.importWhitelist(data);\n              callback();\n            }).catch(callback);\n          }\n        })\n        .catch(callback);\n      }\n    });\n\n    // Clicking a whitelist entry fill in entry fields above\n    $('.whitelist-entry').click((event) => {\n      event.preventDefault();\n      // console.log('whitelist-entry click', event, this);\n      let $el = $(event.currentTarget);\n      let title = $el.data('title');\n      let url = $el.data('url');\n      $('input[name=\"entry-title\"]').val(title).change();\n      $('input[name=\"entry-url\"]').val(url).change();\n    });\n\n    // When Enter is pressed while focus is inside of password field\n    // Login automatically\n    $('input[name=\"password\"]').keyup((event) => {\n      if (event.keyCode === 13) {\n        this.lock();\n      }\n    });\n    // When Enter is pressed while focus is inside of password field\n    // Login automatically\n    $('input[name=\"entry-url\"]').keyup((event) => {\n      if (event.keyCode === 13) {\n        this.addToWhitelist();\n      }\n    });\n\n    // Make sure that input elements do not\n    // have their value cleared when template is refreshed.\n    // So every change to input, we store the state\n    // On refresh, we sync the last state of the input field\n    // back into the input field.\n    const attr = \"name\";\n      // We store state in formData property\n    const formData = this.formData;\n    // Iterate over all Input fields that should be syncing their value\n    $(`input[type=\"text\"][${attr}]`).each((idx, el) => {\n      let $el = $(el);\n      // Get the key to sync with in the formData\n      let key = $el.attr(attr);\n      // Get current value of input\n      let val = _.get(formData, key);\n      $el.val(val);\n      // console.log($el, attr, key, val);\n\n      // Handle changing input value\n      // and storing state\n      let changeHandler = (event) => {\n          let text = $(event.currentTarget).val();\n          // console.log(key, text);\n          _.set(formData, key, text);\n        }\n        // Bind events to listen for changes to input field\n      $el.change(changeHandler);\n      $el.keyup(changeHandler);\n    });\n\n  }\n\n  /**\n  @desc Refresh the template\n  @private\n  */\n  refresh() {\n    this.render(this.templateId, this.getContext());\n  }\n\n  /**\n  @desc Lock\n  @public\n  */\n  lock() {\n    // console.log('Lock!');\n    let context = this.getContext();\n    let email = $('input[name=\"email\"]').val() || context.email;\n    let password = $('input[name=\"password\"]').val();\n\n    let emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$/;\n    let emailValid = (emailPattern.test(email) && email !== null);\n    let passwordValid = (password !== \"\" && password !== null);\n    $('#emailError').toggleClass(\"errorshow\", !emailValid);\n    $('#passwordError').toggleClass(\"errorshow\", !passwordValid);\n\n    if (emailValid && passwordValid) {\n      // console.log(email, password);\n      let successful = this.background.moderator.lock(email, password);\n      // console.log('successful', successful);\n      this.refresh();\n      introJs().exit();\n      $('#passwordError').toggleClass(\"errorshow\", !successful);\n    }\n  }\n\n  /**\n  @desc Logout\n  @public\n  */\n  logout() {\n    // console.log('logout!');\n    let successful = this.background.moderator.logout();\n    // console.log('successful', successful);\n    this.refresh();\n    introJs().exit();\n  }\n\n  /**\n  @desc Unlock\n  @public\n  */\n  unlock() {\n    // console.log('Unlock!');\n    let context = this.getContext();\n    let email = context.email;\n    if (context.isLoggedIn) {\n      let successful = this.background.moderator.unlock(email, null);\n      this.refresh();\n      introJs().exit();\n      return;\n    }\n    let password = $('input[name=\"password\"]').val();\n\n    let passwordValid = (password !== \"\" && password !== null);\n    $('#passwordError').toggleClass(\"errorshow\", !passwordValid);\n    // console.log(email, password);\n    if (passwordValid) {\n      let successful = this.background.moderator.unlock(email, password);\n      this.refresh();\n      introJs().exit();\n      $('#passwordError').toggleClass(\"errorshow\", !successful);\n    }\n  }\n\n  /**\n  @desc Add to Whitelist\n  @public\n  */\n  addToWhitelist() {\n    // console.log('addToWhitelist');\n    let title = $('input[name=\"entry-title\"]').val();\n    let url = $('input[name=\"entry-url\"]').val();\n    try {\n      let successful = this.background.moderator.addToWhitelist(title, url);\n      if (successful) {\n        // Clear fields\n        $('input[name=\"entry-title\"]').val('').change();\n        $('input[name=\"entry-url\"]').val('').change();\n        // Refresh UI\n        this.refresh();\n      }\n    } catch (error) {\n      this.showError(error);\n    }\n  }\n\n  /**\n  @desc Remove entry from whitelist\n  @public\n  @param {string} url - URL pattern in an existing whitelist entry\n  */\n  removeFromWhitelist(url) {\n    let successful = this.background.moderator.removeFromWhitelist(url);\n    if (successful) this.refresh();\n  }\n\n  /**\n  @desc Show error in User Interface\n  @public\n  @param {Error} error - The error to show\n  */\n  showError(error) {\n    let message = error.message;\n    this.lastErrorMessage = message\n    this.refresh();\n    // $('#entryError').text(message).toggleClass(\"errorshow\", !error);\n  }\n\n  /**\n  @desc Import entries from an existing whitelist\n  @public\n  @param {whitelist} whitelist - An existing whitelist to copy entries from\n  */\n  importWhitelist(whitelist) {\n    _.each(whitelist, ({\n      title,\n      url\n    }) => {\n      try {\n        this.background.moderator.addToWhitelist(title, url);\n      } catch (error) {\n        this.showError(error);\n      }\n    });\n    this.refresh();\n  }\n\n  /**\n  @desc Show IntroJS tutorial for login page\n  */\n  loginIntro() {\n    let intro = introJs();\n    intro.setOptions({\n      steps: [{\n        intro: 'Welcome to Burnt Chrome!<br>If this is your first time \\\n        using Burnt Chrome, use these steps to get started!'\n      }, {\n        element: document.querySelector('input[name=\"email\"]'),\n        intro: 'First lets create your account. Please enter a valid \\\n        email address.',\n        position: 'right'\n      }, {\n        element: document.querySelector('input[name=\"password\"]'),\n        intro: 'Next, choose the password you would like to use.',\n        position: 'right'\n      }, {\n        element: document.querySelector('#lock'),\n        intro: 'Click \\\"login and lock\\\" to login and setup your whitelist!',\n        position: 'left'\n      }]\n    });\n    intro.start();\n  }\n\n  /**\n  @desc Show IntroJS tutorial for whitelist list page\n  */\n  listIntro() {\n    let intro = introJs();\n    intro.setOptions({\n      steps: [{\n        intro: 'Welcome to your whitelist!<br>Only websites on your list will be available \\\n          while your browser is locked with Burnt Chrome. Lets get started by adding some entries.'\n      }, {\n        element: document.querySelector('input[name=\"entry-title\"]'),\n        intro: 'First give your entry a title or short description.',\n        position: 'right'\n      }, {\n        element: document.querySelector('input[name=\"entry-url\"]'),\n        intro: 'Next, enter the URL you wish to permit.',\n        position: 'right'\n      }, {\n        element: document.querySelector('#add-to-whitelist'),\n        intro: 'Click here to add your entry to the whitelist.',\n        position: 'right'\n      }, {\n        element: document.querySelector('#options'),\n        intro: 'Click here for more options.',\n        position: 'bottom'\n      }, {\n        element: document.querySelector('#export-whitelist'),\n        intro: 'Click here to export your current whitelist to a file.',\n        position: 'right'\n      }, {\n        element: document.querySelector('#import-whitelist-file'),\n        intro: 'Click here to import a whitelist from a file.',\n        position: 'right'\n      }, {\n        element: document.querySelector('#import-whitelist-url'),\n        intro: 'Enter a URL to read and import a remote whitelist from.',\n        position: 'right'\n      }, {\n        element: document.querySelector('#import-whitelist'),\n        intro: 'Click here to start importing a remote whitelist from the URL you previously entered.',\n        position: 'right'\n      }, {\n        element: document.querySelector('#logout'),\n        intro: 'When finished logout. Browsing will remain locked \\\n          to your whitelist until you choose to unlock it.',\n        position: 'right'\n      }, {\n        element: document.querySelector('#unlock'),\n        intro: 'Click here to logout and unlock your browser.',\n        position: 'right'\n      }]\n    });\n    intro.start();\n  }\n\n  /**\n  @desc Download the given data to the users computer as a file\n  @param {string} name - Name of the file\n  @param {string} data - Contents of the file\n  @param {string} type - MIME type of the file\n  */\n  downloadData(name, data, type) {\n    // Browser support\n    window.URL = window.URL || window.webkitURL;\n    // Arg defaults\n    type = type || \"text/plain\";\n    name = name || \"download\";\n    data = data || \"\";\n    // Create Blob\n    let blob;\n    if (data instanceof Blob) {\n      blob = data;\n    } else {\n      blob = new Blob([data], {\n        type: type\n      });\n    }\n    let url = window.URL.createObjectURL(blob)\n      // Create link\n    let link = document.createElement(\"a\")\n    link.download = name\n    link.href = url\n      // Download!\n      // See http://stackoverflow.com/a/25047811/2578205 for more details\n    let event = document.createEvent(\"MouseEvents\")\n    event.initMouseEvent(\n      \"click\", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null\n    )\n    link.dispatchEvent(event)\n  }\n\n};\n/**\nReady up!\n\n@ignore\n*/\n$(document).ready(() => {\n  // console.log('Ready');\n  let burnt = window.burnt = new Popup();\n\n});\n"
   },
   {
-    "__docId__": 40,
+    "__docId__": 44,
+    "kind": "typedef",
+    "static": true,
+    "variation": null,
+    "name": "whitelist",
+    "memberof": "src/popup.js",
+    "longname": "src/popup.js~whitelist",
+    "access": null,
+    "description": "",
+    "type": {
+      "types": [
+        "Array<whitelist_entry>"
+      ],
+      "optional": false,
+      "name": "whitelist"
+    }
+  },
+  {
+    "__docId__": 45,
     "kind": "class",
     "static": true,
     "variation": null,
@@ -1048,11 +1127,11 @@
     "importPath": "burntchrome/src/popup.js",
     "importStyle": null,
     "description": "Popup view for Burnt Chrome",
-    "lineNumber": 4,
+    "lineNumber": 8,
     "interface": false
   },
   {
-    "__docId__": 41,
+    "__docId__": 46,
     "kind": "constructor",
     "static": false,
     "variation": null,
@@ -1061,12 +1140,12 @@
     "longname": "src/popup.js~Popup#constructor",
     "access": "private",
     "description": "Initialize the instance.",
-    "lineNumber": 9,
+    "lineNumber": 13,
     "params": [],
     "generator": false
   },
   {
-    "__docId__": 42,
+    "__docId__": 47,
     "kind": "member",
     "static": false,
     "variation": null,
@@ -1075,7 +1154,7 @@
     "longname": "src/popup.js~Popup#background",
     "access": null,
     "description": "Background page.",
-    "lineNumber": 14,
+    "lineNumber": 18,
     "type": {
       "types": [
         "*"
@@ -1083,7 +1162,7 @@
     }
   },
   {
-    "__docId__": 43,
+    "__docId__": 48,
     "kind": "member",
     "static": false,
     "variation": null,
@@ -1092,7 +1171,7 @@
     "longname": "src/popup.js~Popup#templateId",
     "access": null,
     "description": "Template element ID",
-    "lineNumber": 18,
+    "lineNumber": 22,
     "type": {
       "types": [
         "string"
@@ -1100,7 +1179,41 @@
     }
   },
   {
-    "__docId__": 44,
+    "__docId__": 49,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "formData",
+    "memberof": "src/popup.js~Popup",
+    "longname": "src/popup.js~Popup#formData",
+    "access": null,
+    "description": "Static form data",
+    "lineNumber": 27,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 50,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "lastErrorMessage",
+    "memberof": "src/popup.js~Popup",
+    "longname": "src/popup.js~Popup#lastErrorMessage",
+    "access": null,
+    "description": "Last error message",
+    "lineNumber": 32,
+    "type": {
+      "types": [
+        "string"
+      ]
+    }
+  },
+  {
+    "__docId__": 51,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1109,12 +1222,12 @@
     "longname": "src/popup.js~Popup#setupTemplates",
     "access": "private",
     "description": "Setup handlebars views to render compiled templates to.",
-    "lineNumber": 31,
+    "lineNumber": 45,
     "params": [],
     "generator": false
   },
   {
-    "__docId__": 45,
+    "__docId__": 52,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1123,7 +1236,7 @@
     "longname": "src/popup.js~Popup#getContext",
     "access": "private",
     "description": "Generate the context to pass to the template to render.",
-    "lineNumber": 48,
+    "lineNumber": 62,
     "params": [],
     "return": {
       "types": [
@@ -1133,7 +1246,7 @@
     "generator": false
   },
   {
-    "__docId__": 46,
+    "__docId__": 53,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1142,7 +1255,7 @@
     "longname": "src/popup.js~Popup#render",
     "access": "private",
     "description": "Render the template with a context",
-    "lineNumber": 62,
+    "lineNumber": 77,
     "params": [
       {
         "name": "id",
@@ -1160,7 +1273,7 @@
     "generator": false
   },
   {
-    "__docId__": 47,
+    "__docId__": 54,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1169,12 +1282,12 @@
     "longname": "src/popup.js~Popup#bind",
     "access": "private",
     "description": "Bind the events",
-    "lineNumber": 78,
+    "lineNumber": 93,
     "params": [],
     "generator": false
   },
   {
-    "__docId__": 48,
+    "__docId__": 55,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1183,12 +1296,12 @@
     "longname": "src/popup.js~Popup#refresh",
     "access": "private",
     "description": "Refresh the template",
-    "lineNumber": 90,
+    "lineNumber": 217,
     "params": [],
     "generator": false
   },
   {
-    "__docId__": 49,
+    "__docId__": 56,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1197,12 +1310,12 @@
     "longname": "src/popup.js~Popup#lock",
     "access": "public",
     "description": "Lock",
-    "lineNumber": 98,
+    "lineNumber": 225,
     "params": [],
     "generator": false
   },
   {
-    "__docId__": 50,
+    "__docId__": 57,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1211,12 +1324,12 @@
     "longname": "src/popup.js~Popup#logout",
     "access": "public",
     "description": "Logout",
-    "lineNumber": 113,
+    "lineNumber": 251,
     "params": [],
     "generator": false
   },
   {
-    "__docId__": 51,
+    "__docId__": 58,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1225,12 +1338,12 @@
     "longname": "src/popup.js~Popup#unlock",
     "access": "public",
     "description": "Unlock",
-    "lineNumber": 124,
+    "lineNumber": 263,
     "params": [],
     "generator": false
   },
   {
-    "__docId__": 52,
+    "__docId__": 59,
     "kind": "method",
     "static": false,
     "variation": null,
@@ -1239,12 +1352,178 @@
     "longname": "src/popup.js~Popup#addToWhitelist",
     "access": "public",
     "description": "Add to Whitelist",
-    "lineNumber": 141,
+    "lineNumber": 290,
     "params": [],
     "generator": false
   },
   {
-    "__docId__": 54,
+    "__docId__": 60,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "removeFromWhitelist",
+    "memberof": "src/popup.js~Popup",
+    "longname": "src/popup.js~Popup#removeFromWhitelist",
+    "access": "public",
+    "description": "Remove entry from whitelist",
+    "lineNumber": 313,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "url",
+        "description": "URL pattern in an existing whitelist entry"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 61,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "showError",
+    "memberof": "src/popup.js~Popup",
+    "longname": "src/popup.js~Popup#showError",
+    "access": "public",
+    "description": "Show error in User Interface",
+    "lineNumber": 323,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Error"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "error",
+        "description": "The error to show"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 62,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "lastErrorMessage",
+    "memberof": "src/popup.js~Popup",
+    "longname": "src/popup.js~Popup#lastErrorMessage",
+    "access": null,
+    "description": null,
+    "lineNumber": 325,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 63,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "importWhitelist",
+    "memberof": "src/popup.js~Popup",
+    "longname": "src/popup.js~Popup#importWhitelist",
+    "access": "public",
+    "description": "Import entries from an existing whitelist",
+    "lineNumber": 335,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "whitelist"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "whitelist",
+        "description": "An existing whitelist to copy entries from"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 64,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "loginIntro",
+    "memberof": "src/popup.js~Popup",
+    "longname": "src/popup.js~Popup#loginIntro",
+    "access": null,
+    "description": "Show IntroJS tutorial for login page",
+    "lineNumber": 352,
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 65,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "listIntro",
+    "memberof": "src/popup.js~Popup",
+    "longname": "src/popup.js~Popup#listIntro",
+    "access": null,
+    "description": "Show IntroJS tutorial for whitelist list page",
+    "lineNumber": 379,
+    "params": [],
+    "generator": false
+  },
+  {
+    "__docId__": 66,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "downloadData",
+    "memberof": "src/popup.js~Popup",
+    "longname": "src/popup.js~Popup#downloadData",
+    "access": null,
+    "description": "Download the given data to the users computer as a file",
+    "lineNumber": 437,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "name",
+        "description": "Name of the file"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "data",
+        "description": "Contents of the file"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "type",
+        "description": "MIME type of the file"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 68,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1257,7 +1536,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 55,
+    "__docId__": 69,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1270,7 +1549,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 56,
+    "__docId__": 70,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1283,7 +1562,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 57,
+    "__docId__": 71,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1296,7 +1575,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 58,
+    "__docId__": 72,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1309,7 +1588,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 59,
+    "__docId__": 73,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1322,7 +1601,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 60,
+    "__docId__": 74,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1335,7 +1614,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 61,
+    "__docId__": 75,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1348,7 +1627,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 62,
+    "__docId__": 76,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1361,7 +1640,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 63,
+    "__docId__": 77,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1374,7 +1653,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 64,
+    "__docId__": 78,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1387,7 +1666,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 65,
+    "__docId__": 79,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1400,7 +1679,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 66,
+    "__docId__": 80,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1413,7 +1692,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 67,
+    "__docId__": 81,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1426,7 +1705,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 68,
+    "__docId__": 82,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1439,7 +1718,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 69,
+    "__docId__": 83,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1452,7 +1731,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 70,
+    "__docId__": 84,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1465,7 +1744,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 71,
+    "__docId__": 85,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1478,7 +1757,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 72,
+    "__docId__": 86,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1491,7 +1770,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 73,
+    "__docId__": 87,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1504,7 +1783,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 74,
+    "__docId__": 88,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1517,7 +1796,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 75,
+    "__docId__": 89,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1530,7 +1809,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 76,
+    "__docId__": 90,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1543,7 +1822,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 77,
+    "__docId__": 91,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1556,7 +1835,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 78,
+    "__docId__": 92,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1569,7 +1848,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 79,
+    "__docId__": 93,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1582,7 +1861,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 80,
+    "__docId__": 94,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1595,7 +1874,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 81,
+    "__docId__": 95,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1608,7 +1887,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 82,
+    "__docId__": 96,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1621,7 +1900,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 83,
+    "__docId__": 97,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1634,7 +1913,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 84,
+    "__docId__": 98,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1647,7 +1926,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 85,
+    "__docId__": 99,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1660,7 +1939,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 86,
+    "__docId__": 100,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1673,7 +1952,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 87,
+    "__docId__": 101,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1686,7 +1965,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 88,
+    "__docId__": 102,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1699,7 +1978,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 89,
+    "__docId__": 103,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1712,7 +1991,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 90,
+    "__docId__": 104,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1725,7 +2004,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 91,
+    "__docId__": 105,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1738,7 +2017,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 92,
+    "__docId__": 106,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1751,7 +2030,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 93,
+    "__docId__": 107,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1764,7 +2043,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 94,
+    "__docId__": 108,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1777,7 +2056,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 95,
+    "__docId__": 109,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1790,7 +2069,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 96,
+    "__docId__": 110,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1803,7 +2082,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 97,
+    "__docId__": 111,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1816,7 +2095,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 98,
+    "__docId__": 112,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1829,7 +2108,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 99,
+    "__docId__": 113,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1842,7 +2121,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 100,
+    "__docId__": 114,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1855,7 +2134,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 102,
+    "__docId__": 116,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1868,7 +2147,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 103,
+    "__docId__": 117,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1881,7 +2160,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 104,
+    "__docId__": 118,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1894,7 +2173,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 105,
+    "__docId__": 119,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1907,7 +2186,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 106,
+    "__docId__": 120,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1920,7 +2199,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 107,
+    "__docId__": 121,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1933,7 +2212,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 108,
+    "__docId__": 122,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1946,7 +2225,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 109,
+    "__docId__": 123,
     "kind": "external",
     "static": true,
     "variation": null,

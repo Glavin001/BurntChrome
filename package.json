@@ -21,7 +21,10 @@
     "watch": "./node_modules/.bin/babel extension/src --watch --out-dir extension/dist --source-maps inline",
     "start": "./node_modules/.bin/npm-run-all compile watch",
     "pack": "./node_modules/.bin/crx pack ./extension -o burnt_chrome.crx -p ./key.pem --zip-output burnt_chrome.crx.zip",
-    "zip": "zip -r burnt_chrome.zip extension"
+    "zip": "zip -r burnt_chrome.zip extension",
+    "obfuscate:popup": "./node_modules/.bin/jsobfuscate extension/dist/popup.js > extension/dist/popup.dist.js && mv extension/dist/popup.dist.js extension/dist/popup.js",
+    "obfuscate:background": "./node_modules/.bin/jsobfuscate extension/dist/background.js > extension/dist/background.dist.js && mv extension/dist/background.dist.js extension/dist/background.js",
+    "dist": "./node_modules/.bin/npm-run-all compile obfuscate:* pack"
   },
   "repository": {
     "type": "git",
@@ -45,6 +48,7 @@
     "clean-css": "^3.4.9",
     "crx": "^3.0.3",
     "esdoc": "^0.4.5",
+    "js-obfuscator": "^0.1.1",
     "mocha": "^2.4.5",
     "npm-run-all": "^1.5.1",
     "uglifyjs": "^2.4.10"

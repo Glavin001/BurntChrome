@@ -7,8 +7,7 @@
 /**
 @typedef {Array<whitelist_entry>} whitelist A whitelist array
 */
-
-if (!!require) {
+if (typeof module !== 'undefined' && typeof require !== "undefined") {
   var _ = require('../../bower_components/lodash/dist/lodash');
   var minimatch = require('../../bower_components/minimatch/minimatch');
 }
@@ -503,7 +502,8 @@ Start the background script
 @ignore
 */
 if (typeof window !== 'undefined') {
-  let moderator = window.moderator = new Moderator();
+  let moderator = new Moderator();
+  window.moderator = moderator;
 }
 
 /*
